@@ -1,0 +1,32 @@
+server:
+  port: 9500
+
+spring:
+  flyway:
+    enabled: true
+  datasource:
+    url: jdbc:postgresql://${db.host}:${db.port}/${db.database}
+    username: ${db.username}
+    password: ${db.password}
+    hikari:
+      maxLifeTime: 600000
+      maximum-pool-size: 5
+  jackson:
+    mapper:
+      accept_case_insensitive_properties: true
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    show-sql: false
+
+no.nav.security.jwt.issuer.pim:
+  discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
+  accepted_audience: ${AZURE_APP_CLIENT_ID}
+  proxyurl: ${HTTP_PROXY:}
