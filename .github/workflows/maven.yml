@@ -51,31 +51,3 @@ jobs:
           CLUSTER: dev-gcp
           RESOURCE: .nais/nais-test.yaml
           IMAGE: ${{ needs.build.outputs.image }}
-
-  deploy:
-    name: Deploy to NAIS preprod
-    needs: build
-    if: github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-gcp
-          RESOURCE: .nais/nais-dev.yaml,alerts.yaml
-          IMAGE: ${{ needs.build.outputs.image }}
-
-  prod-deploy:
-    name: Deploy to NAIS prod
-    needs: build
-    if: github.ref == 'refs/heads/prod-deploy'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: prod-gcp
-          RESOURCE: .nais/nais-prod.yaml,alerts.yaml
-          IMAGE: ${{ needs.build.outputs.image }}
