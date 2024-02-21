@@ -1,0 +1,72 @@
+---
+kind: Application
+apiVersion: nais.io/v1alpha1
+metadata:
+  name: prim-brukerstyring
+  namespace: pim
+  annotations:
+    nais.io/read-only-file-system: "false"
+    nais.io/run-as-group: "0"
+  labels:
+    team: pim
+spec:
+  gcp:
+    sqlInstances:
+      - name: prim-brukerstyring
+        type: POSTGRES_14
+        diskSize: 10
+        databases:
+          - name: prim-brukerstyring
+            envVarPrefix: DB
+        tier: db-custom-1-3840
+        diskAutoresize: true
+        highAvailability: true
+        diskType: SSD
+        maintenance:
+          day: 7
+          hour: 3
+  image: {{ image }}
+  azure:
+    application:
+      allowAllUsers: true
+      enabled: true
+      claims:
+        extra:
+          - "NAVident"
+  ingresses:
+    - https://prim-brukerstyring.intern.nav.no
+  liveness:
+    path: /internal/isAlive
+    port: 8080
+    initialDelay: 100
+    periodSeconds: 5
+    failureThreshold: 30
+  port: 8080
+  readiness:
+    path: /internal/isReady
+    port: 8080
+    initialDelay: 100
+    periodSeconds: 5
+    failureThreshold: 30
+  replicas:
+    min: 2
+    max: 3
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  accessPolicy:
+    inbound:
+      rules:
+        - application: prim-admin-gui
+          namespace: pim
+          cluster: prod-gcp
+        - application: prim-bemanningsbehov
+          namespace: pim
+          cluster: prod-gcp
+        - application: pim-bemanning
+          namespace: pim
+          cluster: prod-gcp

@@ -39,9 +39,10 @@ jobs:
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
 
-  dev2-deploy:
+  test-deploy:
     name: Deploy to NAIS test
     needs: build
+    if: github.ref == 'refs/heads/dev2-deploy'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -49,4 +50,30 @@ jobs:
         env:
           CLUSTER: dev-gcp
           RESOURCE: .nais/nais-test.yaml
+          IMAGE: ${{ needs.build.outputs.image }}
+
+  preprod-deploy:
+    name: Deploy to NAIS preprod
+    needs: build
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: .nais/nais-preprod.yaml
+          IMAGE: ${{ needs.build.outputs.image }}
+
+  prod-deploy:
+    name: Deploy to NAIS prod
+    needs: build
+    if: github.ref == 'refs/heads/prod-deploy'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: prod-gcp
+          RESOURCE: .nais/nais-prod.yaml
           IMAGE: ${{ needs.build.outputs.image }}
