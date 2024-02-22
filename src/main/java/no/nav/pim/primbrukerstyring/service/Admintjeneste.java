@@ -1,6 +1,6 @@
 package no.nav.pim.primbrukerstyring.service;
 
-// import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.validation.Valid;
 import no.nav.pim.primbrukerstyring.domain.DriftOgVedlikehold;
 import no.nav.pim.primbrukerstyring.repository.DriftOgVedlikeholdrepository;
@@ -21,6 +21,9 @@ public class Admintjeneste implements AdmintjenesteInterface {
     private static final Logger log = LoggerFactory.getLogger(Admintjeneste.class);
 
     @Autowired
+    MeterRegistry metricsRegistry;
+
+    @Autowired
     DriftOgVedlikeholdrepository driftogvedlikeholdrepository;
 
     @Override
@@ -28,7 +31,7 @@ public class Admintjeneste implements AdmintjenesteInterface {
     @GetMapping(path = "/driftOgVedlikehold")
     public DriftOgVedlikehold hentDriftOgVedlikehold(@RequestHeader(value = "Authorization") String authorization) {
 
-        // metricsRegistry.counter("tjenestekall", "tjeneste", "Admintjeneste", "metode", "hentDriftOgVedlikehold").increment();
+        metricsRegistry.counter("tjenestekall", "tjeneste", "Admintjeneste", "metode", "hentDriftOgVedlikehold").increment();
         return driftogvedlikeholdrepository.getReferenceById(0L);
     }
 
@@ -38,7 +41,7 @@ public class Admintjeneste implements AdmintjenesteInterface {
     public DriftOgVedlikehold settDriftOgVedlikehold(@RequestHeader(value = "Authorization") String authorization,
                                                      @Valid @RequestBody DriftOgVedlikehold driftOgVedlikehold) {
 
-        // metricsRegistry.counter("tjenestekall", "tjeneste", "Admintjeneste", "metode", "settDriftOgVedlikehold").increment();
+        metricsRegistry.counter("tjenestekall", "tjeneste", "Admintjeneste", "metode", "settDriftOgVedlikehold").increment();
         log.info("Oppdaterer drift og vedlikehold med vedlikeholdsmelding: {}: {}, og driftsmelding: {}, vedlikeholdsmodus er {}.", driftOgVedlikehold.getVedlikeholdOverskrift(), driftOgVedlikehold.getVedlikeholdMelding(), driftOgVedlikehold.getDriftsmelding(), driftOgVedlikehold.getVedlikeholdModus() ? "på" : "av");
 
         driftOgVedlikehold.setDriftOgVedlikeholdId(0L);
