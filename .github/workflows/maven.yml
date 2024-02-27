@@ -42,7 +42,6 @@ jobs:
   test-deploy:
     name: Deploy to NAIS test
     needs: build
-    if: github.ref == 'refs/heads/dev2-deploy'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
