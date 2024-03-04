@@ -15,10 +15,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Component
 public class NomGraphQLClient {
 
-    @Value("nom.url")
+    @Value("${nom.url}")
     String url;
 
-    @Value("nom.scope")
+    @Value("${nom.scope}")
     String scope;
 
     @Autowired
