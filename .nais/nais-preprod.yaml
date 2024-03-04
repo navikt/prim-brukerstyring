@@ -12,7 +12,7 @@ metadata:
 spec:
   env:
     - name: NOM_URL
-      value: https://nom-api.intern.dev.nav.no/graphql
+      value: http://nom-api.nom.svc.cluster.local/graphql
     - name: NOM_SCOPE
       value: api://dev-gcp.nom.nom-api/.default
   gcp:
