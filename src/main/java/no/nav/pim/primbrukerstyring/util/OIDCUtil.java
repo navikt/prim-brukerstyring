@@ -46,6 +46,7 @@ public class OIDCUtil {
     private AADProperties aadProperties;
 
     public Optional<String> finnClaimFraOIDCToken(String authorization, String claim) {
+        log.info("NAIS CLUSTER: {}", naisCluster);
         if (authorization != null) {
             if (!LOCAL.equals(naisCluster)) {
                 String[] authElements = authorization.split(",");

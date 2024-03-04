@@ -24,7 +24,7 @@ spring:
             non_contextual_creation: true
     show-sql: false
 
-nais_cluster: LOCAL
+nais_cluster: local-dev
 
 nom:
   url: na
