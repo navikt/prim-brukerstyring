@@ -26,6 +26,10 @@ spring:
             non_contextual_creation: true
     show-sql: false
 
+nom:
+  url: ${NOM_URL}
+  scope: ${NOM_SCOPE}
+
 no.nav.security.jwt.issuer.pim:
   discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
   accepted_audience: ${AZURE_APP_CLIENT_ID}

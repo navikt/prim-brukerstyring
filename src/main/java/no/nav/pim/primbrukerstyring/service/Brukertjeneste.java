@@ -1,19 +1,21 @@
 package no.nav.pim.primbrukerstyring.service;
 
-import com.nimbusds.jwt.JWT;
-import com.nimbusds.jwt.JWTParser;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import jakarta.validation.Valid;
 import no.nav.pim.primbrukerstyring.domain.BrukerRolle;
 import no.nav.pim.primbrukerstyring.domain.Rolle;
 import no.nav.pim.primbrukerstyring.exceptions.AuthorizationException;
+import no.nav.pim.primbrukerstyring.nom.NomGraphQLClient;
+import no.nav.pim.primbrukerstyring.nom.NomQueries;
 import no.nav.pim.primbrukerstyring.repository.BrukerRollerepository;
+import no.nav.pim.primbrukerstyring.util.OIDCUtil;
 import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -34,16 +36,28 @@ public class Brukertjeneste implements BrukertjenesteInterface{
     @Autowired
     BrukerRollerepository brukerRollerepository;
 
+    @Autowired
+    OIDCUtil oidcUtil;
+
+    @Autowired
+    NomGraphQLClient nomGraphQLClient;
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
     @GetMapping(path = "/rolle")
     public Rolle hentBrukerRolle(@RequestHeader(value = "Authorization") String authorization) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentBrukerRolle").increment();
-        String brukerIdent = finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
+        String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
         Optional<BrukerRolle> brukerRolle = brukerRollerepository.findByIdent(brukerIdent);
 
         if (brukerRolle.isEmpty()) {
-            // HENT FRA NOM
+            try {
+                ResponseEntity<String> response = nomGraphQLClient.callGraphQLService(authorization, NomQueries.getLedersResurser(brukerIdent));
+                log.info("Respons fra NOM: {}: {}", response.getStatusCode(), response.getBody());
+            } catch (Exception e) {
+                log.error("###Kunne ikke hente bruker i NOM: {}", brukerIdent);
+                return Rolle.UKJENT;
+            }
         } else {
             return brukerRolle.get().getRolle();
         }
@@ -96,27 +110,5 @@ public class Brukertjeneste implements BrukertjenesteInterface{
     public List<BrukerRolle> hentAlleBrukereMedRolle(@RequestHeader(value = "Authorization") String authorization,  @PathVariable Rolle rolle) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentAlleMedHRMedarbeiderRolle").increment();
         return brukerRollerepository.findAllByRolle(rolle);
-    }
-
-    private Optional<String> finnClaimFraOIDCToken(String authorization, String claim) {
-        if (authorization != null) {
-            String[] authElements = authorization.split(",");
-            for (String authElement : authElements) {
-                try {
-                    String[] pair = authElement.split(" ");
-                    if (pair[0].trim().equalsIgnoreCase("bearer")) {
-                        JWT jwt = JWTParser.parse(pair[1].trim());
-                        return Optional.ofNullable(jwt.getJWTClaimsSet().getStringClaim(claim));
-                    }
-                } catch (Exception e) {
-                    log.error("###OIDC-token har ikke riktig format");
-                    return Optional.empty();
-                }
-            }
-            log.error("###Authorization-header inneholder ikke OIDC-token");
-            return Optional.empty();
-        }
-        log.error("###Ingen Authorization-header");
-        return Optional.empty();
     }
 }

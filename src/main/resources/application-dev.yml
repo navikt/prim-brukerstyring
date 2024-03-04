@@ -23,3 +23,7 @@ spring:
           lob:
             non_contextual_creation: true
     show-sql: false
+
+nom:
+  url: na
+  scope: local-dev
