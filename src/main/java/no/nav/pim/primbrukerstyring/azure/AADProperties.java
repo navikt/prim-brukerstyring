@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Data
 public class AADProperties {
 
-    @Value("${token.endpoint}")
+    @Value("${token_endpoint}")
     private String tokenEndpoint;
     @Value("${clientId}")
     private String clientId;

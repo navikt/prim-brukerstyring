@@ -1,8 +1,0 @@
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/brukerstyring
-    username: postgres
-    password: root
-no.nav.security.jwt.issuer.pim:
-  discoveryurl: https://login.microsoftonline.com/navq.onmicrosoft.com/.well-known/openid-configuration
-  accepted_audience: 11d090aa-5a3a-433c-b1f9-f742c2e1f48b
