@@ -1,14 +1,16 @@
 server:
-  port: 9102
+  port: 9500
 
 spring:
   flyway:
     enabled: true
   datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/brukerstyring
-    username: postgres
-    password: root
+    url: jdbc:postgresql://${db.host}:${db.port}/${db.database}
+    username: ${db.username}
+    password: ${db.password}
+    hikari:
+      maxLifeTime: 600000
+      maximum-pool-size: 5
   jackson:
     mapper:
       accept_case_insensitive_properties: true
@@ -24,16 +26,17 @@ spring:
             non_contextual_creation: true
     show-sql: false
 
-nais_cluster: local-dev
+nais_cluster: ${NAIS_CLUSTER_NAME}
 
 nom:
-  url: na
-  scope: local-dev
+  url: ${NOM_URL}
+  scope: ${NOM_SCOPE}
 
-token_endpoint: na
-clientId: na
-clientSecret: na
+token_endpoint: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+clientId: ${AZURE_APP_CLIENT_ID}
+clientSecret: ${AZURE_APP_CLIENT_SECRET}
 
 no.nav.security.jwt.issuer.pim:
-  discoveryurl: https://login.microsoftonline.com/navq.onmicrosoft.com/.well-known/openid-configuration
-  accepted_audience: 11d090aa-5a3a-433c-b1f9-f742c2e1f48b
+  discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
+  accepted_audience: ${AZURE_APP_CLIENT_ID}
+  proxyurl: ${HTTP_PROXY:}

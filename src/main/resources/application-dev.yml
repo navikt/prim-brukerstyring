@@ -1,0 +1,39 @@
+server:
+  port: 9102
+
+spring:
+  flyway:
+    enabled: true
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/brukerstyring
+    username: postgres
+    password: root
+  jackson:
+    mapper:
+      accept_case_insensitive_properties: true
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    show-sql: false
+
+nais_cluster: local-dev
+
+nom:
+  url: na
+  scope: local-dev
+
+token_endpoint: na
+clientId: na
+clientSecret: na
+
+no.nav.security.jwt.issuer.pim:
+  discoveryurl: https://login.microsoftonline.com/navq.onmicrosoft.com/.well-known/openid-configuration
+  accepted_audience: 11d090aa-5a3a-433c-b1f9-f742c2e1f48b
