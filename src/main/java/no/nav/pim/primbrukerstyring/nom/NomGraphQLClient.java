@@ -41,6 +41,7 @@ public class NomGraphQLClient {
                 query LedersRessurser {
                     ressurs(where: {navident: "%s"}) {
                         navident
+                        visningsnavn
                         lederFor {
                             orgEnhet {
                                 koblinger {

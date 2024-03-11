@@ -74,6 +74,10 @@ public class Brukertjeneste implements BrukertjenesteInterface{
         Optional<BrukerRolle> finnesBrukerRolle = brukerrollerepository.findByIdent(brukerRolle.getIdent());
 
         if (finnesBrukerRolle.isEmpty()) {
+            Leder leder = nomGraphQLClient.getLedersResurser(authorization, brukerRolle.getIdent());
+            if (leder != null) {
+                brukerRolle.setNavn(leder.getVisningsnavn());
+            }
             return brukerrollerepository.save(brukerRolle);
         } else {
             Metrics.counter("prim_error", "exception", "UserAlreadyExistException").increment();

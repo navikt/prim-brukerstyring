@@ -29,15 +29,18 @@ public class BrukerRolle {
     @NotNull
     private Rolle rolle;
 
+    @Column
+    private String navn;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof BrukerRolle that)) return false;
-        return Objects.equals(ident, that.ident) && Objects.equals(rolle, that.rolle);
+        return Objects.equals(ident, that.ident) && Objects.equals(rolle, that.rolle) && Objects.equals(navn, that.navn);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(ident, rolle);
+        return Objects.hash(ident, rolle, navn);
     }
 }

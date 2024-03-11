@@ -9,5 +9,6 @@ import java.util.List;
 @Getter
 public class Leder {
     String navident;
+    String visningsnavn;
     List<LederFor> lederFor;
 }
