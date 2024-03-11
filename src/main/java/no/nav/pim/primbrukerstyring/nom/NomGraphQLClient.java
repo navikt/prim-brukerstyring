@@ -56,6 +56,8 @@ public class NomGraphQLClient {
 
         try {
             HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();
+            String testString = graphQlClient.document(document).retrieve("lederFor").toEntity(String.class).block();
+            log.info("NOM returnerer følgende: {}",testString);
             return graphQlClient.document(document).retrieve("lederFor").toEntity(Leder.class).block();
         } catch (Exception e) {
             log.info("Noe gikk galt med henting av leders ressurser i NOM for navident {}. Feilmelding: {}", navident, e.getMessage());
