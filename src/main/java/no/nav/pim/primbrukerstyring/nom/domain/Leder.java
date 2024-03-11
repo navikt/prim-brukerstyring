@@ -9,5 +9,5 @@ import java.util.List;
 @Getter
 public class Leder {
     String navident;
-    List<Orgenhet> lederFor;
+    List<LederFor> lederFor;
 }

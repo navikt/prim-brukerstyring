@@ -43,10 +43,10 @@ public class Brukertjeneste implements BrukertjenesteInterface{
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-    @GetMapping(path = "/rolle")
-    public Rolle hentBrukerRolle(@RequestHeader(value = "Authorization") String authorization) {
+    @GetMapping(path = "/rolle/{brukerIdent}")
+    public Rolle hentBrukerRolle(@RequestHeader(value = "Authorization") String authorization, @PathVariable String brukerIdent) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentBrukerRolle").increment();
-        String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
+        //String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
         Optional<BrukerRolle> brukerRolle = brukerRollerepository.findByIdent(brukerIdent);
 
         if (brukerRolle.isEmpty()) {

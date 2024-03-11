@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface BrukertjenesteInterface {
 
-    Rolle hentBrukerRolle(String authorization);
+    Rolle hentBrukerRolle(String authorization, String brukerIdent);
 
     BrukerRolle leggTilBrukerRolle(String authorization, BrukerRolle brukerRolle);
 
