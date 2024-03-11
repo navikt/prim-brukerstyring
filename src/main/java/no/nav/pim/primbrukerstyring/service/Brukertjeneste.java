@@ -7,7 +7,6 @@ import no.nav.pim.primbrukerstyring.domain.BrukerRolle;
 import no.nav.pim.primbrukerstyring.domain.Rolle;
 import no.nav.pim.primbrukerstyring.exceptions.AuthorizationException;
 import no.nav.pim.primbrukerstyring.nom.NomGraphQLClient;
-import no.nav.pim.primbrukerstyring.nom.NomQueries;
 import no.nav.pim.primbrukerstyring.repository.BrukerRollerepository;
 import no.nav.pim.primbrukerstyring.util.OIDCUtil;
 import no.nav.security.token.support.core.api.Protected;
@@ -15,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -52,8 +50,8 @@ public class Brukertjeneste implements BrukertjenesteInterface{
 
         if (brukerRolle.isEmpty()) {
             try {
-                ResponseEntity<String> response = nomGraphQLClient.callGraphQLService(authorization, NomQueries.getLedersResurser(brukerIdent));
-                log.info("Respons fra NOM: {}: {}", response.getStatusCode(), response.getBody());
+                String response = nomGraphQLClient.getLedersResurser(authorization, brukerIdent);
+                log.info("Respons fra NOM: {}", response);
             } catch (Exception e) {
                 log.error("###Kunne ikke hente bruker i NOM: {}", brukerIdent);
                 return Rolle.UKJENT;

@@ -1,14 +1,14 @@
 package no.nav.pim.primbrukerstyring.nom;
 
+import jakarta.annotation.PostConstruct;
 import no.nav.pim.primbrukerstyring.util.OIDCUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.graphql.client.HttpGraphQlClient;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.reactive.function.client.WebClient;
 
 
 
@@ -22,33 +22,37 @@ public class NomGraphQLClient {
     String scope;
 
     @Autowired
-    private RestTemplate rest;
-
-    @Autowired
     OIDCUtil oidcUtil;
+
+    WebClient webClient;
+
+    @PostConstruct
+    void init() {
+        webClient = WebClient.create(url);
+    }
 
     private static final Logger log = LoggerFactory.getLogger(NomGraphQLClient.class);
 
-    public ResponseEntity<String> callGraphQLService(String auth, String query) throws Exception {
-        HttpHeaders headers;
-        try {
-            headers = oidcUtil.setHeaders(auth, scope);
-        } catch (Exception e) {
-            log.error("###Problemer med header ved bruk av NOM service! Feilmelding: {}", e.getMessage());
-            throw e;
-        }
-        headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url).query(query);
-
-        try {
-            return rest.exchange(
-                    builder.toUriString(),
-                    HttpMethod.GET,
-                    new HttpEntity<>(headers),
-                    String.class);
-        } catch (Exception e) {
-            log.error("###Henting av NOM ressurs feilet: Feilmelding: {}", e.getMessage());
-            throw e;
-        }
+    public String getLedersResurser(String authorization, String navident) {
+        log.info("Henter leders resurser for navident {}", navident);
+        String document =
+                """
+                query LedersRessurser {
+                    ressurs(where: navident: $navident:String!) {
+                        navident
+                        lederFor {
+                            orgEnhet {
+                                koblinger {
+                                    ressurs {
+                                        navident
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                """;
+        HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", authorization).build();
+        return graphQlClient.document(document).variable("navident", navident).retrieve("lederFor").toEntity(String.class).block();
     }
 }
