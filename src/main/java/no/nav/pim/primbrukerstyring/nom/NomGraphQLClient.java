@@ -38,7 +38,7 @@ public class NomGraphQLClient {
         String document =
                 """
                 query LedersRessurser {
-                    ressurs(where: navident: $navident:String!) {
+                    ressurs(where: navident: %s) {
                         navident
                         lederFor {
                             orgEnhet {
@@ -51,11 +51,11 @@ public class NomGraphQLClient {
                         }
                     }
                 }
-                """;
+                """.formatted(navident);
 
         try {
             HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();
-            return graphQlClient.document(document).variable("navident", navident).retrieve("lederFor").toEntity(String.class).block();
+            return graphQlClient.document(document).retrieve("lederFor").toEntity(String.class).block();
         } catch (Exception e) {
             log.info("Noe gikk galt med henting av leders ressurser i NOM for navident {}. Feilmelding: {}", navident, e.getMessage());
         }
