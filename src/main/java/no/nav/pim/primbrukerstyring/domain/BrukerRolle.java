@@ -2,6 +2,7 @@ package no.nav.pim.primbrukerstyring.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.Objects;
@@ -19,11 +20,13 @@ public class BrukerRolle {
     public BrukerRolle() {}
 
     @Id
-    @Column
+    @Column(name = "ident")
+    @NotNull
     private String ident;
 
     @Column
     @Enumerated(EnumType.STRING)
+    @NotNull
     private Rolle rolle;
 
     @Override
