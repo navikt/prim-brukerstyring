@@ -38,7 +38,7 @@ public class NomGraphQLClient {
         String document =
                 """
                 query LedersRessurser {
-                    ressurs(where: navident: %s) {
+                    ressurs(where: {navident: %s}) {
                         navident
                         lederFor {
                             orgEnhet {
