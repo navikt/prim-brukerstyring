@@ -33,7 +33,7 @@ public class Brukertjeneste implements BrukertjenesteInterface{
     MeterRegistry metricsRegistry;
 
     @Autowired
-    BrukerRollerepository brukerRollerepository;
+    BrukerRollerepository brukerrollerepository;
 
     @Autowired
     OIDCUtil oidcUtil;
@@ -42,18 +42,18 @@ public class Brukertjeneste implements BrukertjenesteInterface{
     NomGraphQLClient nomGraphQLClient;
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
     @GetMapping(path = "/rolle/{brukerIdent}")
     public Rolle hentBrukerRolle(@RequestHeader(value = "Authorization") String authorization, @PathVariable String brukerIdent) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentBrukerRolle").increment();
         //String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
-        Optional<BrukerRolle> brukerRolle = brukerRollerepository.findByIdent(brukerIdent);
+        Optional<BrukerRolle> brukerRolle = brukerrollerepository.findByIdent(brukerIdent);
 
         if (brukerRolle.isEmpty()) {
             Leder leder = nomGraphQLClient.getLedersResurser(authorization, brukerIdent);
             if (leder != null) {
                 if (leder.getLederFor().size() > 0) {
-                    brukerRollerepository.save(BrukerRolle.builder().ident(brukerIdent).rolle(Rolle.LEDER).build());
+                    brukerrollerepository.save(BrukerRolle.builder().ident(brukerIdent).rolle(Rolle.LEDER).build());
                     return Rolle.LEDER;
                 } else {
                     return Rolle.MEDARBEIDER;
@@ -67,14 +67,14 @@ public class Brukertjeneste implements BrukertjenesteInterface{
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
     @PostMapping(path = "/rolle", consumes = MediaType.APPLICATION_JSON_VALUE)
     public BrukerRolle leggTilBrukerRolle(@RequestHeader(value = "Authorization") String authorization, @Valid @RequestBody BrukerRolle brukerRolle) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "leggTilBrukerRolle").increment();
-        Optional<BrukerRolle> finnesBrukerRolle = brukerRollerepository.findByIdent(brukerRolle.getIdent());
+        Optional<BrukerRolle> finnesBrukerRolle = brukerrollerepository.findByIdent(brukerRolle.getIdent());
 
         if (finnesBrukerRolle.isEmpty()) {
-            return brukerRollerepository.save(brukerRolle);
+            return brukerrollerepository.save(brukerRolle);
         } else {
             Metrics.counter("prim_error", "exception", "UserAlreadyExistException").increment();
             throw new RuntimeException("Bruker med ident " + brukerRolle.getIdent() + " har allerede en rolle i PRIM");
@@ -82,15 +82,15 @@ public class Brukertjeneste implements BrukertjenesteInterface{
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
     @PutMapping(path = "/rolle/{ident}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public BrukerRolle endreBrukerRolle(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident, @Valid @RequestBody Rolle rolle) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "endreBrukerRolle").increment();
-        Optional<BrukerRolle> eksisterendeBrukerRolle = brukerRollerepository.findByIdent(ident);
+        Optional<BrukerRolle> eksisterendeBrukerRolle = brukerrollerepository.findByIdent(ident);
         if (eksisterendeBrukerRolle.isPresent()) {
             BrukerRolle oppdatertBrukerRolle = eksisterendeBrukerRolle.get();
             oppdatertBrukerRolle.setRolle(rolle);
-            return brukerRollerepository.save(oppdatertBrukerRolle);
+            return brukerrollerepository.save(oppdatertBrukerRolle);
         } else {
             Metrics.counter("prim_error", "exception", "UserAlreadyExistException").increment();
             throw new RuntimeException("Bruker med ident " + ident + " har allerede en rolle i PRIM");
@@ -98,11 +98,11 @@ public class Brukertjeneste implements BrukertjenesteInterface{
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
     @DeleteMapping(path = "/rolle/{ident}")
     public void slettBrukerRolle(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "leggTilBrukerRolle").increment();
-        brukerRollerepository.deleteByIdent(ident);
+        brukerrollerepository.deleteByIdent(ident);
     }
 
     @Override
@@ -110,6 +110,6 @@ public class Brukertjeneste implements BrukertjenesteInterface{
     @GetMapping(path = "/{rolle}")
     public List<BrukerRolle> hentAlleBrukereMedRolle(@RequestHeader(value = "Authorization") String authorization,  @PathVariable Rolle rolle) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentAlleMedHRMedarbeiderRolle").increment();
-        return brukerRollerepository.findAllByRolle(rolle);
+        return brukerrollerepository.findAllByRolle(rolle);
     }
 }
