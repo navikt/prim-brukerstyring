@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface BrukerRollerepository extends JpaRepository<BrukerRolle, Long> {
+public interface BrukerRollerepository extends JpaRepository<BrukerRolle, String> {
 
     Optional<BrukerRolle> findByIdent(String ident);
 

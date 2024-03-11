@@ -59,7 +59,7 @@ public class Brukertjeneste implements BrukertjenesteInterface{
                     return Rolle.MEDARBEIDER;
                 }
             }
-        log.error("###Kunne ikke hente bruker i NOM: {}", brukerIdent);
+            log.error("###Kunne ikke hente bruker i NOM: {}", brukerIdent);
             return Rolle.UKJENT;
         } else {
             return brukerRolle.get().getRolle();
