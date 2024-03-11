@@ -7,6 +7,7 @@ import no.nav.pim.primbrukerstyring.domain.BrukerRolle;
 import no.nav.pim.primbrukerstyring.domain.Rolle;
 import no.nav.pim.primbrukerstyring.exceptions.AuthorizationException;
 import no.nav.pim.primbrukerstyring.nom.NomGraphQLClient;
+import no.nav.pim.primbrukerstyring.nom.domain.Leder;
 import no.nav.pim.primbrukerstyring.repository.BrukerRollerepository;
 import no.nav.pim.primbrukerstyring.util.OIDCUtil;
 import no.nav.security.token.support.core.api.Protected;
@@ -49,18 +50,20 @@ public class Brukertjeneste implements BrukertjenesteInterface{
         Optional<BrukerRolle> brukerRolle = brukerRollerepository.findByIdent(brukerIdent);
 
         if (brukerRolle.isEmpty()) {
-            try {
-                String response = nomGraphQLClient.getLedersResurser(authorization, brukerIdent);
-                log.info("Respons fra NOM: {}", response);
-            } catch (Exception e) {
-                log.error("###Kunne ikke hente bruker i NOM: {}", brukerIdent);
-                return Rolle.UKJENT;
+            Leder leder = nomGraphQLClient.getLedersResurser(authorization, brukerIdent);
+            if (leder != null) {
+                if (leder.getLederFor().size() > 0) {
+                    brukerRollerepository.save(BrukerRolle.builder().ident(brukerIdent).rolle(Rolle.LEDER).build());
+                    return Rolle.LEDER;
+                } else {
+                    return Rolle.MEDARBEIDER;
+                }
             }
+        log.error("###Kunne ikke hente bruker i NOM: {}", brukerIdent);
+            return Rolle.UKJENT;
         } else {
             return brukerRolle.get().getRolle();
         }
-        log.error("###Kunne ikke finne rolle for bruker {}", brukerIdent);
-        return Rolle.UKJENT;
     }
 
     @Override

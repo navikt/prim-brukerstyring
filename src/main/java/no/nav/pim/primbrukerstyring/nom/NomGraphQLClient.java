@@ -1,6 +1,7 @@
 package no.nav.pim.primbrukerstyring.nom;
 
 import jakarta.annotation.PostConstruct;
+import no.nav.pim.primbrukerstyring.nom.domain.Leder;
 import no.nav.pim.primbrukerstyring.util.OIDCUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ public class NomGraphQLClient {
 
     private static final Logger log = LoggerFactory.getLogger(NomGraphQLClient.class);
 
-    public String getLedersResurser(String authorization, String navident) {
+    public Leder getLedersResurser(String authorization, String navident) {
         log.info("Henter leders resurser for navident {}", navident);
         String document =
                 """
@@ -55,10 +56,10 @@ public class NomGraphQLClient {
 
         try {
             HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();
-            return graphQlClient.document(document).retrieve("lederFor").toEntity(String.class).block();
+            return graphQlClient.document(document).retrieve("lederFor").toEntity(Leder.class).block();
         } catch (Exception e) {
             log.info("Noe gikk galt med henting av leders ressurser i NOM for navident {}. Feilmelding: {}", navident, e.getMessage());
         }
-        return "";
+        return null;
     }
 }
