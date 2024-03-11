@@ -52,7 +52,13 @@ public class NomGraphQLClient {
                     }
                 }
                 """;
-        HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", authorization).build();
-        return graphQlClient.document(document).variable("navident", navident).retrieve("lederFor").toEntity(String.class).block();
+
+        try {
+            HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();
+            return graphQlClient.document(document).variable("navident", navident).retrieve("lederFor").toEntity(String.class).block();
+        } catch (Exception e) {
+            log.info("Noe gikk galt med henting av leders ressurser i NOM for navident {}. Feilmelding: {}", navident, e.getMessage());
+        }
+        return "";
     }
 }

@@ -71,6 +71,14 @@ public class OIDCUtil {
         return Optional.empty();
     }
 
+    public String getAuthHeader(String auth, String scope) throws Exception {
+        if (LOCAL.equals(naisCluster)) {
+            return "Bearer localtoken";
+        } else {
+            return "bearer " + getAccessToken(auth, scope);
+        }
+    }
+
     public HttpHeaders setHeaders(String auth, String scope) throws Exception {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
