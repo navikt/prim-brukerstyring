@@ -73,16 +73,11 @@ public class Brukertjeneste implements BrukertjenesteInterface{
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "leggTilBrukerRolle").increment();
         Optional<BrukerRolle> finnesBrukerRolle = brukerrollerepository.findByIdent(brukerRolle.getIdent());
 
-        if (finnesBrukerRolle.isEmpty()) {
-            Leder leder = nomGraphQLClient.getLedersResurser(authorization, brukerRolle.getIdent());
-            if (leder != null) {
-                brukerRolle.setNavn(leder.getVisningsnavn());
-            }
-            return brukerrollerepository.save(brukerRolle);
-        } else {
-            Metrics.counter("prim_error", "exception", "UserAlreadyExistException").increment();
-            throw new RuntimeException("Bruker med ident " + brukerRolle.getIdent() + " har allerede en rolle i PRIM");
+        Leder leder = nomGraphQLClient.getLedersResurser(authorization, brukerRolle.getIdent());
+        if (finnesBrukerRolle.isEmpty() && leder != null) {
+            brukerRolle.setNavn(leder.getVisningsnavn());
         }
+        return brukerrollerepository.save(brukerRolle);
     }
 
     @Override
