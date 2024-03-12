@@ -87,8 +87,8 @@ public class Brukertjeneste implements BrukertjenesteInterface{
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
-    @PutMapping(path = "/rolle/{ident}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public BrukerRolle endreBrukerRolle(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident, @Valid @RequestBody Rolle rolle) {
+    @PutMapping(path = "/rolle/{ident}/{rolle}")
+    public BrukerRolle endreBrukerRolle(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident, @PathVariable Rolle rolle) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "endreBrukerRolle").increment();
         Optional<BrukerRolle> eksisterendeBrukerRolle = brukerrollerepository.findByIdent(ident);
         if (eksisterendeBrukerRolle.isPresent()) {
