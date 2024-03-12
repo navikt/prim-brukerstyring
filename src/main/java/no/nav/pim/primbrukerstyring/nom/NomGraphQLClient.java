@@ -1,7 +1,7 @@
 package no.nav.pim.primbrukerstyring.nom;
 
 import jakarta.annotation.PostConstruct;
-import no.nav.pim.primbrukerstyring.nom.domain.Leder;
+import no.nav.pim.primbrukerstyring.nom.domain.Ressurs;
 import no.nav.pim.primbrukerstyring.util.OIDCUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,30 +34,43 @@ public class NomGraphQLClient {
 
     private static final Logger log = LoggerFactory.getLogger(NomGraphQLClient.class);
 
-    public Leder getLedersResurser(String authorization, String navident) {
+    public Ressurs getLedersResurser(String authorization, String navident) {
         log.info("Henter leders resurser for navident {}", navident);
         String document =
                 """
-                query LedersRessurser {
-                    ressurs(where: {navident: "%s"}) {
-                        navident
-                        visningsnavn
-                        lederFor {
-                            orgEnhet {
-                                koblinger {
-                                    ressurs {
-                                        navident
+                        query LedersRessurser {
+                            ressurs(where: {navident: "%s"}) {
+                                navident
+                                visningsnavn
+                                lederFor {
+                                    orgEnhet {
+                                        koblinger {
+                                            ressurs {
+                                                navident
+                                                visningsnavn
+                                            }
+                                        }
+                                        navn
+                                        organiseringer {
+                                            orgEnhet {
+                                                navn
+                                                leder {
+                                                    ressurs {
+                                                        navident
+                                                        visningsnavn
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                }
-                """.formatted(navident);
+                        """.formatted(navident);
 
         try {
             HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();
-            return graphQlClient.document(document).retrieve("ressurs").toEntity(Leder.class).block();
+            return graphQlClient.document(document).retrieve("ressurs").toEntity(Ressurs.class).block();
         } catch (Exception e) {
             log.info("Noe gikk galt med henting av leders ressurser i NOM for navident {}. Feilmelding: {}", navident, e.getMessage());
         }

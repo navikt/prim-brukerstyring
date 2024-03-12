@@ -7,4 +7,6 @@ import java.util.List;
 @Data
 public class Orgenhet {
     List<Kobling> koblinger;
+    List<Organisering> organiseringer;
+    Leder leder;
 }
