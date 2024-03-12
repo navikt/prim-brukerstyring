@@ -8,5 +8,5 @@ import java.util.List;
 public class Orgenhet {
     List<Kobling> koblinger;
     List<Organisering> organiseringer;
-    Leder leder;
+    List<Leder> leder;
 }

@@ -8,6 +8,7 @@ import no.nav.pim.primbrukerstyring.domain.Rolle;
 import no.nav.pim.primbrukerstyring.exceptions.AuthorizationException;
 import no.nav.pim.primbrukerstyring.nom.NomGraphQLClient;
 import no.nav.pim.primbrukerstyring.nom.domain.Kobling;
+import no.nav.pim.primbrukerstyring.nom.domain.Leder;
 import no.nav.pim.primbrukerstyring.nom.domain.Ressurs;
 import no.nav.pim.primbrukerstyring.repository.BrukerRollerepository;
 import no.nav.pim.primbrukerstyring.util.OIDCUtil;
@@ -131,7 +132,8 @@ public class Brukertjeneste implements BrukertjenesteInterface{
             return ledersRessurser.getLederFor().stream()
                 .flatMap((lederFor) -> {
                     List<Ressurs> koblinger = lederFor.getOrgEnhet().getKoblinger().stream().map((Kobling::getRessurs)).toList();
-                    List<Ressurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream().map((org -> org.getOrgenhet().getLeder().getRessurs())).toList();
+                    List<Ressurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
+                            .flatMap(org -> org.getOrgenhet().getLeder().stream().map(Leder::getRessurs)).toList();
                     return Stream.concat(koblinger.stream(), organiseringer.stream());
                 }).filter(ressurs -> ressurs.getNavident().equals(ident)).toList();
         } else {
