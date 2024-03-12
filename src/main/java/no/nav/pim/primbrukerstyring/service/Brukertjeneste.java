@@ -73,9 +73,13 @@ public class Brukertjeneste implements BrukertjenesteInterface{
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "leggTilBrukerRolle").increment();
         Optional<BrukerRolle> finnesBrukerRolle = brukerrollerepository.findByIdent(brukerRolle.getIdent());
 
-        Leder leder = nomGraphQLClient.getLedersResurser(authorization, brukerRolle.getIdent());
-        if (finnesBrukerRolle.isEmpty() && leder != null) {
-            brukerRolle.setNavn(leder.getVisningsnavn());
+        if (finnesBrukerRolle.isEmpty()) {
+            Leder leder = nomGraphQLClient.getLedersResurser(authorization, brukerRolle.getIdent());
+            if (leder != null) {
+                brukerRolle.setNavn(leder.getVisningsnavn());
+            }
+        } else {
+            brukerRolle.setNavn(finnesBrukerRolle.get().getNavn());
         }
         return brukerrollerepository.save(brukerRolle);
     }
