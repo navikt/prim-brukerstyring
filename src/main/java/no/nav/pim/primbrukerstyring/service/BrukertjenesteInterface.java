@@ -15,5 +15,5 @@ public interface BrukertjenesteInterface {
 
     void slettBrukerRolle(String authorization, String ident);
 
-    List<BrukerRolle> hentAlleBrukereMedRolle(String authorization);
+    List<BrukerRolle> hentAlleHRMedarbeidere(String authorization);
 }

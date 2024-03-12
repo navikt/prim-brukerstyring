@@ -111,9 +111,9 @@ public class Brukertjeneste implements BrukertjenesteInterface{
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-    @GetMapping(path = "/roller")
-    public List<BrukerRolle> hentAlleBrukereMedRolle(@RequestHeader(value = "Authorization") String authorization) {
+    @GetMapping(path = "/hr")
+    public List<BrukerRolle> hentAlleHRMedarbeidere(@RequestHeader(value = "Authorization") String authorization) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentAlleMedHRMedarbeiderRolle").increment();
-        return brukerrollerepository.findAll();
+        return brukerrollerepository.findAllByRolleIn(List.of(Rolle.HR_MEDARBEIDER, Rolle.HR_MEDARBEIDER_BEMANNING));
     }
 }
