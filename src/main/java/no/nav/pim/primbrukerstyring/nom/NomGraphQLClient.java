@@ -38,35 +38,35 @@ public class NomGraphQLClient {
         log.info("Henter leders resurser for navident {}", navident);
         String document =
                 """
-                        query LedersRessurser {
-                            ressurs(where: {navident: "%s"}) {
-                                navident
-                                visningsnavn
-                                lederFor {
+                query LedersRessurser {
+                    ressurs(where: {navident: "%s"}) {
+                        navident
+                        visningsnavn
+                        lederFor {
+                            orgEnhet {
+                                koblinger {
+                                    ressurs {
+                                        navident
+                                        visningsnavn
+                                    }
+                                }
+                                navn
+                                organiseringer {
                                     orgEnhet {
-                                        koblinger {
+                                        navn
+                                        leder {
                                             ressurs {
                                                 navident
                                                 visningsnavn
-                                            }
-                                        }
-                                        navn
-                                        organiseringer {
-                                            orgEnhet {
-                                                navn
-                                                leder {
-                                                    ressurs {
-                                                        navident
-                                                        visningsnavn
-                                                    }
-                                                }
                                             }
                                         }
                                     }
                                 }
                             }
                         }
-                        """.formatted(navident);
+                    }
+                }
+                """.formatted(navident);
 
         try {
             HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();
