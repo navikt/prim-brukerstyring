@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class Orgenhet {
+public class OrgEnhet {
     List<Kobling> koblinger;
     List<Organisering> organiseringer;
     List<Leder> leder;

@@ -133,7 +133,7 @@ public class Brukertjeneste implements BrukertjenesteInterface{
                 .flatMap((lederFor) -> {
                     List<Ressurs> koblinger = lederFor.getOrgEnhet().getKoblinger().stream().map((Kobling::getRessurs)).toList();
                     List<Ressurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
-                            .flatMap(org -> org.getOrgenhet().getLeder().stream().map(Leder::getRessurs)).toList();
+                            .flatMap(org -> org.getOrgEnhet().getLeder().stream().map(Leder::getRessurs)).toList();
                     return Stream.concat(koblinger.stream(), organiseringer.stream());
                 }).filter(ressurs -> ressurs.getNavident().equals(ident)).toList();
         } else {
