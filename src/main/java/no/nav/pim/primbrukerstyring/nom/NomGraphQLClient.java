@@ -1,6 +1,7 @@
 package no.nav.pim.primbrukerstyring.nom;
 
 import jakarta.annotation.PostConstruct;
+import no.nav.pim.primbrukerstyring.nom.domain.OrgEnheter;
 import no.nav.pim.primbrukerstyring.nom.domain.Ressurs;
 import no.nav.pim.primbrukerstyring.util.OIDCUtil;
 import org.slf4j.Logger;
@@ -73,6 +74,52 @@ public class NomGraphQLClient {
             return graphQlClient.document(document).retrieve("ressurs").toEntity(Ressurs.class).block();
         } catch (Exception e) {
             log.info("Noe gikk galt med henting av leders ressurser i NOM for navident {}. Feilmelding: {}", navident, e.getMessage());
+        }
+        return null;
+    }
+
+    public OrgEnheter getOrganisasjonstre(String authorization) {
+        log.info("Henter organisasjonstre");
+        String document =
+            """
+                query Organisjonstre {
+                      orgEnheter(where: {orgNiv: "ORGNIV0"}) {
+                            nomId
+                            orgEnhet {
+                                  navn
+                                  organiseringer(retning: under) {
+                                        orgEnhet {
+                                              navn
+                                              id
+                                              organiseringer(retning: under) {
+                                                    orgEnhet {
+                                                          navn
+                                                          id
+                                                          organiseringer(retning: under) {
+                                                                orgEnhet {
+                                                                      navn
+                                                                      id
+                                                                      organiseringer(retning: under) {
+                                                                            orgEnhet {
+                                                                              navn
+                                                                              id
+                                                                            }
+                                                                      }
+                                                                }
+                                                          }
+                                                    }
+                                              }
+                                        }
+                                  }
+                            }
+                      }
+                }
+            """;
+        try {
+            HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();
+            return graphQlClient.document(document).retrieve("orgEnheter").toEntity(OrgEnheter.class).block();
+        } catch (Exception e) {
+            log.info("Noe gikk galt med henting av organisasjons pyramiden. Feilmelding: {}", e.getMessage());
         }
         return null;
     }

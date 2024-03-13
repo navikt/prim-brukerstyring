@@ -6,6 +6,8 @@ import java.util.List;
 
 @Data
 public class OrgEnhet {
+    String id;
+    String navn;
     List<Kobling> koblinger;
     List<Organisering> organiseringer;
     List<Leder> leder;

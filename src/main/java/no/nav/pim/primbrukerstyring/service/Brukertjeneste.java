@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 @RestController
 @Protected
 @RequestMapping(value = "/bruker")
-public class Brukertjeneste implements BrukertjenesteInterface{
+public class Brukertjeneste implements BrukertjenesteInterface {
 
     private static final Logger log = LoggerFactory.getLogger(Brukertjeneste.class);
 
@@ -135,7 +135,7 @@ public class Brukertjeneste implements BrukertjenesteInterface{
                     List<Ressurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
                             .flatMap(org -> org.getOrgEnhet().getLeder().stream().map(Leder::getRessurs)).toList();
                     return Stream.concat(koblinger.stream(), organiseringer.stream());
-                }).filter(ressurs -> !ressurs.getNavident().equals(ident)).toList();
+                }).filter(ressurs -> !ressurs.getNavident().equals(ident)).distinct().toList();
         } else {
             throw new AuthorizationException("Bruker med ident "+ brukerIdent + " har ikke tilgang til ident " + ident);
         }
