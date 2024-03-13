@@ -1,8 +1,10 @@
 package no.nav.pim.primbrukerstyring.service;
 
-import no.nav.pim.primbrukerstyring.nom.domain.OrgEnheter;
+import no.nav.pim.primbrukerstyring.nom.domain.Organisering;
+
+import java.util.List;
 
 public interface OrganisasjonstjenesteInterface {
-        OrgEnheter hentOrganisasjonstre(String authorization);
+        List<Organisering> hentOrganisasjonstre(String authorization);
 
 }

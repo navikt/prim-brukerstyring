@@ -1,7 +1,7 @@
 package no.nav.pim.primbrukerstyring.nom;
 
 import jakarta.annotation.PostConstruct;
-import no.nav.pim.primbrukerstyring.nom.domain.OrgEnheter;
+import no.nav.pim.primbrukerstyring.nom.domain.Organisering;
 import no.nav.pim.primbrukerstyring.nom.domain.Ressurs;
 import no.nav.pim.primbrukerstyring.util.OIDCUtil;
 import org.slf4j.Logger;
@@ -12,6 +12,7 @@ import org.springframework.graphql.client.HttpGraphQlClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.List;
 
 
 @Component
@@ -78,7 +79,7 @@ public class NomGraphQLClient {
         return null;
     }
 
-    public OrgEnheter getOrganisasjonstre(String authorization) {
+    public List<Organisering> getOrganisasjonstre(String authorization) {
         log.info("Henter organisasjonstre");
         String document =
             """
@@ -117,7 +118,7 @@ public class NomGraphQLClient {
             """;
         try {
             HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();
-            return graphQlClient.document(document).retrieve("orgEnheter").toEntity(OrgEnheter.class).block();
+            return graphQlClient.document(document).retrieve("orgEnheter").toEntityList(Organisering.class).block();
         } catch (Exception e) {
             log.info("Noe gikk galt med henting av organisasjons pyramiden. Feilmelding: {}", e.getMessage());
         }
