@@ -21,4 +21,6 @@ public interface BrukertjenesteInterface {
     List<Bruker> hentAlleHRMedarbeidere(String authorization);
 
     List<Ressurs> hentLedersRessurser(String authorization, String ident);
+
+    List<Ressurs> hentLedere(String authorization);
 }
