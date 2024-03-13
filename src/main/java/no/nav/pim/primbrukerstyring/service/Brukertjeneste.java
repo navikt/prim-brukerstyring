@@ -105,7 +105,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
-    @PutMapping(path = "/rolle/tilganger/{ident}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(path = "/tilganger/{ident}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public BrukerRolle endreBrukerTilganger(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident, @Valid @RequestBody BrukerRolle brukerRolle) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "endreBrukerRolle").increment();
         Optional<BrukerRolle> eksisterendeBrukerRolle = brukerrollerepository.findByIdent(ident);
