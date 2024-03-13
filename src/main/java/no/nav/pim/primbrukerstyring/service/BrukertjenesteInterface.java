@@ -14,6 +14,8 @@ public interface BrukertjenesteInterface {
 
     BrukerRolle endreBrukerRolle(String authorization, String ident, BrukerRolle brukerRolle);
 
+    BrukerRolle endreBrukerTilganger(String authorization,String ident, BrukerRolle brukerRolle);
+
     void slettBrukerRolle(String authorization, String ident);
 
     List<BrukerRolle> hentAlleHRMedarbeidere(String authorization);

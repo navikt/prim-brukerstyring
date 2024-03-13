@@ -98,8 +98,24 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             oppdatertBrukerRolle.setRolle(brukerRolle.getRolle());
             return brukerrollerepository.save(oppdatertBrukerRolle);
         } else {
-            Metrics.counter("prim_error", "exception", "UserAlreadyExistException").increment();
-            throw new RuntimeException("Bruker med ident " + ident + " har allerede en rolle i PRIM");
+            Metrics.counter("prim_error", "exception", "UserDoesntExistException").increment();
+            throw new RuntimeException("Bruker med ident " + ident + " eksisterer ikke i PRIM");
+        }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
+    @PutMapping(path = "/rolle/tilganger/{ident}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public BrukerRolle endreBrukerTilganger(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident, @Valid @RequestBody BrukerRolle brukerRolle) {
+        metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "endreBrukerRolle").increment();
+        Optional<BrukerRolle> eksisterendeBrukerRolle = brukerrollerepository.findByIdent(ident);
+        if (eksisterendeBrukerRolle.isPresent()) {
+            BrukerRolle oppdatertBrukerRolle = eksisterendeBrukerRolle.get();
+            oppdatertBrukerRolle.setTilganger(brukerRolle.getTilganger());
+            return brukerrollerepository.save(oppdatertBrukerRolle);
+        } else {
+            Metrics.counter("prim_error", "exception", "UserDoesntExistException").increment();
+            throw new RuntimeException("Bruker med ident " + ident + " eksisterer ikke i PRIM");
         }
     }
 

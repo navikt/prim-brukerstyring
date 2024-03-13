@@ -1,11 +1,12 @@
 package no.nav.pim.primbrukerstyring.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 @Table(name = "bruker_rolle")
@@ -26,11 +27,16 @@ public class BrukerRolle {
 
     @Column
     @Enumerated(EnumType.STRING)
-    @NotNull
     private Rolle rolle;
 
     @Column
     private String navn;
+
+    @ElementCollection
+    @CollectionTable(name="bruker_tilgang", joinColumns=@JoinColumn(name="ident"))
+    @Column(name="tilgang")
+    @JsonBackReference
+    private List<String> tilganger = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {
