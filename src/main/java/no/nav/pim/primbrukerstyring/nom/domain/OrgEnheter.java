@@ -6,5 +6,5 @@ import java.util.List;
 
 @Data
 public class OrgEnheter {
-    List<OrgEnhet> orgEnheter;
+    List<Organisering> orgEnheter;
 }

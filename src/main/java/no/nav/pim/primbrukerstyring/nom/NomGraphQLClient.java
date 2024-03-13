@@ -84,9 +84,9 @@ public class NomGraphQLClient {
             """
                 query Organisjonstre {
                       orgEnheter(where: {orgNiv: "ORGNIV0"}) {
-                            nomId
                             orgEnhet {
                                   navn
+                                  id
                                   organiseringer(retning: under) {
                                         orgEnhet {
                                               navn
