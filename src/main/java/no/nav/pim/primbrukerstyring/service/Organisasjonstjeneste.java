@@ -24,8 +24,8 @@ public class Organisasjonstjeneste implements OrganisasjonstjenesteInterface {
     NomGraphQLClient nomGraphQLClient;
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
-    @GetMapping(path = "/")
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+    @GetMapping()
     public OrgEnheter hentOrganisasjonstre(@RequestHeader(value = "Authorization") String authorization) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Organisasjonstjeneste", "metode", "hentOrganisasjonstre").increment();
         return nomGraphQLClient.getOrganisasjonstre(authorization);
