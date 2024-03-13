@@ -168,7 +168,6 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         Optional<Bruker> bruker = brukerrepository.findByIdent(brukerIdent);
         boolean erHR = bruker.isPresent() && List.of(Rolle.HR_MEDARBEIDER, Rolle.HR_MEDARBEIDER_BEMANNING).contains(bruker.get().getRolle());
         if (erHR) {
-            log.info("Henter orgenheter med ider: {}", String.join(",", bruker.get().getTilganger()));
             List<OrgEnhet> orgenheter = bruker.get().getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
             return orgenheter.stream().flatMap(this::hentOrgenhetsLedere).distinct().toList();
         } else {
@@ -177,6 +176,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     }
 
     private Stream<Ressurs> hentOrgenhetsLedere(OrgEnhet orgEnhet){
+        if (orgEnhet == null) return Stream.empty();
         return Stream.concat(orgEnhet.getLeder().stream().map(Leder::getRessurs), orgEnhet.getOrganiseringer().stream().flatMap((organisering -> hentOrgenhetsLedere(organisering.getOrgEnhet()))));
     }
 }
