@@ -3,14 +3,14 @@ package no.nav.pim.primbrukerstyring.service;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import jakarta.validation.Valid;
-import no.nav.pim.primbrukerstyring.domain.BrukerRolle;
+import no.nav.pim.primbrukerstyring.domain.Bruker;
 import no.nav.pim.primbrukerstyring.domain.Rolle;
 import no.nav.pim.primbrukerstyring.exceptions.AuthorizationException;
 import no.nav.pim.primbrukerstyring.nom.NomGraphQLClient;
 import no.nav.pim.primbrukerstyring.nom.domain.Kobling;
 import no.nav.pim.primbrukerstyring.nom.domain.Leder;
 import no.nav.pim.primbrukerstyring.nom.domain.Ressurs;
-import no.nav.pim.primbrukerstyring.repository.BrukerRollerepository;
+import no.nav.pim.primbrukerstyring.repository.Brukerrepository;
 import no.nav.pim.primbrukerstyring.util.OIDCUtil;
 import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
@@ -36,7 +36,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     MeterRegistry metricsRegistry;
 
     @Autowired
-    BrukerRollerepository brukerrollerepository;
+    Brukerrepository brukerrollerepository;
 
     @Autowired
     OIDCUtil oidcUtil;
@@ -50,13 +50,13 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     public Rolle hentBrukerRolle(@RequestHeader(value = "Authorization") String authorization) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentBrukerRolle").increment();
         String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
-        Optional<BrukerRolle> brukerRolle = brukerrollerepository.findByIdent(brukerIdent);
+        Optional<Bruker> brukerRolle = brukerrollerepository.findByIdent(brukerIdent);
 
         if (brukerRolle.isEmpty()) {
             Ressurs ressurs = nomGraphQLClient.getLedersResurser(authorization, brukerIdent);
             if (ressurs != null) {
                 if (ressurs.getLederFor().size() > 0) {
-                    brukerrollerepository.save(BrukerRolle.builder().ident(brukerIdent).rolle(Rolle.LEDER).build());
+                    brukerrollerepository.save(Bruker.builder().ident(brukerIdent).rolle(Rolle.LEDER).build());
                     return Rolle.LEDER;
                 } else {
                     return Rolle.MEDARBEIDER;
@@ -72,31 +72,31 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
     @PostMapping(path = "/rolle", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public BrukerRolle leggTilBrukerRolle(@RequestHeader(value = "Authorization") String authorization, @Valid @RequestBody BrukerRolle brukerRolle) {
+    public Bruker leggTilBrukerRolle(@RequestHeader(value = "Authorization") String authorization, @Valid @RequestBody Bruker bruker) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "leggTilBrukerRolle").increment();
-        Optional<BrukerRolle> finnesBrukerRolle = brukerrollerepository.findByIdent(brukerRolle.getIdent());
+        Optional<Bruker> finnesBrukerRolle = brukerrollerepository.findByIdent(bruker.getIdent());
 
         if (finnesBrukerRolle.isEmpty()) {
-            Ressurs ressurs = nomGraphQLClient.getLedersResurser(authorization, brukerRolle.getIdent());
+            Ressurs ressurs = nomGraphQLClient.getLedersResurser(authorization, bruker.getIdent());
             if (ressurs != null) {
-                brukerRolle.setNavn(ressurs.getVisningsnavn());
+                bruker.setNavn(ressurs.getVisningsnavn());
             }
         } else {
-            brukerRolle.setNavn(finnesBrukerRolle.get().getNavn());
+            bruker.setNavn(finnesBrukerRolle.get().getNavn());
         }
-        return brukerrollerepository.save(brukerRolle);
+        return brukerrollerepository.save(bruker);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
     @PutMapping(path = "/rolle/{ident}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public BrukerRolle endreBrukerRolle(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident, @Valid @RequestBody BrukerRolle brukerRolle) {
+    public Bruker endreBrukerRolle(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident, @Valid @RequestBody Bruker bruker) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "endreBrukerRolle").increment();
-        Optional<BrukerRolle> eksisterendeBrukerRolle = brukerrollerepository.findByIdent(ident);
+        Optional<Bruker> eksisterendeBrukerRolle = brukerrollerepository.findByIdent(ident);
         if (eksisterendeBrukerRolle.isPresent()) {
-            BrukerRolle oppdatertBrukerRolle = eksisterendeBrukerRolle.get();
-            oppdatertBrukerRolle.setRolle(brukerRolle.getRolle());
-            return brukerrollerepository.save(oppdatertBrukerRolle);
+            Bruker oppdatertBruker = eksisterendeBrukerRolle.get();
+            oppdatertBruker.setRolle(bruker.getRolle());
+            return brukerrollerepository.save(oppdatertBruker);
         } else {
             Metrics.counter("prim_error", "exception", "UserDoesntExistException").increment();
             throw new RuntimeException("Bruker med ident " + ident + " eksisterer ikke i PRIM");
@@ -106,13 +106,13 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
     @PutMapping(path = "/tilganger/{ident}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public BrukerRolle endreBrukerTilganger(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident, @Valid @RequestBody BrukerRolle brukerRolle) {
+    public Bruker endreBrukerTilganger(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident, @Valid @RequestBody Bruker bruker) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "endreBrukerRolle").increment();
-        Optional<BrukerRolle> eksisterendeBrukerRolle = brukerrollerepository.findByIdent(ident);
+        Optional<Bruker> eksisterendeBrukerRolle = brukerrollerepository.findByIdent(ident);
         if (eksisterendeBrukerRolle.isPresent()) {
-            BrukerRolle oppdatertBrukerRolle = eksisterendeBrukerRolle.get();
-            oppdatertBrukerRolle.setTilganger(brukerRolle.getTilganger());
-            return brukerrollerepository.save(oppdatertBrukerRolle);
+            Bruker oppdatertBruker = eksisterendeBrukerRolle.get();
+            oppdatertBruker.setTilganger(bruker.getTilganger());
+            return brukerrollerepository.save(oppdatertBruker);
         } else {
             Metrics.counter("prim_error", "exception", "UserDoesntExistException").increment();
             throw new RuntimeException("Bruker med ident " + ident + " eksisterer ikke i PRIM");
@@ -130,7 +130,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
     @GetMapping(path = "/hr")
-    public List<BrukerRolle> hentAlleHRMedarbeidere(@RequestHeader(value = "Authorization") String authorization) {
+    public List<Bruker> hentAlleHRMedarbeidere(@RequestHeader(value = "Authorization") String authorization) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentAlleHRMedarbeidere").increment();
         return brukerrollerepository.findAllByRolleIn(List.of(Rolle.HR_MEDARBEIDER, Rolle.HR_MEDARBEIDER_BEMANNING));
     }
@@ -141,7 +141,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     public List<Ressurs> hentLedersRessurser(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentLedersRessurser").increment();
         String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
-        Optional<BrukerRolle> brukerRolle = brukerrollerepository.findByIdent(brukerIdent);
+        Optional<Bruker> brukerRolle = brukerrollerepository.findByIdent(brukerIdent);
         boolean erHR = brukerRolle.isPresent() && List.of(Rolle.HR_MEDARBEIDER, Rolle.HR_MEDARBEIDER_BEMANNING).contains(brukerRolle.get().getRolle());
         if (erHR || brukerIdent.equals(ident)) {
             Ressurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, ident);

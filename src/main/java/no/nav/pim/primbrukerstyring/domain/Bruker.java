@@ -1,27 +1,27 @@
 package no.nav.pim.primbrukerstyring.domain;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import no.nav.pim.primbrukerstyring.util.StringToListConverter;
 
 import java.util.*;
 
 @Entity
-@Table(name = "bruker_rolle")
+@Table(name = "bruker")
 @ToString
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class BrukerRolle {
+public class Bruker {
 
-    public BrukerRolle() {}
+    public Bruker() {}
 
     @Id
-    @Column(name = "ident")
+    @Column
     @NotNull
     private String ident;
 
@@ -32,21 +32,19 @@ public class BrukerRolle {
     @Column
     private String navn;
 
-    @ElementCollection
-    @CollectionTable(name="bruker_tilgang", joinColumns=@JoinColumn(name="ident"))
-    @Column(name="tilgang")
-    @JsonBackReference
-    private List<String> tilganger = new ArrayList<>();
+    @Column(name = "tilganger")
+    @Convert(converter = StringToListConverter.class)
+    private List<String> tilganger;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof BrukerRolle that)) return false;
-        return Objects.equals(ident, that.ident) && Objects.equals(rolle, that.rolle) && Objects.equals(navn, that.navn);
+        if (!(o instanceof Bruker bruker)) return false;
+        return Objects.equals(ident, bruker.ident) && rolle == bruker.rolle && Objects.equals(navn, bruker.navn) && Objects.equals(tilganger, bruker.tilganger);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(ident, rolle, navn);
+        return Objects.hash(ident, rolle, navn, tilganger);
     }
 }
