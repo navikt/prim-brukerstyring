@@ -4,14 +4,16 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import jakarta.validation.Valid;
 import no.nav.pim.primbrukerstyring.domain.Bruker;
+import no.nav.pim.primbrukerstyring.domain.Leder;
 import no.nav.pim.primbrukerstyring.domain.Rolle;
 import no.nav.pim.primbrukerstyring.exceptions.AuthorizationException;
 import no.nav.pim.primbrukerstyring.nom.NomGraphQLClient;
-import no.nav.pim.primbrukerstyring.nom.domain.Kobling;
-import no.nav.pim.primbrukerstyring.nom.domain.Leder;
-import no.nav.pim.primbrukerstyring.nom.domain.OrgEnhet;
-import no.nav.pim.primbrukerstyring.nom.domain.Ressurs;
+import no.nav.pim.primbrukerstyring.nom.domain.NomKobling;
+import no.nav.pim.primbrukerstyring.nom.domain.NomLeder;
+import no.nav.pim.primbrukerstyring.nom.domain.NomOrgEnhet;
+import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 import no.nav.pim.primbrukerstyring.repository.Brukerrepository;
+import no.nav.pim.primbrukerstyring.service.dto.BrukerDto;
 import no.nav.pim.primbrukerstyring.util.OIDCUtil;
 import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
@@ -48,25 +50,26 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
     @GetMapping(path = "/rolle")
-    public Rolle hentBrukerRolle(@RequestHeader(value = "Authorization") String authorization) {
+    public BrukerDto hentBrukerRolle(@RequestHeader(value = "Authorization") String authorization) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentBrukerRolle").increment();
         String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
         Optional<Bruker> bruker = brukerrepository.findByIdent(brukerIdent);
 
         if (bruker.isEmpty()) {
-            Ressurs ressurs = nomGraphQLClient.getLedersResurser(authorization, brukerIdent);
+            NomRessurs ressurs = nomGraphQLClient.getLedersResurser(authorization, brukerIdent);
             if (ressurs != null) {
                 if (ressurs.getLederFor().size() > 0) {
-                    brukerrepository.save(Bruker.builder().ident(brukerIdent).rolle(Rolle.LEDER).build());
-                    return Rolle.LEDER;
+                    Leder leder = Leder.builder().ident(brukerIdent).navn(ressurs.getVisningsnavn()).build();
+                    brukerrepository.save(Bruker.builder().ident(brukerIdent).navn(ressurs.getVisningsnavn()).representertLeder(leder).rolle(Rolle.LEDER).build());
+                    return new BrukerDto(Rolle.LEDER, leder);
                 } else {
-                    return Rolle.MEDARBEIDER;
+                    return new BrukerDto(Rolle.MEDARBEIDER, null);
                 }
             }
             log.error("###Kunne ikke hente bruker i NOM: {}", brukerIdent);
-            return Rolle.UKJENT;
+            return new BrukerDto(Rolle.UKJENT, null);
         } else {
-            return bruker.get().getRolle();
+            return new BrukerDto(bruker.get().getRolle(), bruker.get().getRepresentertLeder());
         }
     }
 
@@ -78,7 +81,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         Optional<Bruker> finnesBrukerRolle = brukerrepository.findByIdent(bruker.getIdent());
 
         if (finnesBrukerRolle.isEmpty()) {
-            Ressurs ressurs = nomGraphQLClient.getLedersResurser(authorization, bruker.getIdent());
+            NomRessurs ressurs = nomGraphQLClient.getLedersResurser(authorization, bruker.getIdent());
             if (ressurs != null) {
                 bruker.setNavn(ressurs.getVisningsnavn());
             }
@@ -139,18 +142,18 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
     @GetMapping(path = "/ressurser/{ident}")
-    public List<Ressurs> hentLedersRessurser(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident) {
+    public List<NomRessurs> hentLedersRessurser(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentLedersRessurser").increment();
         String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
         Optional<Bruker> bruker = brukerrepository.findByIdent(brukerIdent);
         boolean erHR = bruker.isPresent() && List.of(Rolle.HR_MEDARBEIDER, Rolle.HR_MEDARBEIDER_BEMANNING).contains(bruker.get().getRolle());
         if (erHR || brukerIdent.equals(ident)) {
-            Ressurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, ident);
+            NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, ident);
             return ledersRessurser.getLederFor().stream()
                 .flatMap((lederFor) -> {
-                    List<Ressurs> koblinger = lederFor.getOrgEnhet().getKoblinger().stream().map((Kobling::getRessurs)).toList();
-                    List<Ressurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
-                            .flatMap(org -> org.getOrgEnhet().getLeder().stream().map(Leder::getRessurs)).toList();
+                    List<NomRessurs> koblinger = lederFor.getOrgEnhet().getKoblinger().stream().map((NomKobling::getRessurs)).toList();
+                    List<NomRessurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
+                            .flatMap(org -> org.getOrgEnhet().getLeder().stream().map(NomLeder::getRessurs)).toList();
                     return Stream.concat(koblinger.stream(), organiseringer.stream());
                 }).filter(ressurs -> !ressurs.getNavident().equals(ident)).distinct().toList();
         } else {
@@ -162,21 +165,45 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
     @GetMapping(path = "/ledere")
-    public List<Ressurs> hentLedere(@RequestHeader(value = "Authorization") String authorization) {
+    public List<Leder> hentLedere(@RequestHeader(value = "Authorization") String authorization) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentLedersRessurser").increment();
         String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
         Optional<Bruker> bruker = brukerrepository.findByIdent(brukerIdent);
         boolean erHR = bruker.isPresent() && List.of(Rolle.HR_MEDARBEIDER, Rolle.HR_MEDARBEIDER_BEMANNING).contains(bruker.get().getRolle());
         if (erHR) {
-            List<OrgEnhet> orgenheter = bruker.get().getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
-            return orgenheter.stream().flatMap(this::hentOrgenhetsLedere).distinct().toList();
+            List<NomOrgEnhet> orgenheter = bruker.get().getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
+            return orgenheter.stream().flatMap(this::hentOrgenhetsLedere).distinct().map(Leder::fraNomRessurs).toList();
         } else {
             throw new AuthorizationException("Bruker med ident "+ brukerIdent + " er ikke HR ansatt");
         }
     }
 
-    private Stream<Ressurs> hentOrgenhetsLedere(OrgEnhet orgEnhet){
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
+    @PutMapping(path = "/leder", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public BrukerDto settRepresentertLeder(@RequestHeader(value = "Authorization") String authorization, @Valid @RequestBody Leder representertLeder) {
+        metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "settRepresentertLeder").increment();
+        String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
+        Optional<Bruker> bruker = brukerrepository.findByIdent(brukerIdent);
+        boolean erHR = bruker.isPresent() && List.of(Rolle.HR_MEDARBEIDER, Rolle.HR_MEDARBEIDER_BEMANNING).contains(bruker.get().getRolle());
+        if (bruker.isPresent() && erHR) {
+            List<NomOrgEnhet> orgenheter = bruker.get().getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
+            boolean tilgangTilLeder = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).anyMatch((ressurs) -> ressurs.getNavident().equals(representertLeder.getIdent()));
+            if (tilgangTilLeder) {
+                Bruker brukerMedLeder = bruker.get();
+                brukerMedLeder.setRepresentertLeder(representertLeder);
+                brukerrepository.save(brukerMedLeder);
+            } else {
+                throw new AuthorizationException("Bruker med ident "+ brukerIdent + " har ikke tilgang til leder " + representertLeder.getIdent());
+            }
+        } else {
+            throw new AuthorizationException("Bruker med ident "+ brukerIdent + " er ikke HR ansatt");
+        }
+        return null;
+    }
+
+    private Stream<NomRessurs> hentOrgenhetsLedere(NomOrgEnhet orgEnhet){
         if (orgEnhet == null) return Stream.empty();
-        return Stream.concat(orgEnhet.getLeder().stream().map(Leder::getRessurs), orgEnhet.getOrganiseringer().stream().flatMap((organisering -> hentOrgenhetsLedere(organisering.getOrgEnhet()))));
+        return Stream.concat(orgEnhet.getLeder().stream().map(NomLeder::getRessurs), orgEnhet.getOrganiseringer().stream().flatMap((organisering -> hentOrgenhetsLedere(organisering.getOrgEnhet()))));
     }
 }

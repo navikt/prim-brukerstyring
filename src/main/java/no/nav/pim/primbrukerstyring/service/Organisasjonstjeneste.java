@@ -2,7 +2,7 @@ package no.nav.pim.primbrukerstyring.service;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import no.nav.pim.primbrukerstyring.nom.NomGraphQLClient;
-import no.nav.pim.primbrukerstyring.nom.domain.Organisering;
+import no.nav.pim.primbrukerstyring.nom.domain.NomOrganisering;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
@@ -28,7 +28,7 @@ public class Organisasjonstjeneste implements OrganisasjonstjenesteInterface {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
     @GetMapping()
-    public List<Organisering> hentOrganisasjonstre(@RequestHeader(value = "Authorization") String authorization) {
+    public List<NomOrganisering> hentOrganisasjonstre(@RequestHeader(value = "Authorization") String authorization) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Organisasjonstjeneste", "metode", "hentOrganisasjonstre").increment();
         return nomGraphQLClient.getOrganisasjonstre(authorization);
     }

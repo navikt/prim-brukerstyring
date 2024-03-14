@@ -5,8 +5,8 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class Ressurs {
+public class NomRessurs {
     String navident;
     String visningsnavn;
-    List<LederFor> lederFor;
+    List<NomLederFor> lederFor;
 }

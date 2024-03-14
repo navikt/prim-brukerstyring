@@ -1,9 +1,9 @@
 package no.nav.pim.primbrukerstyring.nom;
 
 import jakarta.annotation.PostConstruct;
-import no.nav.pim.primbrukerstyring.nom.domain.OrgEnhet;
-import no.nav.pim.primbrukerstyring.nom.domain.Organisering;
-import no.nav.pim.primbrukerstyring.nom.domain.Ressurs;
+import no.nav.pim.primbrukerstyring.nom.domain.NomOrgEnhet;
+import no.nav.pim.primbrukerstyring.nom.domain.NomOrganisering;
+import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 import no.nav.pim.primbrukerstyring.util.OIDCUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +37,7 @@ public class NomGraphQLClient {
 
     private static final Logger log = LoggerFactory.getLogger(NomGraphQLClient.class);
 
-    public Ressurs getLedersResurser(String authorization, String navident) {
+    public NomRessurs getLedersResurser(String authorization, String navident) {
         log.info("Henter leders resurser for navident {}", navident);
         String document =
                 """
@@ -73,14 +73,14 @@ public class NomGraphQLClient {
 
         try {
             HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();
-            return graphQlClient.document(document).retrieve("ressurs").toEntity(Ressurs.class).block();
+            return graphQlClient.document(document).retrieve("ressurs").toEntity(NomRessurs.class).block();
         } catch (Exception e) {
             log.info("Noe gikk galt med henting av leders ressurser i NOM for navident {}. Feilmelding: {}", navident, e.getMessage());
         }
         return null;
     }
 
-    public List<Organisering> getOrganisasjonstre(String authorization) {
+    public List<NomOrganisering> getOrganisasjonstre(String authorization) {
         log.info("Henter organisasjonstre");
         String document =
             """
@@ -143,14 +143,14 @@ public class NomGraphQLClient {
             """;
         try {
             HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();
-            return graphQlClient.document(document).retrieve("orgEnheter").toEntityList(Organisering.class).block();
+            return graphQlClient.document(document).retrieve("orgEnheter").toEntityList(NomOrganisering.class).block();
         } catch (Exception e) {
             log.info("Noe gikk galt med henting av organisasjons pyramiden. Feilmelding: {}", e.getMessage());
         }
         return null;
     }
 
-    public OrgEnhet hentOrganisasjoner(String authorization, String organisasjonsId) {
+    public NomOrgEnhet hentOrganisasjoner(String authorization, String organisasjonsId) {
         log.info("Henter organisasjon med id: {}", organisasjonsId);
         String document =
             """
@@ -253,7 +253,7 @@ public class NomGraphQLClient {
             """.formatted(organisasjonsId);
         try {
             HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();
-            return graphQlClient.document(document).retrieve("orgEnhet").toEntity(OrgEnhet.class).block();
+            return graphQlClient.document(document).retrieve("orgEnhet").toEntity(NomOrgEnhet.class).block();
         } catch (Exception e) {
             log.info("Noe gikk galt med henting av organisasjons pyramiden. Feilmelding: {}", e.getMessage());
         }

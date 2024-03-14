@@ -1,14 +1,15 @@
 package no.nav.pim.primbrukerstyring.service;
 
 import no.nav.pim.primbrukerstyring.domain.Bruker;
-import no.nav.pim.primbrukerstyring.domain.Rolle;
-import no.nav.pim.primbrukerstyring.nom.domain.Ressurs;
+import no.nav.pim.primbrukerstyring.domain.Leder;
+import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
+import no.nav.pim.primbrukerstyring.service.dto.BrukerDto;
 
 import java.util.List;
 
 public interface BrukertjenesteInterface {
 
-    Rolle hentBrukerRolle(String authorization);
+    BrukerDto hentBrukerRolle(String authorization);
 
     Bruker leggTilBrukerRolle(String authorization, Bruker bruker);
 
@@ -20,7 +21,9 @@ public interface BrukertjenesteInterface {
 
     List<Bruker> hentAlleHRMedarbeidere(String authorization);
 
-    List<Ressurs> hentLedersRessurser(String authorization, String ident);
+    List<NomRessurs> hentLedersRessurser(String authorization, String ident);
 
-    List<Ressurs> hentLedere(String authorization);
+    List<Leder> hentLedere(String authorization);
+
+    BrukerDto settRepresentertLeder(String authorization, Leder representertLeder);
 }

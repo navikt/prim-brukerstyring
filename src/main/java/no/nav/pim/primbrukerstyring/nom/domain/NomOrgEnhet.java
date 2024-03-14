@@ -5,10 +5,10 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class OrgEnhet {
+public class NomOrgEnhet {
     String id;
     String navn;
-    List<Kobling> koblinger;
-    List<Organisering> organiseringer;
-    List<Leder> leder;
+    List<NomKobling> koblinger;
+    List<NomOrganisering> organiseringer;
+    List<NomLeder> leder;
 }

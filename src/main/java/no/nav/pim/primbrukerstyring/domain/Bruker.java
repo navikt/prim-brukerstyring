@@ -1,10 +1,12 @@
 package no.nav.pim.primbrukerstyring.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import no.nav.pim.primbrukerstyring.util.StringToListConverter;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.util.*;
 
@@ -35,6 +37,16 @@ public class Bruker {
     @Column(name = "tilganger")
     @Convert(converter = StringToListConverter.class)
     private List<String> tilganger;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "representert_leder_ident", insertable = false, updatable = false)
+    @JsonManagedReference
+    private Leder representertLeder;
+
+    @Column(nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    @LastModifiedDate
+    private Date sist_aksessert;
 
     @Override
     public boolean equals(Object o) {
