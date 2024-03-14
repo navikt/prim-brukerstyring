@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface BrukertjenesteInterface {
 
-    BrukerDto hentBrukerRolle(String authorization);
+    BrukerDto hentBruker(String authorization);
 
     Bruker leggTilBrukerRolle(String authorization, Bruker bruker);
 
