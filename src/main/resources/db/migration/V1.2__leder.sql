@@ -1,7 +1,6 @@
 CREATE TABLE leder (
     ident TEXT NOT NULL,
-    navn TEXT,
-    CONSTRAINT PK_bruker PRIMARY KEY (ident)
+    navn TEXT
 );
 
 ALTER TABLE bruker ADD COLUMN representert_leder_ident TEXT;
