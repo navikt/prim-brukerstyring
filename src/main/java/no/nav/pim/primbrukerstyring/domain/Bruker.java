@@ -38,12 +38,11 @@ public class Bruker {
     @Convert(converter = StringToListConverter.class)
     private List<String> tilganger;
 
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "representert_leder_ident", referencedColumnName = "ident")
-    @JsonManagedReference
     private Leder representertLeder;
 
-    @Column(nullable = false)
+    @Column
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     private Date sist_aksessert;
