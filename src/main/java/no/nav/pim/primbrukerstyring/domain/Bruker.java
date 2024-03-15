@@ -38,8 +38,8 @@ public class Bruker {
     @Convert(converter = StringToListConverter.class)
     private List<String> tilganger;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "representert_leder_ident", insertable = false, updatable = false)
+    @ManyToOne
+    @JoinColumn(name = "representert_leder_ident", referencedColumnName = "ident")
     @JsonManagedReference
     private Leder representertLeder;
 
