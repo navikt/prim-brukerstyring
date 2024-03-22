@@ -75,6 +75,9 @@ spec:
         - application: pim-bemanning-test
           namespace: pim
           cluster: dev-gcp
+        - application: bemanningsbehov-test
+          namespace: pim
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nom-api
