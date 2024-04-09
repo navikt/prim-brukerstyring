@@ -1,7 +1,6 @@
 package no.nav.pim.primbrukerstyring.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -39,7 +38,7 @@ public class Bruker {
     private List<String> tilganger;
 
     @ManyToOne(fetch=FetchType.EAGER, cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "representert_leder_ident", referencedColumnName = "ident")
+    @JoinColumn(name = "FK_representert_leder_id", referencedColumnName = "leder_id")
     private Leder representertLeder;
 
     @Column
