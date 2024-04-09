@@ -1,8 +1,8 @@
 package no.nav.pim.primbrukerstyring.service;
 
+import no.nav.pim.primbrukerstyring.domain.Ansatt;
 import no.nav.pim.primbrukerstyring.domain.Bruker;
 import no.nav.pim.primbrukerstyring.domain.Leder;
-import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 import no.nav.pim.primbrukerstyring.service.dto.BrukerDto;
 
 import java.util.List;
@@ -21,7 +21,7 @@ public interface BrukertjenesteInterface {
 
     List<Bruker> hentAlleHRMedarbeidere(String authorization);
 
-    List<NomRessurs> hentLedersRessurser(String authorization, String ident);
+    List<Ansatt> hentLedersRessurser(String authorization);
 
     List<Leder> hentLedere(String authorization);
 

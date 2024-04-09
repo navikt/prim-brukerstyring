@@ -3,6 +3,7 @@ package no.nav.pim.primbrukerstyring.service;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import jakarta.validation.Valid;
+import no.nav.pim.primbrukerstyring.domain.Ansatt;
 import no.nav.pim.primbrukerstyring.domain.Bruker;
 import no.nav.pim.primbrukerstyring.domain.Leder;
 import no.nav.pim.primbrukerstyring.domain.Rolle;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -141,23 +143,29 @@ public class Brukertjeneste implements BrukertjenesteInterface {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
-    @GetMapping(path = "/ressurser/{ident}")
-    public List<NomRessurs> hentLedersRessurser(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident) {
+    @GetMapping(path = "/ressurser")
+    public List<Ansatt> hentLedersRessurser(@RequestHeader(value = "Authorization") String authorization) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentLedersRessurser").increment();
         String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
         Optional<Bruker> bruker = brukerrepository.findByIdent(brukerIdent);
         boolean erHR = bruker.isPresent() && List.of(Rolle.HR_MEDARBEIDER, Rolle.HR_MEDARBEIDER_BEMANNING).contains(bruker.get().getRolle());
-        if (erHR || brukerIdent.equals(ident)) {
-            NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, ident);
+        String lederIdent;
+        if (erHR) {
+            lederIdent = bruker.get().getRepresentertLeder().getIdent();
+        } else {
+            lederIdent = brukerIdent;
+        }
+        if (!Objects.isNull(lederIdent)) {
+            NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, lederIdent);
             return ledersRessurser.getLederFor().stream()
                 .flatMap((lederFor) -> {
                     List<NomRessurs> koblinger = lederFor.getOrgEnhet().getKoblinger().stream().map((NomKobling::getRessurs)).toList();
                     List<NomRessurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
                             .flatMap(org -> org.getOrgEnhet().getLeder().stream().map(NomLeder::getRessurs)).toList();
                     return Stream.concat(koblinger.stream(), organiseringer.stream());
-                }).filter(ressurs -> !ressurs.getNavident().equals(ident)).distinct().toList();
+                }).filter(ressurs -> !ressurs.getNavident().equals(lederIdent)).distinct().map(Ansatt::fraNomRessurs).toList();
         } else {
-            throw new AuthorizationException("Bruker med ident "+ brukerIdent + " har ikke tilgang til ident " + ident);
+            throw new AuthorizationException("Representert leder er ikke satt for bruker med ident  "+ brukerIdent);
         }
 
     }

@@ -9,4 +9,6 @@ public class NomRessurs {
     String navident;
     String visningsnavn;
     List<NomLederFor> lederFor;
+    List<NomSektor> sektor;
+    List<NomLeder> ledere;
 }

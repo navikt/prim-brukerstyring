@@ -6,8 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 
-import java.util.Objects;
-
 @Entity
 @Table(name = "leder")
 @ToString
@@ -15,32 +13,25 @@ import java.util.Objects;
 @Setter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Leder {
 
     static public Leder fraNomRessurs(NomRessurs ressurs) {
-        return new Leder(ressurs.getNavident(), ressurs.getVisningsnavn());
+        return Leder.builder().ident(ressurs.getNavident()).navn(ressurs.getVisningsnavn()).build();
     }
 
-    public Leder(){}
-
     @Id
+    @GeneratedValue(generator = "ID_GENERATOR")
+    @Column(name = "leder_id")
+    private Long lederId;
+
     @Column
     @NotNull
     private String ident;
 
     @Column
+    @NotNull
     private String navn;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Leder leder)) return false;
-        return Objects.equals(ident, leder.ident) && Objects.equals(navn, leder.navn);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(ident, navn);
-    }
 }

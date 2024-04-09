@@ -75,6 +75,15 @@ spec:
         - application: pim-bemanning
           namespace: pim
           cluster: dev-gcp
+        - application: bemanningsbehov
+          namespace: pim
+          cluster: dev-gcp
+        - application: nedbemanning
+          namespace: pim
+          cluster: dev-gcp
+        - application: ferdig-utprovd
+          namespace: pim
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nom-api
