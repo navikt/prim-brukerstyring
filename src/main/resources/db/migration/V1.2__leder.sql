@@ -4,7 +4,7 @@ CREATE TABLE leder (
     leder_id    BIGINT  NOT NULL,
     ident       TEXT    NOT NULL,
     navn        TEXT    NOT NULL,
-    CONSTRAINT PK_leder PRIMARY KEY (leder_id);
+    CONSTRAINT PK_leder PRIMARY KEY (leder_id)
 );
 
 ALTER TABLE bruker ADD COLUMN representert_leder_ident TEXT;
