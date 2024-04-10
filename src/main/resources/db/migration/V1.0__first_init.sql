@@ -22,7 +22,7 @@ CREATE TABLE bruker (
     rolle TEXT NOT NULL,
     navn TEXT,
     tilganger TEXT,
-    representert_leder_id TEXT,
+    representert_leder_id BIGINT,
     sist_aksessert TIMESTAMP,
     CONSTRAINT PK_bruker PRIMARY KEY (ident),
     CONSTRAINT FK_representert_leder_id FOREIGN KEY (representert_leder_id) REFERENCES leder (leder_id)
