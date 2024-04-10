@@ -31,7 +31,8 @@ public class Ansatt {
     }
 
     @Id
-    @GeneratedValue(generator = "ID_GENERATOR")
+    @GeneratedValue(generator = "sequence-generator")
+    @SequenceGenerator(name = "sequence-generator", sequenceName = "brukerstyring_sequence")
     @Column(name = "ansatt_id")
     private Long ansattId;
 

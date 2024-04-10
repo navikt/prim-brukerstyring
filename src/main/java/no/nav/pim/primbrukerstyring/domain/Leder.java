@@ -23,7 +23,8 @@ public class Leder {
     }
 
     @Id
-    @GeneratedValue(generator = "ID_GENERATOR")
+    @GeneratedValue(generator = "sequence-generator")
+    @SequenceGenerator(name = "sequence-generator", sequenceName = "brukerstyring_sequence")
     @Column(name = "leder_id")
     private Long lederId;
 
