@@ -14,6 +14,7 @@ import no.nav.pim.primbrukerstyring.nom.domain.NomLeder;
 import no.nav.pim.primbrukerstyring.nom.domain.NomOrgEnhet;
 import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 import no.nav.pim.primbrukerstyring.repository.Brukerrepository;
+import no.nav.pim.primbrukerstyring.repository.Lederrepository;
 import no.nav.pim.primbrukerstyring.service.dto.BrukerDto;
 import no.nav.pim.primbrukerstyring.util.OIDCUtil;
 import no.nav.security.token.support.core.api.Protected;
@@ -42,6 +43,9 @@ public class Brukertjeneste implements BrukertjenesteInterface {
 
     @Autowired
     Brukerrepository brukerrepository;
+
+    @Autowired
+    Lederrepository lederrepository;
 
     @Autowired
     OIDCUtil oidcUtil;
@@ -196,10 +200,14 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         boolean erHR = bruker.isPresent() && List.of(Rolle.HR_MEDARBEIDER, Rolle.HR_MEDARBEIDER_BEMANNING).contains(bruker.get().getRolle());
         if (bruker.isPresent() && erHR) {
             List<NomOrgEnhet> orgenheter = bruker.get().getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
-            boolean tilgangTilLeder = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).anyMatch((ressurs) -> ressurs.getNavident().equals(representertLeder.getIdent()));
-            if (tilgangTilLeder) {
+            Optional<NomRessurs> lederRessurs = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).filter((ressurs) -> ressurs.getNavident().equals(representertLeder.getIdent())).findFirst();
+            if (lederRessurs.isPresent()) {
+                Leder leder = Leder.fraNomRessurs(lederRessurs.get());
+                Optional<Leder> eksisterendeLeder = lederrepository.findByIdent(representertLeder.getIdent());
+                eksisterendeLeder.ifPresent(value -> leder.setLederId(value.getLederId()));
+
                 Bruker brukerMedLeder = bruker.get();
-                brukerMedLeder.setRepresentertLeder(representertLeder);
+                brukerMedLeder.setRepresentertLeder(leder);
                 brukerrepository.save(brukerMedLeder);
             } else {
                 throw new AuthorizationException("Bruker med ident "+ brukerIdent + " har ikke tilgang til leder " + representertLeder.getIdent());
