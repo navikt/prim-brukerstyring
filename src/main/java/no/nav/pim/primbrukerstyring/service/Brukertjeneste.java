@@ -204,7 +204,11 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             if (lederRessurs.isPresent()) {
                 Leder leder = Leder.fraNomRessurs(lederRessurs.get());
                 Optional<Leder> eksisterendeLeder = lederrepository.findByIdent(representertLeder.getIdent());
-                eksisterendeLeder.ifPresent(value -> leder.setLederId(value.getLederId()));
+                if (eksisterendeLeder.isPresent()) {
+                    leder.setLederId(eksisterendeLeder.get().getLederId());
+                } else {
+                    leder = lederrepository.save(leder);
+                }
 
                 Bruker brukerMedLeder = bruker.get();
                 brukerMedLeder.setRepresentertLeder(leder);
