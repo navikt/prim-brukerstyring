@@ -38,7 +38,7 @@ public class Bruker {
     private List<String> tilganger;
 
     @ManyToOne(fetch=FetchType.EAGER, cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "FK_representert_leder_id", referencedColumnName = "leder_id")
+    @JoinColumn(name = "representert_leder_id", referencedColumnName = "leder_id")
     private Leder representertLeder;
 
     @Column
