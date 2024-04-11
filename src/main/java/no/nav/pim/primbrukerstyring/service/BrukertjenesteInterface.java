@@ -25,5 +25,5 @@ public interface BrukertjenesteInterface {
 
     List<Leder> hentLedere(String authorization);
 
-    BrukerDto settRepresentertLeder(String authorization, Leder representertLeder);
+    Leder settRepresentertLeder(String authorization, Leder representertLeder);
 }

@@ -193,7 +193,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
     @PutMapping(path = "/leder", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public BrukerDto settRepresentertLeder(@RequestHeader(value = "Authorization") String authorization, @Valid @RequestBody Leder representertLeder) {
+    public Leder settRepresentertLeder(@RequestHeader(value = "Authorization") String authorization, @Valid @RequestBody Leder representertLeder) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "settRepresentertLeder").increment();
         String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
         Optional<Bruker> bruker = brukerrepository.findByIdent(brukerIdent);
@@ -202,24 +202,20 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             List<NomOrgEnhet> orgenheter = bruker.get().getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
             Optional<NomRessurs> lederRessurs = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).filter((ressurs) -> ressurs.getNavident().equals(representertLeder.getIdent())).findFirst();
             if (lederRessurs.isPresent()) {
-                Leder leder = Leder.fraNomRessurs(lederRessurs.get());
+                Leder leder;
                 Optional<Leder> eksisterendeLeder = lederrepository.findByIdent(representertLeder.getIdent());
-                if (eksisterendeLeder.isPresent()) {
-                    leder.setLederId(eksisterendeLeder.get().getLederId());
-                } else {
-                    leder = lederrepository.save(leder);
-                }
+                leder = eksisterendeLeder.orElseGet(() -> lederrepository.save(Leder.fraNomRessurs(lederRessurs.get())));
 
                 Bruker brukerMedLeder = bruker.get();
                 brukerMedLeder.setRepresentertLeder(leder);
                 brukerrepository.save(brukerMedLeder);
+                return leder;
             } else {
                 throw new AuthorizationException("Bruker med ident "+ brukerIdent + " har ikke tilgang til leder " + representertLeder.getIdent());
             }
         } else {
             throw new AuthorizationException("Bruker med ident "+ brukerIdent + " er ikke HR ansatt");
         }
-        return null;
     }
 
     private Stream<NomRessurs> hentOrgenhetsLedere(NomOrgEnhet orgEnhet){
