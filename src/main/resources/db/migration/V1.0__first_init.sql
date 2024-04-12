@@ -14,7 +14,7 @@ CREATE TABLE leder (
     leder_id                BIGINT  NOT NULL,
     ident                   TEXT    NOT NULL,
     navn                    TEXT    NOT NULL,
-    erDirektoratsleder      BOOLEAN,
+    er_direktoratsleder      BOOLEAN,
     CONSTRAINT PK_leder PRIMARY KEY (leder_id)
 );
 
