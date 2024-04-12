@@ -96,6 +96,35 @@ public class NomGraphQLClient {
         return null;
     }
 
+    public NomRessurs getRessurs(String authorization, String navident) {
+        log.info("Henter leders resurser for navident {}", navident);
+        String document =
+                """
+                query AnsattRessurs {
+                    ressurs(where: {navident: "%s"}) {
+                        navident
+                        visningsnavn
+                        sektor
+                        ledere {
+                            erDagligOppfolging
+                            ressurs {
+                                navident
+                                visningsnavn
+                            }
+                        }
+                    }
+                }
+                """.formatted(navident);
+
+        try {
+            HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();
+            return graphQlClient.document(document).retrieve("ressurs").toEntity(NomRessurs.class).block();
+        } catch (Exception e) {
+            log.info("Noe gikk galt med henting av leders ressurser i NOM for navident {}. Feilmelding: {}", navident, e.getMessage());
+        }
+        return null;
+    }
+
     public List<NomOrganisering> getOrganisasjonstre(String authorization) {
         log.info("Henter organisasjonstre");
         String document =
