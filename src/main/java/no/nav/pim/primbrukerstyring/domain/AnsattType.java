@@ -21,7 +21,7 @@ public enum AnsattType {
     }
 
     static AnsattType fraNomSektor(List<NomSektor> sektor) {
-        if (sektor.stream().anyMatch(s -> s.equals(NomSektor.NAV_STATELIG))) return AnsattType.F;
+        if (sektor.stream().anyMatch(s -> s.equals(NomSektor.NAV_STATLIG))) return AnsattType.F;
         if (sektor.stream().anyMatch(s -> s.equals(NomSektor.NAV_KOMMUNAL))) return AnsattType.N;
         if (sektor.stream().anyMatch(s -> s.equals(NomSektor.EKSTERN))) return AnsattType.E;
         return AnsattType.U;
