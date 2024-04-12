@@ -22,7 +22,7 @@ public class Leder {
         return Leder.builder()
                 .ident(ressurs.getNavident())
                 .navn(ressurs.getVisningsnavn())
-                .erDirektoratsleder(ressurs.getLederFor().stream().anyMatch((nomLederFor -> nomLederFor.getOrgEnhet().getOrgEnhetsType().equals("DIREKTORAT"))))
+                .erDirektoratsleder(ressurs.getLederFor() != null && ressurs.getLederFor().stream().anyMatch((nomLederFor -> nomLederFor.getOrgEnhet().getOrgEnhetsType().equals("DIREKTORAT"))))
                 .build();
     }
 
