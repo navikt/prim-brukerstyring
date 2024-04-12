@@ -11,9 +11,10 @@ CREATE TABLE drift_og_vedlikehold (
 INSERT INTO drift_og_vedlikehold (drift_og_vedlikehold_id, vedlikehold_modus, vedlikehold_overskrift, vedlikehold_melding, driftsmelding) VALUES (0, false, '', '', '');
 
 CREATE TABLE leder (
-    leder_id    BIGINT  NOT NULL,
-    ident       TEXT    NOT NULL,
-    navn        TEXT    NOT NULL,
+    leder_id                BIGINT  NOT NULL,
+    ident                   TEXT    NOT NULL,
+    navn                    TEXT    NOT NULL,
+    erDirektoratsleder      BOOLEAN,
     CONSTRAINT PK_leder PRIMARY KEY (leder_id)
 );
 

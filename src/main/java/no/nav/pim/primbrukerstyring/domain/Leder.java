@@ -19,7 +19,11 @@ import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 public class Leder {
 
     static public Leder fraNomRessurs(NomRessurs ressurs) {
-        return Leder.builder().ident(ressurs.getNavident()).navn(ressurs.getVisningsnavn()).build();
+        return Leder.builder()
+                .ident(ressurs.getNavident())
+                .navn(ressurs.getVisningsnavn())
+                .erDirektoratsleder(ressurs.getLederFor().stream().anyMatch((nomLederFor -> nomLederFor.getOrgEnhet().getOrgEnhetsType().equals("DIREKTORAT"))))
+                .build();
     }
 
     @Id
@@ -35,4 +39,8 @@ public class Leder {
     @Column
     @NotNull
     private String navn;
+
+    @Column
+    @NotNull
+    private Boolean erDirektoratsleder;
 }
