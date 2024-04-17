@@ -101,21 +101,21 @@ public class NomGraphQLClient {
         log.info("Henter leders resurser for navident {}", navident);
         String document =
                 """
-                query AnsattRessurs {
-                    ressurs(where: {navident: "%s"}) {
-                        navident
-                        visningsnavn
-                        sektor
-                        ledere {
-                            erDagligOppfolging
-                            ressurs {
+                        query AnsattRessurs {
+                            ressurs(where: {navident: "%s"}) {
                                 navident
                                 visningsnavn
+                                ledere {
+                                    erDagligOppfolging
+                                    ressurs {
+                                        navident
+                                        visningsnavn
+                                        sektor
+                                    }
+                                }
                             }
                         }
-                    }
-                }
-                """.formatted(navident);
+                        """.formatted(navident);
 
         try {
             HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();

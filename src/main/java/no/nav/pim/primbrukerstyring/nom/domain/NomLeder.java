@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class NomLeder {
-    Boolean erDagligOppfolfing;
+    Boolean erDagligOppfolging;
     NomRessurs ressurs;
 }

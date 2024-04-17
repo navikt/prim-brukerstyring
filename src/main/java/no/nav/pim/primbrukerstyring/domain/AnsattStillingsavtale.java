@@ -23,7 +23,7 @@ public class AnsattStillingsavtale {
         return AnsattStillingsavtale.builder()
                 .leder(Leder.fraNomRessurs(leder.getRessurs()))
                 .ansattType(AnsattType.fraNomSektor(leder.getRessurs().getSektor()))
-                .stillingsavtale(leder.getErDagligOppfolfing() ? Stillingsavtale.DR : Stillingsavtale.MR)
+                .stillingsavtale(leder.getErDagligOppfolging() ? Stillingsavtale.DR : Stillingsavtale.MR)
                 .build();
     }
 
