@@ -23,11 +23,13 @@ import java.util.stream.Collectors;
 public class Ansatt {
 
     static public Ansatt fraNomRessurs(NomRessurs ressurs) {
-        return Ansatt.builder()
+        Ansatt nyAnsatt = Ansatt.builder()
                 .ident(ressurs.getNavident())
                 .navn(ressurs.getVisningsnavn())
-                .stillingsavtaler(ressurs.getLedere().stream().distinct().map(AnsattStillingsavtale::fraNomLeder).collect(Collectors.toSet()))
                 .build();
+        Set<AnsattStillingsavtale> stillingsavtaler = ressurs.getLedere().stream().distinct().map(leder -> AnsattStillingsavtale.fraNomLeder(nyAnsatt, leder)).collect(Collectors.toSet());
+        nyAnsatt.setStillingsavtaler(stillingsavtaler);
+        return nyAnsatt;
     }
 
     @Id

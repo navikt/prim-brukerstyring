@@ -9,7 +9,7 @@ import no.nav.pim.primbrukerstyring.nom.domain.NomLeder;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "ansattStillingsavtale")
+@Table(name = "ansatt_stillingsavtale")
 @ToString
 @Getter
 @Setter
@@ -19,8 +19,9 @@ import java.io.Serializable;
 @EqualsAndHashCode
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class AnsattStillingsavtale {
-    static AnsattStillingsavtale fraNomLeder(NomLeder leder) {
+    static AnsattStillingsavtale fraNomLeder(Ansatt ansatt, NomLeder leder) {
         return AnsattStillingsavtale.builder()
+                .ansatt(ansatt)
                 .leder(Leder.fraNomRessurs(leder.getRessurs()))
                 .ansattType(AnsattType.fraNomSektor(leder.getRessurs().getSektor()))
                 .stillingsavtale(leder.getErDagligOppfolging() ? Stillingsavtale.DR : Stillingsavtale.MR)
