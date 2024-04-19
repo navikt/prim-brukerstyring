@@ -3,10 +3,7 @@ package no.nav.pim.primbrukerstyring.service;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import jakarta.validation.Valid;
-import no.nav.pim.primbrukerstyring.domain.Ansatt;
-import no.nav.pim.primbrukerstyring.domain.Bruker;
-import no.nav.pim.primbrukerstyring.domain.Leder;
-import no.nav.pim.primbrukerstyring.domain.Rolle;
+import no.nav.pim.primbrukerstyring.domain.*;
 import no.nav.pim.primbrukerstyring.exceptions.AuthorizationException;
 import no.nav.pim.primbrukerstyring.nom.NomGraphQLClient;
 import no.nav.pim.primbrukerstyring.nom.domain.NomKobling;
@@ -163,19 +160,19 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         } else {
             lederIdent = brukerIdent;
         }
-        if (!Objects.isNull(lederIdent)) {
+        Optional<Leder> leder = lederrepository.findByIdent(lederIdent);
+        if (!Objects.isNull(lederIdent) && leder.isPresent()) {
             NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, lederIdent);
             List<Ansatt> ansatte = ledersRessurser.getLederFor().stream()
-                .flatMap((lederFor) -> {
-                    Stream<NomRessurs> koblinger = lederFor.getOrgEnhet().getKoblinger().stream().map((NomKobling::getRessurs));
-                    Stream<NomRessurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
-                            .flatMap(org -> org.getOrgEnhet().getLeder().stream().map(NomLeder::getRessurs));
-                    return Stream.concat(koblinger, organiseringer);
-                }).filter(ressurs -> !ressurs.getNavident().equals(lederIdent)).distinct().map(Ansatt::fraNomRessurs).toList();
-            ansatte.forEach(ansatt -> ansatt.getStillingsavtaler().forEach(sa -> log.info("Stillingsavtale for ansatt: {}, leder: {}, type: {}, avtale: {}", sa.getAnsatt().getIdent(), sa.getLeder().getIdent(), sa.getAnsattType(), sa.getStillingsavtale())));
+                    .flatMap((lederFor) -> {
+                        Stream<NomRessurs> koblinger = lederFor.getOrgEnhet().getKoblinger().stream().map((NomKobling::getRessurs));
+                        Stream<NomRessurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
+                                .flatMap(org -> org.getOrgEnhet().getLeder().stream().map(NomLeder::getRessurs));
+                        return Stream.concat(koblinger, organiseringer);
+                    }).filter(ressurs -> !ressurs.getNavident().equals(lederIdent)).distinct().map((ressurs -> Ansatt.fraNomRessurs(leder.get(), ressurs))).toList();
             return ansattrepository.saveAll(ansatte);
         } else {
-            throw new AuthorizationException("Representert leder er ikke satt for bruker med ident  "+ brukerIdent);
+            throw new AuthorizationException("Representert leder er ikke satt for bruker med ident " + brukerIdent);
         }
 
     }

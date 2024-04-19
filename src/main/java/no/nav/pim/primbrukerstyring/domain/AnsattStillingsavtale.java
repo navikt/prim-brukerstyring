@@ -19,12 +19,12 @@ import java.util.Objects;
 @NoArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class AnsattStillingsavtale {
-    static AnsattStillingsavtale fraNomLeder(Ansatt ansatt, NomLeder leder) {
+    static AnsattStillingsavtale fraNomLeder(NomLeder nomLeder, Ansatt ansatt, Leder leder) {
         return AnsattStillingsavtale.builder()
                 .ansatt(ansatt)
-                .leder(Leder.fraNomRessurs(leder.getRessurs()))
-                .ansattType(AnsattType.fraNomSektor(leder.getRessurs().getSektor()))
-                .stillingsavtale(leder.getErDagligOppfolging() ? Stillingsavtale.DR : Stillingsavtale.MR)
+                .leder(leder)
+                .ansattType(AnsattType.fraNomSektor(nomLeder.getRessurs().getSektor()))
+                .stillingsavtale(nomLeder.getErDagligOppfolging() ? Stillingsavtale.DR : Stillingsavtale.MR)
                 .build();
     }
 
@@ -54,12 +54,12 @@ public class AnsattStillingsavtale {
     protected Id id = new Id();
 
     @ManyToOne
-    @JoinColumn(name = "ansatt_id", insertable = false, updatable = false)
+    @JoinColumn(name = "ansatt_id")
     @JsonBackReference
     private Ansatt ansatt;
 
     @ManyToOne
-    @JoinColumn(name = "leder_id", insertable = false, updatable = false)
+    @JoinColumn(name = "leder_id")
     @JsonBackReference
     private Leder leder;
 
