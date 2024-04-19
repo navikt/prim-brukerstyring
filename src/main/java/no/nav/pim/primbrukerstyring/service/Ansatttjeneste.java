@@ -34,7 +34,7 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
 
         NomRessurs ressurs = nomGraphQLClient.getRessurs(authorization, ident);
         if (ressurs != null) {
-            return Ansatt.fraNomRessurs(ressurs);
+            return Ansatt.fraNomRessurs(ressurs, null);
         } else {
             log.error("###Kunne ikke hente ansatt i NOM: {}", ident);
             return null;

@@ -23,14 +23,14 @@ import java.util.stream.Collectors;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Ansatt {
 
-    static public Ansatt fraNomRessurs(Leder leder, NomRessurs ressurs) {
+    static public Ansatt fraNomRessurs(NomRessurs ressurs, Leder leder) {
         Ansatt nyAnsatt = Ansatt.builder()
                 .ident(ressurs.getNavident())
                 .navn(ressurs.getVisningsnavn())
                 .build();
 
         Set<AnsattStillingsavtale> stillingsavtaler = ressurs.getLedere().stream()
-                .filter(nomLeder -> nomLeder.getRessurs().getNavident().equals(leder.getIdent()))
+                .filter(nomLeder -> leder != null && nomLeder.getRessurs().getNavident().equals(leder.getIdent()))
                 .distinct()
                 .map(nomLeder -> AnsattStillingsavtale.fraNomLeder(nomLeder, nyAnsatt, leder)).collect(Collectors.toSet());
         nyAnsatt.setStillingsavtaler(stillingsavtaler);
