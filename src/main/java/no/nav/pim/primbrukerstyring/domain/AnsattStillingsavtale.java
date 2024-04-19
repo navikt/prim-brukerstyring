@@ -7,6 +7,7 @@ import lombok.*;
 import no.nav.pim.primbrukerstyring.nom.domain.NomLeder;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Table(name = "ansatt_stillingsavtale")
@@ -16,7 +17,6 @@ import java.io.Serializable;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class AnsattStillingsavtale {
     static AnsattStillingsavtale fraNomLeder(Ansatt ansatt, NomLeder leder) {
@@ -68,4 +68,16 @@ public class AnsattStillingsavtale {
 
     @Enumerated(EnumType.STRING)
     private Stillingsavtale stillingsavtale;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AnsattStillingsavtale that)) return false;
+        return Objects.equals(id, that.id) && Objects.equals(ansatt, that.ansatt) && Objects.equals(leder, that.leder) && ansattType == that.ansattType && stillingsavtale == that.stillingsavtale;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, ansattType, stillingsavtale);
+    }
 }
