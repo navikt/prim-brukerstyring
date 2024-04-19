@@ -172,6 +172,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                             .flatMap(org -> org.getOrgEnhet().getLeder().stream().map(NomLeder::getRessurs));
                     return Stream.concat(koblinger, organiseringer);
                 }).filter(ressurs -> !ressurs.getNavident().equals(lederIdent)).distinct().map(Ansatt::fraNomRessurs).toList();
+            ansatte.forEach(ansatt -> ansatt.getStillingsavtaler().forEach(sa -> log.info("Stillingsavtale for ansatt: {}, leder: {}, type: {}, avtale: {}", sa.getAnsatt().getIdent(), sa.getLeder().getIdent(), sa.getAnsattType(), sa.getStillingsavtale())));
             return ansattrepository.saveAll(ansatte);
         } else {
             throw new AuthorizationException("Representert leder er ikke satt for bruker med ident  "+ brukerIdent);

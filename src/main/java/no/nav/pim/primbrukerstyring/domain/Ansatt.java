@@ -1,5 +1,6 @@
 package no.nav.pim.primbrukerstyring.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -7,6 +8,7 @@ import lombok.*;
 import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,7 +20,6 @@ import java.util.stream.Collectors;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Ansatt {
 
@@ -47,7 +48,18 @@ public class Ansatt {
     String navn;
 
     @OneToMany(mappedBy = "ansatt")
+    @JsonBackReference
     Set<AnsattStillingsavtale> stillingsavtaler = new HashSet<>();
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Ansatt ansatt)) return false;
+        return Objects.equals(ansattId, ansatt.ansattId) && Objects.equals(ident, ansatt.ident) && Objects.equals(navn, ansatt.navn) && Objects.equals(stillingsavtaler, ansatt.stillingsavtaler);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(ansattId, ident, navn, stillingsavtaler);
+    }
 }

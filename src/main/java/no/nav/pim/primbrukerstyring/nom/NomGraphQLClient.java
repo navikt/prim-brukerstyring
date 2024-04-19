@@ -41,42 +41,41 @@ public class NomGraphQLClient {
         log.info("Henter leders resurser for navident {}", navident);
         String document =
             """
-                    query LedersRessurser {
-                        ressurs(where: {navident: "%s"}) {
-                            navident
-                            visningsnavn
-                            lederFor {
-                                orgEnhet {
-                                    orgEnhetsType
-                                    koblinger {
-                                        ressurs {
-                                            navident
-                                            visningsnavn
-                                            ledere {
-                                                erDagligOppfolging
-                                                ressurs {
-                                                    navident
-                                                    visningsnavn
-                                                    sektor
-                                                }
+                query LedersRessurser {
+                    ressurs(where: {navident: "%s"}) {
+                        navident
+                        visningsnavn
+                        lederFor {
+                            orgEnhet {
+                                orgEnhetsType
+                                koblinger {
+                                    ressurs {
+                                        navident
+                                        visningsnavn
+                                        ledere {
+                                            erDagligOppfolging
+                                            ressurs {
+                                                navident
+                                                visningsnavn
+                                                sektor
                                             }
                                         }
                                     }
-                                    navn
-                                    organiseringer {
-                                        orgEnhet {
-                                            navn
-                                            leder {
-                                                ressurs {
-                                                    navident
-                                                    visningsnavn
-                                                    ledere {
-                                                        erDagligOppfolging
-                                                        ressurs {
-                                                            navident
-                                                            visningsnavn
-                                                            sektor
-                                                        }
+                                }
+                                navn
+                                organiseringer {
+                                    orgEnhet {
+                                        navn
+                                        leder {
+                                            ressurs {
+                                                navident
+                                                visningsnavn
+                                                ledere {
+                                                    erDagligOppfolging
+                                                    ressurs {
+                                                        navident
+                                                        visningsnavn
+                                                        sektor
                                                     }
                                                 }
                                             }
@@ -86,6 +85,7 @@ public class NomGraphQLClient {
                             }
                         }
                     }
+                }
                     """.formatted(navident);
 
         try {

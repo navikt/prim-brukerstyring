@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "leder")
 @ToString
@@ -14,7 +16,6 @@ import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Leder {
 
@@ -43,4 +44,16 @@ public class Leder {
     @Column
     @NotNull
     private Boolean erDirektoratsleder;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Leder leder)) return false;
+        return Objects.equals(lederId, leder.lederId) && Objects.equals(ident, leder.ident) && Objects.equals(navn, leder.navn) && Objects.equals(erDirektoratsleder, leder.erDirektoratsleder);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(lederId, ident, navn, erDirektoratsleder);
+    }
 }
