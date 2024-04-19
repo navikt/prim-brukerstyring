@@ -54,12 +54,12 @@ public class AnsattStillingsavtale {
     protected Id id = new Id();
 
     @ManyToOne
-    @JoinColumn(name = "ansatt_id")
+    @JoinColumn(name = "ansatt_id", insertable = false, updatable = false)
     @JsonBackReference
     private Ansatt ansatt;
 
     @ManyToOne
-    @JoinColumn(name = "leder_id")
+    @JoinColumn(name = "leder_id", insertable = false, updatable = false)
     @JsonBackReference
     private Leder leder;
 
