@@ -156,8 +156,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         } else {
             lederIdent = brukerIdent;
         }
-        Optional<Leder> leder = lederrepository.findByIdent(lederIdent);
-        if (!Objects.isNull(lederIdent) && leder.isPresent()) {
+        if (!Objects.isNull(lederIdent)) {
             NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, lederIdent);
             return ledersRessurser.getLederFor().stream()
                     .flatMap((lederFor) -> {
@@ -166,8 +165,8 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                                 .flatMap(org -> org.getOrgEnhet().getLeder().stream().map(NomLeder::getRessurs));
                         return Stream.concat(koblinger, organiseringer);
                     }).filter(ressurs -> !ressurs.getNavident().equals(lederIdent)).distinct().map((ressurs -> {
-                        Ansatt ansatt = Ansatt.fraNomRessurs(ressurs, leder.get());
-                        log.info("Oppretter ressurs {} for leder {} med {} stillingsavtaler", ansatt.getIdent(), leder.get().getIdent(), ansatt.getStillingsavtaler().size());
+                        Ansatt ansatt = Ansatt.fraNomRessurs(ressurs);
+                        log.info("Oppretter ressurs {} med {} stillingsavtaler", ansatt.getIdent(), ansatt.getStillingsavtaler().size());
                         return ansatt;
                     })).toList();
         } else {
