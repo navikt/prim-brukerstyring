@@ -10,7 +10,6 @@ import no.nav.pim.primbrukerstyring.nom.domain.NomKobling;
 import no.nav.pim.primbrukerstyring.nom.domain.NomLeder;
 import no.nav.pim.primbrukerstyring.nom.domain.NomOrgEnhet;
 import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
-import no.nav.pim.primbrukerstyring.repository.Ansattrepository;
 import no.nav.pim.primbrukerstyring.repository.Brukerrepository;
 import no.nav.pim.primbrukerstyring.repository.Lederrepository;
 import no.nav.pim.primbrukerstyring.service.dto.BrukerDto;
@@ -38,9 +37,6 @@ public class Brukertjeneste implements BrukertjenesteInterface {
 
     @Autowired
     MeterRegistry metricsRegistry;
-
-    @Autowired
-    Ansattrepository ansattrepository;
 
     @Autowired
     Brukerrepository brukerrepository;
@@ -163,7 +159,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         Optional<Leder> leder = lederrepository.findByIdent(lederIdent);
         if (!Objects.isNull(lederIdent) && leder.isPresent()) {
             NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, lederIdent);
-            List<Ansatt> ansatte = ledersRessurser.getLederFor().stream()
+            return ledersRessurser.getLederFor().stream()
                     .flatMap((lederFor) -> {
                         Stream<NomRessurs> koblinger = lederFor.getOrgEnhet().getKoblinger().stream().map((NomKobling::getRessurs));
                         Stream<NomRessurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
@@ -174,11 +170,9 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                         log.info("Oppretter ressurs {} for leder {} med {} stillingsavtaler", ansatt.getIdent(), leder.get().getIdent(), ansatt.getStillingsavtaler().size());
                         return ansatt;
                     })).toList();
-            return ansattrepository.saveAll(ansatte);
         } else {
             throw new AuthorizationException("Representert leder er ikke satt for bruker med ident " + brukerIdent);
         }
-
     }
 
     @Override
