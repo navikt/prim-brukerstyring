@@ -164,7 +164,8 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                         Stream<NomRessurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
                                 .flatMap(org -> org.getOrgEnhet().getLeder().stream().map(NomLeder::getRessurs));
                         return Stream.concat(koblinger, organiseringer);
-                    }).filter(ressurs -> !ressurs.getNavident().equals(lederIdent)).distinct().map((ressurs -> {
+                    }).filter(ressurs -> !ressurs.getNavident().equals(lederIdent) && ressurs.getLedere().stream().anyMatch(leder -> leder.getRessurs().getNavident().equals(lederIdent)))
+                    .distinct().map((ressurs -> {
                         Ansatt ansatt = Ansatt.fraNomRessurs(ressurs);
                         log.info("Oppretter ressurs {} med {} stillingsavtaler", ansatt.getIdent(), ansatt.getStillingsavtaler().size());
                         return ansatt;
