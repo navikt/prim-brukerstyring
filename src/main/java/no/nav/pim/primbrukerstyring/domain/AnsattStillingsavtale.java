@@ -22,6 +22,8 @@ public class AnsattStillingsavtale {
 
     private Leder leder;
 
+    private Ansatt ansatt;
+
     private AnsattType ansattType;
 
     private Stillingsavtale stillingsavtale;
@@ -30,11 +32,11 @@ public class AnsattStillingsavtale {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof AnsattStillingsavtale that)) return false;
-        return Objects.equals(leder, that.leder) && ansattType == that.ansattType && stillingsavtale == that.stillingsavtale;
+        return Objects.equals(leder, that.leder) && Objects.equals(ansatt, that.ansatt) && ansattType == that.ansattType && stillingsavtale == that.stillingsavtale;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(leder.getIdent(), ansattType, stillingsavtale);
+        return Objects.hash(leder.getIdent(), ansatt.getIdent(), ansattType, stillingsavtale);
     }
 }
