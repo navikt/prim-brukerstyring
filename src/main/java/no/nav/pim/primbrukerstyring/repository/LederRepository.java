@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface Lederrepository extends JpaRepository<Leder, String> {
+public interface LederRepository extends JpaRepository<Leder, String> {
     Optional<Leder> findByIdent(String ident);
 }

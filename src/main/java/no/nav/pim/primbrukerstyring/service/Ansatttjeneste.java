@@ -5,9 +5,8 @@ import jakarta.validation.Valid;
 import no.nav.pim.primbrukerstyring.domain.*;
 import no.nav.pim.primbrukerstyring.nom.NomGraphQLClient;
 import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
-import no.nav.pim.primbrukerstyring.repository.AnsattStillingsavtalerepository;
-import no.nav.pim.primbrukerstyring.repository.Ansattrepository;
-import no.nav.pim.primbrukerstyring.repository.Lederrepository;
+import no.nav.pim.primbrukerstyring.repository.LederRepository;
+import no.nav.pim.primbrukerstyring.repository.OverstyrendeLederRepository;
 import no.nav.pim.primbrukerstyring.service.dto.OverstyrendeLederDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
@@ -35,13 +34,10 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
     NomGraphQLClient nomGraphQLClient;
 
     @Autowired
-    Lederrepository lederrepository;
+    LederRepository lederrepository;
 
     @Autowired
-    Ansattrepository ansattrepository;
-
-    @Autowired
-    AnsattStillingsavtalerepository ansattstillingsavtalerepository;
+    OverstyrendeLederRepository overstyrendelederrepository;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
@@ -61,13 +57,11 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
     @PostMapping(path = "/overstyrendeleder", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public AnsattStillingsavtale leggTilOverstyrendeLeder(@RequestHeader(value = "Authorization") String authorization, @Valid @RequestBody OverstyrendeLederDto overstyrendeLederDto) {
+    public OverstyrendeLeder leggTilOverstyrendeLeder(@RequestHeader(value = "Authorization") String authorization, @Valid @RequestBody OverstyrendeLederDto overstyrendeLederDto) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "leggTilOverstyrendeLeder").increment();
         Optional<Leder> finnesLeder = lederrepository.findByIdent(overstyrendeLederDto.getLederIdent());
-        Optional<Ansatt> finnesAnsatt = ansattrepository.findByIdent(overstyrendeLederDto.getAnsattIdent());
+        Optional<OverstyrendeLeder> finnesOverstyrendeLeder = overstyrendelederrepository.findByAnsattIdent(overstyrendeLederDto.getAnsattIdent());
         Leder leder;
-        Ansatt ansatt;
-
         if (finnesLeder.isPresent()) {
             leder = finnesLeder.get();
         } else {
@@ -79,27 +73,25 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
                 return null;
             }
         }
-        if (finnesAnsatt.isPresent()) {
-            ansatt = finnesAnsatt.get();
+        if (finnesOverstyrendeLeder.isPresent()) {
+            log.error("###Ansatt {} har allerede en overstyrende leder i PRIM.", overstyrendeLederDto.getAnsattIdent());
+            return null;
         } else {
             NomRessurs ressurs = nomGraphQLClient.getRessurs(authorization, overstyrendeLederDto.getAnsattIdent());
             if (ressurs != null) {
-                ansatt = ansattrepository.save(Ansatt.fraNomRessurs(ressurs));
+                return overstyrendelederrepository.save(OverstyrendeLeder.builder().ansattIdent(ressurs.getNavident()).ansattNavn(ressurs.getVisningsnavn()).overstyrendeLeder(leder).build());
             } else {
                 log.error("###Kunne ikke finne ansatt i NOM: {}", overstyrendeLederDto.getAnsattIdent());
                 return null;
             }
         }
-
-        AnsattStillingsavtale avtale = AnsattStillingsavtale.builder().id(new AnsattStillingsavtale.Id(ansatt.getAnsattId(), leder.getLederId())).leder(leder).ansatt(ansatt).stillingsavtale(Stillingsavtale.DR).ansattType(AnsattType.F).build();
-        return ansattstillingsavtalerepository.save(avtale);
     }
 
     @Override
     @GetMapping(path = "/overstyrendeledere")
-    public List<AnsattStillingsavtale> hentAlleOverstyrendeLedere(@RequestHeader(value = "Authorization") String authorization) {
+    public List<OverstyrendeLeder> hentAlleOverstyrendeLedere(@RequestHeader(value = "Authorization") String authorization) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "hentAlleOverstyrendeLedere").increment();
 
-        return ansattstillingsavtalerepository.findAll();
+        return overstyrendelederrepository.findAll();
     }
 }

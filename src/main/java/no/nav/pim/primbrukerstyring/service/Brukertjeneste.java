@@ -10,8 +10,8 @@ import no.nav.pim.primbrukerstyring.nom.domain.NomKobling;
 import no.nav.pim.primbrukerstyring.nom.domain.NomLeder;
 import no.nav.pim.primbrukerstyring.nom.domain.NomOrgEnhet;
 import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
-import no.nav.pim.primbrukerstyring.repository.Brukerrepository;
-import no.nav.pim.primbrukerstyring.repository.Lederrepository;
+import no.nav.pim.primbrukerstyring.repository.BrukerRepository;
+import no.nav.pim.primbrukerstyring.repository.LederRepository;
 import no.nav.pim.primbrukerstyring.service.dto.BrukerDto;
 import no.nav.pim.primbrukerstyring.util.OIDCUtil;
 import no.nav.security.token.support.core.api.Protected;
@@ -39,10 +39,10 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     MeterRegistry metricsRegistry;
 
     @Autowired
-    Brukerrepository brukerrepository;
+    BrukerRepository brukerrepository;
 
     @Autowired
-    Lederrepository lederrepository;
+    LederRepository lederrepository;
 
     @Autowired
     OIDCUtil oidcUtil;
