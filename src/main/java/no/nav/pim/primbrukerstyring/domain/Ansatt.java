@@ -50,7 +50,7 @@ public class Ansatt {
     @NotNull
     String navn;
 
-    @OneToMany(mappedBy = "ansatt")
+    @OneToMany
     @JsonBackReference
     Set<AnsattStillingsavtale> stillingsavtaler = new HashSet<>();
 
