@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,7 +61,7 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
     public OverstyrendeLeder leggTilOverstyrendeLeder(@RequestHeader(value = "Authorization") String authorization, @Valid @RequestBody OverstyrendeLederDto overstyrendeLederDto) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "leggTilOverstyrendeLeder").increment();
         Optional<Leder> finnesLeder = lederrepository.findByIdent(overstyrendeLederDto.getLederIdent());
-        Optional<OverstyrendeLeder> finnesOverstyrendeLeder = overstyrendelederrepository.findByAnsattIdent(overstyrendeLederDto.getAnsattIdent());
+        Optional<OverstyrendeLeder> finnesOverstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTil(overstyrendeLederDto.getAnsattIdent(), null);
         Leder leder;
         if (finnesLeder.isPresent()) {
             leder = finnesLeder.get();
@@ -79,7 +80,7 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
         } else {
             NomRessurs ressurs = nomGraphQLClient.getRessurs(authorization, overstyrendeLederDto.getAnsattIdent());
             if (ressurs != null) {
-                return overstyrendelederrepository.save(OverstyrendeLeder.builder().ansattIdent(ressurs.getNavident()).ansattNavn(ressurs.getVisningsnavn()).overstyrendeLeder(leder).build());
+                return overstyrendelederrepository.save(OverstyrendeLeder.builder().ansattIdent(ressurs.getNavident()).ansattNavn(ressurs.getVisningsnavn()).overstyrendeLeder(leder).fra(new Date()).build());
             } else {
                 log.error("###Kunne ikke finne ansatt i NOM: {}", overstyrendeLederDto.getAnsattIdent());
                 return null;

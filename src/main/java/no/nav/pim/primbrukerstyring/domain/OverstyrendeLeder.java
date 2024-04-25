@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.util.Date;
+
 @Entity
 @Table(name = "overstyrende_leder")
 @ToString
@@ -17,16 +19,28 @@ import lombok.*;
 public class OverstyrendeLeder {
 
     @Id
-    @Column
-    @NotNull
-    String ansattIdent;
+    @SequenceGenerator(name = "sequence-generator", sequenceName = "brukerstyring_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence-generator")
+    @Column(name = "id")
+    private Long id;
 
     @Column
     @NotNull
-    String ansattNavn;
+    private String ansattIdent;
+
+    @Column
+    @NotNull
+    private String ansattNavn;
 
     @ManyToOne(fetch=FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "overstyrende_leder_id", referencedColumnName = "leder_id")
     private Leder overstyrendeLeder;
 
+    @Column
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date fra;
+
+    @Column
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date til;
 }
