@@ -91,7 +91,7 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
             }
         }
 
-        AnsattStillingsavtale avtale = AnsattStillingsavtale.builder().leder(leder).ansatt(ansatt).stillingsavtale(Stillingsavtale.DR).ansattType(AnsattType.F).build();
+        AnsattStillingsavtale avtale = AnsattStillingsavtale.builder().id(new AnsattStillingsavtale.Id(ansatt.getAnsattId(), leder.getLederId())).leder(leder).ansatt(ansatt).stillingsavtale(Stillingsavtale.DR).ansattType(AnsattType.F).build();
         return ansattstillingsavtalerepository.save(avtale);
     }
 
