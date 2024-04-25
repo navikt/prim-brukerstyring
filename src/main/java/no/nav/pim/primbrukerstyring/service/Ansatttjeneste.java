@@ -96,7 +96,7 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
     }
 
     @Override
-    @GetMapping(path = "/overstyrendeleder")
+    @GetMapping(path = "/overstyrendeledere")
     public List<AnsattStillingsavtale> hentAlleOverstyrendeLedere(@RequestHeader(value = "Authorization") String authorization) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "hentAlleOverstyrendeLedere").increment();
 
