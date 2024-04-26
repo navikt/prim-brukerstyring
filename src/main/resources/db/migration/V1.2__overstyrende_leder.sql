@@ -5,6 +5,6 @@ CREATE TABLE overstyrende_leder (
     overstyrende_leder_id   BIGINT  NOT NULL,
     fra                     TIMESTAMP,
     til                     TIMESTAMP,
-    CONSTRAINT PK_overstyrende_leder PRIMARY KEY (ansatt_ident),
+    CONSTRAINT PK_overstyrende_leder PRIMARY KEY (id),
     CONSTRAINT FK_overstyrende_leder_id FOREIGN KEY (overstyrende_leder_id) REFERENCES leder (leder_id)
 );
