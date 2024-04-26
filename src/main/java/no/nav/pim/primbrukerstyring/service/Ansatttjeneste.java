@@ -89,6 +89,22 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
+    @DeleteMapping(path = "/overstyrendeleder/{ansattIdent}")
+    public OverstyrendeLeder fjernOverstyrendeLeder(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ansattIdent) {
+        metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "fjernOverstyrendeLeder").increment();
+        Optional<OverstyrendeLeder> finnesOverstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTil(ansattIdent, null);
+        if (finnesOverstyrendeLeder.isPresent()) {
+            OverstyrendeLeder overstyrendeLeder = finnesOverstyrendeLeder.get();
+            overstyrendeLeder.setTil(new Date());
+            return overstyrendelederrepository.save(overstyrendeLeder);
+        } else {
+            log.error("###Ansatt {} har ikke en overstyrende leder i PRIM.", ansattIdent);
+            return null;
+        }
+    }
+
+    @Override
     @GetMapping(path = "/overstyrendeledere")
     public List<OverstyrendeLeder> hentAlleOverstyrendeLedere(@RequestHeader(value = "Authorization") String authorization) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "hentAlleOverstyrendeLedere").increment();
