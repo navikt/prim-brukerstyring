@@ -1,5 +1,7 @@
 server:
   port: 9500
+  error:
+    include-message: always
 
 spring:
   flyway:
@@ -27,6 +29,7 @@ spring:
     show-sql: false
 
 nais_cluster: ${NAIS_CLUSTER_NAME}
+
 
 nom:
   url: ${NOM_URL}
