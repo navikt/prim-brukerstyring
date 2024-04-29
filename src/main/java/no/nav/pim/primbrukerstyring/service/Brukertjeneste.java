@@ -12,6 +12,7 @@ import no.nav.pim.primbrukerstyring.nom.domain.NomOrgEnhet;
 import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 import no.nav.pim.primbrukerstyring.repository.BrukerRepository;
 import no.nav.pim.primbrukerstyring.repository.LederRepository;
+import no.nav.pim.primbrukerstyring.repository.OverstyrendeLederRepository;
 import no.nav.pim.primbrukerstyring.service.dto.BrukerDto;
 import no.nav.pim.primbrukerstyring.util.OIDCUtil;
 import no.nav.security.token.support.core.api.Protected;
@@ -39,10 +40,16 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     MeterRegistry metricsRegistry;
 
     @Autowired
+    Ansatttjeneste ansatttjeneste;
+
+    @Autowired
     BrukerRepository brukerrepository;
 
     @Autowired
     LederRepository lederrepository;
+
+    @Autowired
+    OverstyrendeLederRepository overstyrendelederrepository;
 
     @Autowired
     OIDCUtil oidcUtil;
@@ -158,7 +165,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         }
         if (!Objects.isNull(lederIdent)) {
             NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, lederIdent);
-            return ledersRessurser.getLederFor().stream()
+            Stream<Ansatt> ansatte = ledersRessurser.getLederFor().stream()
                     .flatMap((lederFor) -> {
                         Stream<NomRessurs> koblinger = lederFor.getOrgEnhet().getKoblinger().stream().map((NomKobling::getRessurs));
                         Stream<NomRessurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
@@ -166,10 +173,19 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                         return Stream.concat(koblinger, organiseringer);
                     }).filter(ressurs -> !ressurs.getNavident().equals(lederIdent) && ressurs.getLedere().stream().anyMatch(leder -> leder.getRessurs().getNavident().equals(lederIdent)))
                     .distinct().map((ressurs -> {
-                        Ansatt ansatt = Ansatt.fraNomRessurs(ressurs);
+                        Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdent(ressurs.getNavident());
+                        AnsattStillingsavtale ansattStillingsavtale = null;
+                        if (overstyrendeLeder.isPresent()) {
+                            ansattStillingsavtale = AnsattStillingsavtale.fraOverstyrendeLeder(overstyrendeLeder.get());
+                        }
+                        Ansatt ansatt = Ansatt.fraNomRessurs(ressurs, ansattStillingsavtale);
                         log.info("Oppretter ressurs {} med {} stillingsavtaler", ansatt.getIdent(), ansatt.getStillingsavtaler().size());
                         return ansatt;
-                    })).toList();
+                    }));
+            Stream<Ansatt> overstyrteAnsatte = overstyrendelederrepository.findByLederIdent(lederIdent).stream()
+                    .filter(overstyrtLeder -> ansatte.noneMatch(ansatt -> ansatt.getIdent().equals(overstyrtLeder.getAnsattIdent())))
+                    .map(overstyrtLeder ->  ansatttjeneste.hentAnsatt(authorization, overstyrtLeder.getAnsattIdent()));
+            return Stream.concat(ansatte, overstyrteAnsatte).toList();
         } else {
             throw new AuthorizationException("Representert leder er ikke satt for bruker med ident " + brukerIdent);
         }

@@ -16,7 +16,8 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class Ansatt {
 
-    static public Ansatt fraNomRessurs(NomRessurs ressurs) {
+    static public Ansatt fraNomRessurs(NomRessurs ressurs, AnsattStillingsavtale ansattStillingsavtale) {
+        boolean erOverstyrt = ansattStillingsavtale != null;
         Ansatt nyAnsatt = Ansatt.builder()
                 .ident(ressurs.getNavident())
                 .navn(ressurs.getVisningsnavn())
@@ -24,7 +25,8 @@ public class Ansatt {
 
         Set<AnsattStillingsavtale> stillingsavtaler = ressurs.getLedere().stream()
                 .distinct()
-                .map(nomLeder -> AnsattStillingsavtale.fraNomLeder(nomLeder, Leder.fraNomRessurs(nomLeder.getRessurs()))).collect(Collectors.toSet());
+                .map(nomLeder -> AnsattStillingsavtale.fraNomLeder(nomLeder, Leder.fraNomRessurs(nomLeder.getRessurs()), erOverstyrt)).collect(Collectors.toSet());
+        if (erOverstyrt) stillingsavtaler.add(ansattStillingsavtale);
         nyAnsatt.setStillingsavtaler(stillingsavtaler);
         return nyAnsatt;
     }

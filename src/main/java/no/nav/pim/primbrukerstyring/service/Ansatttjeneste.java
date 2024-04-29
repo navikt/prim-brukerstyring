@@ -12,6 +12,7 @@ import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,9 +47,14 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
     public Ansatt hentAnsatt(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "hentAnsatt").increment();
 
+        Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdent(ident);
         NomRessurs ressurs = nomGraphQLClient.getRessurs(authorization, ident);
         if (ressurs != null) {
-            return Ansatt.fraNomRessurs(ressurs);
+            AnsattStillingsavtale ansattStillingsavtale = null;
+            if (overstyrendeLeder.isPresent()) {
+                ansattStillingsavtale = AnsattStillingsavtale.fraOverstyrendeLeder(overstyrendeLeder.get());
+            }
+            return Ansatt.fraNomRessurs(ressurs, ansattStillingsavtale);
         } else {
             log.error("###Kunne ikke hente ansatt i NOM: {}", ident);
             return null;
@@ -61,7 +67,7 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
     public OverstyrendeLeder leggTilOverstyrendeLeder(@RequestHeader(value = "Authorization") String authorization, @Valid @RequestBody OverstyrendeLederDto overstyrendeLederDto) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "leggTilOverstyrendeLeder").increment();
         Optional<Leder> finnesLeder = lederrepository.findByIdent(overstyrendeLederDto.getLederIdent());
-        Optional<OverstyrendeLeder> finnesOverstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTil(overstyrendeLederDto.getAnsattIdent(), null);
+        Optional<OverstyrendeLeder> finnesOverstyrendeLeder = overstyrendelederrepository.findByAnsattIdent(overstyrendeLederDto.getAnsattIdent());
         Leder leder;
         if (finnesLeder.isPresent()) {
             leder = finnesLeder.get();
@@ -93,7 +99,7 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
     @DeleteMapping(path = "/overstyrendeleder/{ansattIdent}")
     public OverstyrendeLeder fjernOverstyrendeLeder(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ansattIdent) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "fjernOverstyrendeLeder").increment();
-        Optional<OverstyrendeLeder> finnesOverstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTil(ansattIdent, null);
+        Optional<OverstyrendeLeder> finnesOverstyrendeLeder = overstyrendelederrepository.findByAnsattIdent(ansattIdent);
         if (finnesOverstyrendeLeder.isPresent()) {
             OverstyrendeLeder overstyrendeLeder = finnesOverstyrendeLeder.get();
             overstyrendeLeder.setTil(new Date());
@@ -109,6 +115,6 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
     public List<OverstyrendeLeder> hentAlleOverstyrendeLedere(@RequestHeader(value = "Authorization") String authorization) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "hentAlleOverstyrendeLedere").increment();
 
-        return overstyrendelederrepository.findAll();
+        return overstyrendelederrepository.findAll(Sort.by(List.of(new Sort.Order(Sort.Direction.DESC, "til", Sort.NullHandling.NULLS_FIRST), new Sort.Order(Sort.Direction.DESC,"fra"))));
     }
 }
