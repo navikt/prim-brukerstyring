@@ -3,6 +3,8 @@ package no.nav.pim.primbrukerstyring.service;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.validation.Valid;
 import no.nav.pim.primbrukerstyring.domain.*;
+import no.nav.pim.primbrukerstyring.exceptions.ForbiddenException;
+import no.nav.pim.primbrukerstyring.exceptions.NotFoundException;
 import no.nav.pim.primbrukerstyring.nom.NomGraphQLClient;
 import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 import no.nav.pim.primbrukerstyring.repository.LederRepository;
@@ -56,8 +58,8 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
             }
             return Ansatt.fraNomRessurs(ressurs, ansattStillingsavtale);
         } else {
-            log.error("###Kunne ikke hente ansatt i NOM: {}", ident);
-            return null;
+            log.error("###Kunne ikke hente ansatt {} i NOM.", ident);
+            throw new NotFoundException("Kunne ikke finne ansatt " + ident + " i NOM.");
         }
     }
 
@@ -77,19 +79,19 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
                 leder = lederrepository.save(Leder.fraNomRessurs(ressurs));
             } else {
                 log.error("###Kunne ikke finne leder i NOM: {}", overstyrendeLederDto.getLederIdent());
-                return null;
+                throw new NotFoundException("Kunne ikke finne leder " + overstyrendeLederDto.getLederIdent() + " i NOM.");
             }
         }
         if (finnesOverstyrendeLeder.isPresent()) {
             log.error("###Ansatt {} har allerede en overstyrende leder i PRIM.", overstyrendeLederDto.getAnsattIdent());
-            return null;
+            throw new ForbiddenException("Ansatt " + overstyrendeLederDto.getAnsattIdent() + " har allerede en overstyrende leder i PRIM.");
         } else {
             NomRessurs ressurs = nomGraphQLClient.getRessurs(authorization, overstyrendeLederDto.getAnsattIdent());
             if (ressurs != null) {
                 return overstyrendelederrepository.save(OverstyrendeLeder.builder().ansattIdent(ressurs.getNavident()).ansattNavn(ressurs.getVisningsnavn()).overstyrendeLeder(leder).fra(new Date()).build());
             } else {
                 log.error("###Kunne ikke finne ansatt i NOM: {}", overstyrendeLederDto.getAnsattIdent());
-                return null;
+                throw new NotFoundException("Kunne ikke finne ansatt " + overstyrendeLederDto.getAnsattIdent() + " i NOM.");
             }
         }
     }
@@ -106,7 +108,7 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
             return overstyrendelederrepository.save(overstyrendeLeder);
         } else {
             log.error("###Ansatt {} har ikke en overstyrende leder i PRIM.", ansattIdent);
-            return null;
+            throw new NotFoundException("Ansatt " + ansattIdent + " har ikke en overstyrende leder i PRIM.");
         }
     }
 
