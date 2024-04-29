@@ -25,7 +25,7 @@ public class Ansatt {
 
         Set<AnsattStillingsavtale> stillingsavtaler = ressurs.getLedere().stream()
                 .distinct()
-                .map(nomLeder -> AnsattStillingsavtale.fraNomLeder(nomLeder, Leder.fraNomRessurs(nomLeder.getRessurs()), erOverstyrt)).collect(Collectors.toSet());
+                .map(nomLeder -> AnsattStillingsavtale.fraNomLeder(nomLeder, AnsattType.fraNomSektor(ressurs.getSektor()), erOverstyrt)).collect(Collectors.toSet());
         if (erOverstyrt) stillingsavtaler.add(ansattStillingsavtale);
         nyAnsatt.setStillingsavtaler(stillingsavtaler);
         return nyAnsatt;

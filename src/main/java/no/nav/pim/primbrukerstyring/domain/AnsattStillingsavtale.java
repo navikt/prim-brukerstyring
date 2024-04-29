@@ -12,10 +12,11 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AnsattStillingsavtale {
-    static public AnsattStillingsavtale fraNomLeder(NomLeder nomLeder, Leder leder, boolean erOverstyrt) {
+    static public AnsattStillingsavtale fraNomLeder(NomLeder nomLeder, AnsattType ansattType, boolean erOverstyrt) {
+        Leder leder = Leder.fraNomRessurs(nomLeder.getRessurs());
         return AnsattStillingsavtale.builder()
                 .leder(leder)
-                .ansattType(AnsattType.fraNomSektor(nomLeder.getRessurs().getSektor()))
+                .ansattType(ansattType)
                 .stillingsavtale((nomLeder.getErDagligOppfolging() && !erOverstyrt) ? Stillingsavtale.DR : Stillingsavtale.MR)
                 .build();
     }

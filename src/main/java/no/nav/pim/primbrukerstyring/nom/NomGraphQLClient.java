@@ -52,12 +52,12 @@ public class NomGraphQLClient {
                                     ressurs {
                                         navident
                                         visningsnavn
+                                        sektor
                                         ledere {
                                             erDagligOppfolging
                                             ressurs {
                                                 navident
                                                 visningsnavn
-                                                sektor
                                             }
                                         }
                                     }
@@ -70,12 +70,12 @@ public class NomGraphQLClient {
                                             ressurs {
                                                 navident
                                                 visningsnavn
+                                                sektor
                                                 ledere {
                                                     erDagligOppfolging
                                                     ressurs {
                                                         navident
                                                         visningsnavn
-                                                        sektor
                                                     }
                                                 }
                                             }
@@ -105,12 +105,12 @@ public class NomGraphQLClient {
                             ressurs(where: {navident: "%s"}) {
                                 navident
                                 visningsnavn
+                                sektor
                                 ledere {
                                     erDagligOppfolging
                                     ressurs {
                                         navident
                                         visningsnavn
-                                        sektor
                                     }
                                 }
                             }

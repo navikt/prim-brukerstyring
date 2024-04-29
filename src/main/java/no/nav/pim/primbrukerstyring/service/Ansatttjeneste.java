@@ -78,7 +78,7 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
             if (ressurs != null) {
                 leder = lederrepository.save(Leder.fraNomRessurs(ressurs));
             } else {
-                log.error("###Kunne ikke finne leder i NOM: {}", overstyrendeLederDto.getLederIdent());
+                log.error("###Kunne ikke finne leder '{}' i NOM.", overstyrendeLederDto.getLederIdent());
                 throw new NotFoundException("Kunne ikke finne leder " + overstyrendeLederDto.getLederIdent() + " i NOM.");
             }
         }
@@ -90,7 +90,7 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
             if (ressurs != null) {
                 return overstyrendelederrepository.save(OverstyrendeLeder.builder().ansattIdent(ressurs.getNavident()).ansattNavn(ressurs.getVisningsnavn()).overstyrendeLeder(leder).fra(new Date()).build());
             } else {
-                log.error("###Kunne ikke finne ansatt i NOM: {}", overstyrendeLederDto.getAnsattIdent());
+                log.error("###Kunne ikke finne ansatt '{}' i NOM.", overstyrendeLederDto.getAnsattIdent());
                 throw new NotFoundException("Kunne ikke finne ansatt " + overstyrendeLederDto.getAnsattIdent() + " i NOM.");
             }
         }
