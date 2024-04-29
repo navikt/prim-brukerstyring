@@ -173,7 +173,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                         return Stream.concat(koblinger, organiseringer);
                     }).filter(ressurs -> !ressurs.getNavident().equals(lederIdent) && ressurs.getLedere().stream().anyMatch(leder -> leder.getRessurs().getNavident().equals(lederIdent)))
                     .distinct().map((ressurs -> {
-                        Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTil(ressurs.getNavident(), null);
+                        Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsNull(ressurs.getNavident());
                         AnsattStillingsavtale ansattStillingsavtale = null;
                         if (overstyrendeLeder.isPresent()) {
                             ansattStillingsavtale = AnsattStillingsavtale.fraOverstyrendeLeder(overstyrendeLeder.get());
@@ -182,7 +182,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                         log.info("Oppretter ressurs {} med {} stillingsavtaler", ansatt.getIdent(), ansatt.getStillingsavtaler().size());
                         return ansatt;
                     }));
-            Stream<Ansatt> overstyrteAnsatte = overstyrendelederrepository.findByLederIdent(lederIdent).stream()
+            Stream<Ansatt> overstyrteAnsatte = overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(lederIdent).stream()
                     .filter(overstyrtLeder -> ansatte.noneMatch(ansatt -> ansatt.getIdent().equals(overstyrtLeder.getAnsattIdent())))
                     .map(overstyrtLeder ->  ansatttjeneste.hentAnsatt(authorization, overstyrtLeder.getAnsattIdent()));
             return Stream.concat(ansatte, overstyrteAnsatte).toList();
