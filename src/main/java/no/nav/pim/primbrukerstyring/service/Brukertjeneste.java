@@ -173,7 +173,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                         return Stream.concat(koblinger, organiseringer);
                     }).filter(ressurs -> !ressurs.getNavident().equals(lederIdent) && ressurs.getLedere().stream().anyMatch(leder -> leder.getRessurs().getNavident().equals(lederIdent)))
                     .distinct().map((ressurs -> {
-                        Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdent(ressurs.getNavident());
+                        Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTil(ressurs.getNavident(), null);
                         AnsattStillingsavtale ansattStillingsavtale = null;
                         if (overstyrendeLeder.isPresent()) {
                             ansattStillingsavtale = AnsattStillingsavtale.fraOverstyrendeLeder(overstyrendeLeder.get());
