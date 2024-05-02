@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.Metrics;
 import jakarta.validation.Valid;
 import no.nav.pim.primbrukerstyring.domain.*;
 import no.nav.pim.primbrukerstyring.exceptions.AuthorizationException;
+import no.nav.pim.primbrukerstyring.exceptions.NotFoundException;
 import no.nav.pim.primbrukerstyring.nom.NomGraphQLClient;
 import no.nav.pim.primbrukerstyring.nom.domain.NomKobling;
 import no.nav.pim.primbrukerstyring.nom.domain.NomLeder;
@@ -216,29 +217,38 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         Optional<Bruker> bruker = brukerrepository.findByIdent(brukerIdent);
         boolean erHR = bruker.isPresent() && List.of(Rolle.HR_MEDARBEIDER, Rolle.HR_MEDARBEIDER_BEMANNING).contains(bruker.get().getRolle());
         if (bruker.isPresent() && erHR) {
-            if (representertLeder != null) {
-                List<NomOrgEnhet> orgenheter = bruker.get().getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
-                Optional<NomRessurs> lederRessurs = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).filter((ressurs) -> ressurs.getNavident().equals(representertLeder.getIdent())).findFirst();
-                if (lederRessurs.isPresent()) {
-                    Leder leder;
-                    Optional<Leder> eksisterendeLeder = lederrepository.findByIdent(representertLeder.getIdent());
-                    leder = eksisterendeLeder.orElseGet(() -> lederrepository.save(Leder.fraNomRessurs(lederRessurs.get())));
+            List<NomOrgEnhet> orgenheter = bruker.get().getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
+            Optional<NomRessurs> lederRessurs = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).filter((ressurs) -> ressurs.getNavident().equals(representertLeder.getIdent())).findFirst();
+            if (lederRessurs.isPresent()) {
+                Leder leder;
+                Optional<Leder> eksisterendeLeder = lederrepository.findByIdent(representertLeder.getIdent());
+                leder = eksisterendeLeder.orElseGet(() -> lederrepository.save(Leder.fraNomRessurs(lederRessurs.get())));
 
-                    Bruker brukerMedLeder = bruker.get();
-                    brukerMedLeder.setRepresentertLeder(leder);
-                    brukerrepository.save(brukerMedLeder);
-                    return leder;
-                } else {
-                    throw new AuthorizationException("Bruker med ident " + brukerIdent + " har ikke tilgang til leder " + representertLeder.getIdent());
-                }
+                Bruker brukerMedLeder = bruker.get();
+                brukerMedLeder.setRepresentertLeder(leder);
+                brukerrepository.save(brukerMedLeder);
+                return leder;
             } else {
-                Bruker brukerUtenLeder = bruker.get();
-                brukerUtenLeder.setRepresentertLeder(null);
-                brukerrepository.save(brukerUtenLeder);
-                return null;
+                throw new AuthorizationException("Bruker med ident " + brukerIdent + " har ikke tilgang til leder " + representertLeder.getIdent());
             }
         } else {
             throw new AuthorizationException("Bruker med ident "+ brukerIdent + " er ikke HR ansatt");
+        }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
+    @DeleteMapping(path = "/leder")
+    public void fjernRepresentertLeder(@RequestHeader(value = "Authorization") String authorization) {
+        metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "fjernRepresentertLeder").increment();
+        String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
+        Optional<Bruker> bruker = brukerrepository.findByIdent(brukerIdent);
+        if (bruker.isPresent()) {
+            Bruker brukerUtenLeder = bruker.get();
+            brukerUtenLeder.setRepresentertLeder(null);
+            brukerrepository.save(brukerUtenLeder);
+        } else {
+            throw new NotFoundException("Kunne ikke finne bruker " + brukerIdent + " i PRIM.");
         }
     }
 

@@ -26,4 +26,6 @@ public interface BrukertjenesteInterface {
     List<Leder> hentLedere(String authorization);
 
     Leder settRepresentertLeder(String authorization, Leder representertLeder);
+
+    void fjernRepresentertLeder(String authorization);
 }
