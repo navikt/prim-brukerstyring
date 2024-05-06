@@ -41,10 +41,10 @@ public class Bruker {
     @JoinColumn(name = "representert_leder_id", referencedColumnName = "leder_id")
     private Leder representertLeder;
 
-    @Column
+    @Column(name = "sist_aksessert")
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
-    private Date sist_aksessert;
+    private Date sistAksessert;
 
     @Override
     public boolean equals(Object o) {
