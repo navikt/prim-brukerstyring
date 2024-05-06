@@ -25,9 +25,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.*;
 import java.util.stream.Stream;
 
 @RestController
@@ -71,7 +71,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             if (ressurs != null) {
                 if (ressurs.getLederFor().size() > 0) {
                     Leder leder = Leder.builder().ident(brukerIdent).navn(ressurs.getVisningsnavn()).build();
-                    brukerrepository.save(Bruker.builder().ident(brukerIdent).navn(ressurs.getVisningsnavn()).representertLeder(leder).rolle(Rolle.LEDER).build());
+                    brukerrepository.save(Bruker.builder().ident(brukerIdent).navn(ressurs.getVisningsnavn()).sist_aksessert(new Date()).representertLeder(leder).rolle(Rolle.LEDER).build());
                     return new BrukerDto(Rolle.LEDER, leder);
                 } else {
                     return new BrukerDto(Rolle.MEDARBEIDER, null);
@@ -80,7 +80,14 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             log.error("###Kunne ikke hente bruker i NOM: {}", brukerIdent);
             return new BrukerDto(Rolle.UKJENT, null);
         } else {
-            return new BrukerDto(bruker.get().getRolle(), bruker.get().getRepresentertLeder());
+            Bruker oppdatertBruker = bruker.get();
+            if (oppdatertBruker.getSist_aksessert().toInstant()
+                    .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusHours(1).toInstant())) {
+                oppdatertBruker.setRepresentertLeder(null);
+            }
+            oppdatertBruker.setSist_aksessert(new Date());
+            brukerrepository.save(oppdatertBruker);
+            return new BrukerDto(oppdatertBruker.getRolle(), oppdatertBruker.getRepresentertLeder());
         }
     }
 
