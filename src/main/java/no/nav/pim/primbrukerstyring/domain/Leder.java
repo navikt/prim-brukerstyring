@@ -17,7 +17,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class Leder {
+public class Leder implements Comparable<Leder>{
 
     static public Leder fraNomRessurs(NomRessurs ressurs) {
         return Leder.builder()
@@ -44,6 +44,11 @@ public class Leder {
     @Column
     @NotNull
     private Boolean erDirektoratsleder;
+
+    @Override
+    public int compareTo(Leder other) {
+        return this.navn.compareTo(other.navn);
+    }
 
     @Override
     public boolean equals(Object o) {
