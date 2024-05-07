@@ -70,7 +70,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             NomRessurs ressurs = nomGraphQLClient.getLedersResurser(authorization, brukerIdent);
             if (ressurs != null) {
                 if (ressurs.getLederFor().size() > 0) {
-                    Leder leder = Leder.builder().ident(brukerIdent).navn(ressurs.getVisningsnavn()).build();
+                    Leder leder = Leder.fraNomRessurs(ressurs);
                     brukerrepository.save(Bruker.builder().ident(brukerIdent).navn(ressurs.getVisningsnavn()).sistAksessert(new Date()).representertLeder(leder).rolle(Rolle.LEDER).build());
                     return new BrukerDto(Rolle.LEDER, leder);
                 } else {

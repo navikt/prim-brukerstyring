@@ -6,7 +6,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "leder")
@@ -20,9 +23,11 @@ import java.util.Objects;
 public class Leder implements Comparable<Leder>{
 
     static public Leder fraNomRessurs(NomRessurs ressurs) {
+        Set<OrgEnhet> orgEnheter = ressurs.getLederFor().stream().map((lederFor -> OrgEnhet.fraNomOrgenhet(lederFor.getOrgEnhet()))).collect(Collectors.toSet());
         return Leder.builder()
                 .ident(ressurs.getNavident())
                 .navn(ressurs.getVisningsnavn())
+                .orgEnheter(orgEnheter)
                 .erDirektoratsleder(ressurs.getLederFor() != null && ressurs.getLederFor().stream().anyMatch((nomLederFor -> nomLederFor.getOrgEnhet().getOrgEnhetsType().equals("DIREKTORAT"))))
                 .build();
     }
@@ -44,6 +49,10 @@ public class Leder implements Comparable<Leder>{
     @Column
     @NotNull
     private Boolean erDirektoratsleder;
+
+    @ElementCollection
+    @CollectionTable(name = "orgenhet")
+    private Set<OrgEnhet> orgEnheter = new HashSet<>();
 
     @Override
     public int compareTo(Leder other) {

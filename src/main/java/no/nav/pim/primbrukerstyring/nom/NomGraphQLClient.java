@@ -47,6 +47,8 @@ public class NomGraphQLClient {
                         visningsnavn
                         lederFor {
                             orgEnhet {
+                                id
+                                navn
                                 orgEnhetsType
                                 koblinger {
                                     ressurs {
@@ -62,7 +64,6 @@ public class NomGraphQLClient {
                                         }
                                     }
                                 }
-                                navn
                                 organiseringer {
                                     orgEnhet {
                                         navn
