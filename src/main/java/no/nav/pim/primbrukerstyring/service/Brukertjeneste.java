@@ -174,7 +174,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         }
         if (!Objects.isNull(lederIdent)) {
             NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, lederIdent);
-            Stream<Ansatt> ansatte = ledersRessurser.getLederFor().stream()
+            List<Ansatt> ansatte = ledersRessurser.getLederFor().stream()
                     .flatMap((lederFor) -> {
                         Stream<NomRessurs> koblinger = lederFor.getOrgEnhet().getKoblinger().stream().map((NomKobling::getRessurs));
                         Stream<NomRessurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
@@ -190,11 +190,11 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                         Ansatt ansatt = Ansatt.fraNomRessurs(ressurs, ansattStillingsavtale);
                         log.info("Oppretter ressurs {} med {} stillingsavtaler", ansatt.getIdent(), ansatt.getStillingsavtaler().size());
                         return ansatt;
-                    }));
+                    })).toList();
             Stream<Ansatt> overstyrteAnsatte = overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(lederIdent).stream()
-                    .filter(overstyrtLeder -> ansatte.noneMatch(ansatt -> ansatt.getIdent().equals(overstyrtLeder.getAnsattIdent())))
+                    .filter(overstyrtLeder -> ansatte.stream().noneMatch(ansatt -> ansatt.getIdent().equals(overstyrtLeder.getAnsattIdent())))
                     .map(overstyrtLeder ->  ansatttjeneste.hentAnsatt(authorization, overstyrtLeder.getAnsattIdent()));
-            return Stream.concat(ansatte, overstyrteAnsatte).toList();
+            return Stream.concat(ansatte.stream(), overstyrteAnsatte).toList();
         } else {
             throw new AuthorizationException("Representert leder er ikke satt for bruker med ident " + brukerIdent);
         }
