@@ -33,7 +33,7 @@ public class Leder implements Comparable<Leder>{
                 .ident(ressurs.getNavident())
                 .navn(ressurs.getVisningsnavn())
                 .orgEnheter(orgEnheter)
-                .erDirektoratsleder(ressurs.getLederFor() != null && ressurs.getLederFor().stream().anyMatch((nomLederFor -> nomLederFor.getOrgEnhet().getOrgEnhetsType().equals("DIREKTORAT"))))
+                .erDirektoratsleder(ressurs.getLederFor() != null && ressurs.getLederFor().stream().anyMatch((nomLederFor -> nomLederFor.getOrgEnhet().getOrgEnhetsType() != null && nomLederFor.getOrgEnhet().getOrgEnhetsType().equals("DIREKTORAT"))))
                 .build();
     }
 
