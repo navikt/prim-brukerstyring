@@ -209,6 +209,12 @@ public class NomGraphQLClient {
                         ressurs {
                             navident
                             visningsnavn
+                            lederFor {
+                                orgEnhet {
+                                    id
+                                    navn
+                                }
+                            }
                         }
                     }
                     organiseringer(retning: under) {
@@ -219,6 +225,12 @@ public class NomGraphQLClient {
                                 ressurs {
                                     navident
                                     visningsnavn
+                                    lederFor {
+                                        orgEnhet {
+                                            id
+                                            navn
+                                        }
+                                    }
                                 }
                             }
                             organiseringer(retning: under) {
@@ -229,6 +241,12 @@ public class NomGraphQLClient {
                                         ressurs {
                                             navident
                                             visningsnavn
+                                            lederFor {
+                                                orgEnhet {
+                                                    id
+                                                    navn
+                                                }
+                                            }
                                         }
                                     }
                                     organiseringer(retning: under) {
@@ -239,6 +257,12 @@ public class NomGraphQLClient {
                                                 ressurs {
                                                     navident
                                                     visningsnavn
+                                                    lederFor {
+                                                        orgEnhet {
+                                                            id
+                                                            navn
+                                                        }
+                                                    }
                                                 }
                                             }
                                             organiseringer(retning: under) {
@@ -249,6 +273,12 @@ public class NomGraphQLClient {
                                                         ressurs {
                                                             navident
                                                             visningsnavn
+                                                            lederFor {
+                                                                orgEnhet {
+                                                                    id
+                                                                    navn
+                                                                }
+                                                            }
                                                         }
                                                     }
                                                     organiseringer(retning: under) {
@@ -259,6 +289,12 @@ public class NomGraphQLClient {
                                                                 ressurs {
                                                                     navident
                                                                     visningsnavn
+                                                                    lederFor {
+                                                                        orgEnhet {
+                                                                            id
+                                                                            navn
+                                                                        }
+                                                                    }
                                                                 }
                                                             }
                                                             organiseringer(retning: under) {
@@ -269,6 +305,12 @@ public class NomGraphQLClient {
                                                                         ressurs {
                                                                             navident
                                                                             visningsnavn
+                                                                            lederFor {
+                                                                                orgEnhet {
+                                                                                    id
+                                                                                    navn
+                                                                                }
+                                                                            }
                                                                         }
                                                                     }
                                                                     organiseringer(retning: under) {
@@ -279,6 +321,12 @@ public class NomGraphQLClient {
                                                                                 ressurs {
                                                                                     navident
                                                                                     visningsnavn
+                                                                                    lederFor {
+                                                                                        orgEnhet {
+                                                                                            id
+                                                                                            navn
+                                                                                        }
+                                                                                    }
                                                                                 }
                                                                             }
                                                                         }
