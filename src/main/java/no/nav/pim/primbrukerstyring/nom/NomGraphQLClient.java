@@ -60,6 +60,13 @@ public class NomGraphQLClient {
                                             ressurs {
                                                 navident
                                                 visningsnavn
+                                                lederFor {
+                                                    orgEnhet {
+                                                        id
+                                                        navn
+                                                        orgEnhetsType
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -77,6 +84,13 @@ public class NomGraphQLClient {
                                                     ressurs {
                                                         navident
                                                         visningsnavn
+                                                        lederFor {
+                                                            orgEnhet {
+                                                                id
+                                                                navn
+                                                                orgEnhetsType
+                                                            }
+                                                        }
                                                     }
                                                 }
                                             }
@@ -112,6 +126,13 @@ public class NomGraphQLClient {
                                     ressurs {
                                         navident
                                         visningsnavn
+                                        lederFor {
+                                            orgEnhet {
+                                                id
+                                                navn
+                                                orgEnhetsType
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -213,6 +234,7 @@ public class NomGraphQLClient {
                                 orgEnhet {
                                     id
                                     navn
+                                    orgEnhetsType
                                 }
                             }
                         }
@@ -229,6 +251,7 @@ public class NomGraphQLClient {
                                         orgEnhet {
                                             id
                                             navn
+                                            orgEnhetsType
                                         }
                                     }
                                 }
@@ -245,6 +268,7 @@ public class NomGraphQLClient {
                                                 orgEnhet {
                                                     id
                                                     navn
+                                                    orgEnhetsType
                                                 }
                                             }
                                         }
@@ -261,6 +285,7 @@ public class NomGraphQLClient {
                                                         orgEnhet {
                                                             id
                                                             navn
+                                                            orgEnhetsType
                                                         }
                                                     }
                                                 }
@@ -277,6 +302,7 @@ public class NomGraphQLClient {
                                                                 orgEnhet {
                                                                     id
                                                                     navn
+                                                                    orgEnhetsType
                                                                 }
                                                             }
                                                         }
@@ -293,6 +319,7 @@ public class NomGraphQLClient {
                                                                         orgEnhet {
                                                                             id
                                                                             navn
+                                                                            orgEnhetsType
                                                                         }
                                                                     }
                                                                 }
@@ -309,6 +336,7 @@ public class NomGraphQLClient {
                                                                                 orgEnhet {
                                                                                     id
                                                                                     navn
+                                                                                    orgEnhetsType
                                                                                 }
                                                                             }
                                                                         }
@@ -325,6 +353,7 @@ public class NomGraphQLClient {
                                                                                         orgEnhet {
                                                                                             id
                                                                                             navn
+                                                                                            orgEnhetsType
                                                                                         }
                                                                                     }
                                                                                 }
