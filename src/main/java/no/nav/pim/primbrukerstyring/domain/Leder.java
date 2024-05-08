@@ -23,7 +23,12 @@ import java.util.stream.Collectors;
 public class Leder implements Comparable<Leder>{
 
     static public Leder fraNomRessurs(NomRessurs ressurs) {
-        Set<OrgEnhet> orgEnheter = ressurs.getLederFor().stream().map((lederFor -> OrgEnhet.fraNomOrgenhet(lederFor.getOrgEnhet()))).collect(Collectors.toSet());
+        Set<OrgEnhet> orgEnheter;
+        if (ressurs.getLederFor() != null) {
+            orgEnheter = ressurs.getLederFor().stream().map((lederFor -> OrgEnhet.fraNomOrgenhet(lederFor.getOrgEnhet()))).collect(Collectors.toSet());
+        } else {
+            orgEnheter = new HashSet<>();
+        }
         return Leder.builder()
                 .ident(ressurs.getNavident())
                 .navn(ressurs.getVisningsnavn())
