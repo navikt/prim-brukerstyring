@@ -32,16 +32,18 @@ public class Leder implements Comparable<Leder> {
         } else {
             orgEnheter = new HashSet<>();
         }
+
         Optional<String> telefonnummer = ressurs.getTelefon().stream()
                 .filter(nomTelefon -> !nomTelefon.getType().equals(NomTelefonType.PRIVAT_TELEFON))
                 .sorted()
                 .map(NomTelefon::getNummer)
                 .findFirst();
+
         return Leder.builder()
                 .ident(ressurs.getNavident())
                 .navn(ressurs.getVisningsnavn())
                 .email(ressurs.getEpost())
-                .telefon(telefonnummer.orElse(null))
+                .tlf(telefonnummer.orElse(null))
                 .orgEnheter(orgEnheter)
                 .erDirektoratsleder(ressurs.getLederFor() != null && ressurs.getLederFor().stream().anyMatch((nomLederFor -> nomLederFor.getOrgEnhet().getOrgEnhetsType() != null && nomLederFor.getOrgEnhet().getOrgEnhetsType().equals("DIREKTORAT"))))
                 .build();
@@ -66,7 +68,7 @@ public class Leder implements Comparable<Leder> {
     private String email;
 
     @Column
-    private String telefon;
+    private String tlf;
 
     @Column
     @NotNull
