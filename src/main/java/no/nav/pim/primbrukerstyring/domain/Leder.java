@@ -5,9 +5,12 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
+import no.nav.pim.primbrukerstyring.nom.domain.NomTelefon;
+import no.nav.pim.primbrukerstyring.nom.domain.NomTelefonType;
 
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,7 +23,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class Leder implements Comparable<Leder>{
+public class Leder implements Comparable<Leder> {
 
     static public Leder fraNomRessurs(NomRessurs ressurs) {
         Set<OrgEnhet> orgEnheter;
@@ -29,9 +32,16 @@ public class Leder implements Comparable<Leder>{
         } else {
             orgEnheter = new HashSet<>();
         }
+        Optional<String> telefonnummer = ressurs.getTelefon().stream()
+                .filter(nomTelefon -> !nomTelefon.getType().equals(NomTelefonType.PRIVAT_TELEFON))
+                .sorted()
+                .map(NomTelefon::getNummer)
+                .findFirst();
         return Leder.builder()
                 .ident(ressurs.getNavident())
                 .navn(ressurs.getVisningsnavn())
+                .email(ressurs.getEpost())
+                .telefon(telefonnummer.orElse(null))
                 .orgEnheter(orgEnheter)
                 .erDirektoratsleder(ressurs.getLederFor() != null && ressurs.getLederFor().stream().anyMatch((nomLederFor -> nomLederFor.getOrgEnhet().getOrgEnhetsType() != null && nomLederFor.getOrgEnhet().getOrgEnhetsType().equals("DIREKTORAT"))))
                 .build();
@@ -50,6 +60,13 @@ public class Leder implements Comparable<Leder>{
     @Column
     @NotNull
     private String navn;
+
+    @Column
+    @NotNull
+    private String email;
+
+    @Column
+    private String telefon;
 
     @Column
     @NotNull

@@ -41,54 +41,70 @@ public class NomGraphQLClient {
         log.info("Henter leders resurser for navident {}", navident);
         String document =
             """
-                query LedersRessurser {
-                    ressurs(where: {navident: "%s"}) {
-                        navident
-                        visningsnavn
-                        lederFor {
-                            orgEnhet {
-                                id
-                                navn
-                                orgEnhetsType
-                                koblinger {
-                                    ressurs {
-                                        navident
-                                        visningsnavn
-                                        sektor
-                                        ledere {
-                                            erDagligOppfolging
-                                            ressurs {
-                                                navident
-                                                visningsnavn
-                                                lederFor {
-                                                    orgEnhet {
-                                                        id
-                                                        navn
-                                                        orgEnhetsType
+                    query LedersRessurser {
+                        ressurs(where: {navident: "%s"}) {
+                            navident
+                            visningsnavn
+                            epost
+                            telefon {
+                              nummer
+                              type
+                            }
+                            lederFor {
+                                orgEnhet {
+                                    id
+                                    navn
+                                    orgEnhetsType
+                                    koblinger {
+                                        ressurs {
+                                            navident
+                                            visningsnavn
+                                            sektor
+                                            ledere {
+                                                erDagligOppfolging
+                                                ressurs {
+                                                    navident
+                                                    visningsnavn
+                                                    epost
+                                                    telefon {
+                                                      nummer
+                                                      type
+                                                    }
+                                                    lederFor {
+                                                        orgEnhet {
+                                                            id
+                                                            navn
+                                                            orgEnhetsType
+                                                        }
                                                     }
                                                 }
                                             }
                                         }
                                     }
-                                }
-                                organiseringer {
-                                    orgEnhet {
-                                        navn
-                                        leder {
-                                            ressurs {
-                                                navident
-                                                visningsnavn
-                                                sektor
-                                                ledere {
-                                                    erDagligOppfolging
-                                                    ressurs {
-                                                        navident
-                                                        visningsnavn
-                                                        lederFor {
-                                                            orgEnhet {
-                                                                id
-                                                                navn
-                                                                orgEnhetsType
+                                    organiseringer {
+                                        orgEnhet {
+                                            navn
+                                            leder {
+                                                ressurs {
+                                                    navident
+                                                    visningsnavn
+                                                    sektor
+                                                    ledere {
+                                                        erDagligOppfolging
+                                                        ressurs {
+                                                            navident
+                                                            visningsnavn
+                                                            epost
+                                                            telefon {
+                                                              nummer
+                                                              type
+                                                            }
+                                                            lederFor {
+                                                                orgEnhet {
+                                                                    id
+                                                                    navn
+                                                                    orgEnhetsType
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -100,8 +116,7 @@ public class NomGraphQLClient {
                             }
                         }
                     }
-                }
-                    """.formatted(navident);
+                        """.formatted(navident);
 
         try {
             HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();
@@ -126,6 +141,11 @@ public class NomGraphQLClient {
                                     ressurs {
                                         navident
                                         visningsnavn
+                                        epost
+                                        telefon {
+                                          nummer
+                                          type
+                                        }
                                         lederFor {
                                             orgEnhet {
                                                 id
@@ -230,6 +250,11 @@ public class NomGraphQLClient {
                         ressurs {
                             navident
                             visningsnavn
+                            epost
+                            telefon {
+                              nummer
+                              type
+                            }
                             lederFor {
                                 orgEnhet {
                                     id
@@ -247,6 +272,11 @@ public class NomGraphQLClient {
                                 ressurs {
                                     navident
                                     visningsnavn
+                                    epost
+                                    telefon {
+                                      nummer
+                                      type
+                                    }
                                     lederFor {
                                         orgEnhet {
                                             id
@@ -264,6 +294,11 @@ public class NomGraphQLClient {
                                         ressurs {
                                             navident
                                             visningsnavn
+                                            epost
+                                            telefon {
+                                              nummer
+                                              type
+                                            }
                                             lederFor {
                                                 orgEnhet {
                                                     id
@@ -281,6 +316,11 @@ public class NomGraphQLClient {
                                                 ressurs {
                                                     navident
                                                     visningsnavn
+                                                    epost
+                                                    telefon {
+                                                      nummer
+                                                      type
+                                                    }
                                                     lederFor {
                                                         orgEnhet {
                                                             id
@@ -298,6 +338,11 @@ public class NomGraphQLClient {
                                                         ressurs {
                                                             navident
                                                             visningsnavn
+                                                            epost
+                                                            telefon {
+                                                              nummer
+                                                              type
+                                                            }
                                                             lederFor {
                                                                 orgEnhet {
                                                                     id
@@ -315,6 +360,11 @@ public class NomGraphQLClient {
                                                                 ressurs {
                                                                     navident
                                                                     visningsnavn
+                                                                    epost
+                                                                    telefon {
+                                                                      nummer
+                                                                      type
+                                                                    }
                                                                     lederFor {
                                                                         orgEnhet {
                                                                             id
@@ -332,6 +382,11 @@ public class NomGraphQLClient {
                                                                         ressurs {
                                                                             navident
                                                                             visningsnavn
+                                                                            epost
+                                                                            telefon {
+                                                                              nummer
+                                                                              type
+                                                                            }
                                                                             lederFor {
                                                                                 orgEnhet {
                                                                                     id
@@ -349,6 +404,11 @@ public class NomGraphQLClient {
                                                                                 ressurs {
                                                                                     navident
                                                                                     visningsnavn
+                                                                                    epost
+                                                                                    telefon {
+                                                                                      nummer
+                                                                                      type
+                                                                                    }
                                                                                     lederFor {
                                                                                         orgEnhet {
                                                                                             id
