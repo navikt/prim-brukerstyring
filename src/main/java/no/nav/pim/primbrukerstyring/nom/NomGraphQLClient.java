@@ -128,7 +128,7 @@ public class NomGraphQLClient {
     }
 
     public NomRessurs getRessurs(String authorization, String navident) {
-        log.info("Henter leders resurser for navident {}", navident);
+        log.info("Henter resurs for navident {}", navident);
         String document =
                 """
                         query AnsattRessurs {
@@ -136,6 +136,11 @@ public class NomGraphQLClient {
                                 navident
                                 visningsnavn
                                 sektor
+                                epost
+                                telefon {
+                                  nummer
+                                  type
+                                }
                                 ledere {
                                     erDagligOppfolging
                                     ressurs {
