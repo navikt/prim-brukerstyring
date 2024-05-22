@@ -69,7 +69,8 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         if (bruker.isEmpty()) {
             NomRessurs ressurs = nomGraphQLClient.getLedersResurser(authorization, brukerIdent);
             if (ressurs != null) {
-                if (ressurs.getLederFor().size() > 0) {
+                List<OverstyrendeLeder> overstyrteAnsatte = overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(brukerIdent);
+                if (ressurs.getLederFor().size() > 0 || overstyrteAnsatte.size() > 0) {
                     Leder leder = Leder.fraNomRessurs(ressurs);
                     brukerrepository.save(Bruker.builder().ident(brukerIdent).navn(ressurs.getVisningsnavn()).sistAksessert(new Date()).representertLeder(leder).rolle(Rolle.LEDER).build());
                     return new BrukerDto(Rolle.LEDER, leder);
