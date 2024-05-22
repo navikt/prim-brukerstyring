@@ -71,7 +71,8 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             if (ressurs != null) {
                 List<OverstyrendeLeder> overstyrteAnsatte = overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(brukerIdent);
                 if (ressurs.getLederFor().size() > 0 || overstyrteAnsatte.size() > 0) {
-                    Leder leder = Leder.fraNomRessurs(ressurs);
+                    Optional<Leder> finnesLeder = lederrepository.findByIdent(ressurs.getNavident());
+                    Leder leder = finnesLeder.orElseGet(() -> Leder.fraNomRessurs(ressurs));
                     brukerrepository.save(Bruker.builder().ident(brukerIdent).navn(ressurs.getVisningsnavn()).sistAksessert(new Date()).representertLeder(leder).rolle(Rolle.LEDER).build());
                     return new BrukerDto(Rolle.LEDER, leder);
                 } else {
@@ -82,12 +83,14 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             return new BrukerDto(Rolle.UKJENT, null);
         } else {
             Bruker oppdatertBruker = bruker.get();
-            if (oppdatertBruker.getSistAksessert().toInstant()
-                    .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusHours(1).toInstant())) {
-                oppdatertBruker.setRepresentertLeder(null);
+            if (oppdatertBruker.getRolle() != Rolle.LEDER) {
+                if (oppdatertBruker.getSistAksessert().toInstant()
+                        .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusHours(1).toInstant())) {
+                    oppdatertBruker.setRepresentertLeder(null);
+                }
+                oppdatertBruker.setSistAksessert(new Date());
+                brukerrepository.save(oppdatertBruker);
             }
-            oppdatertBruker.setSistAksessert(new Date());
-            brukerrepository.save(oppdatertBruker);
             return new BrukerDto(oppdatertBruker.getRolle(), oppdatertBruker.getRepresentertLeder());
         }
     }
