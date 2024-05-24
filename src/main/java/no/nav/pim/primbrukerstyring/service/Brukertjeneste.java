@@ -214,7 +214,15 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         boolean erHR = bruker.isPresent() && List.of(Rolle.HR_MEDARBEIDER, Rolle.HR_MEDARBEIDER_BEMANNING).contains(bruker.get().getRolle());
         if (erHR) {
             List<NomOrgEnhet> orgenheter = bruker.get().getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
-            return orgenheter.stream().flatMap(this::hentOrgenhetsLedere).distinct().map(Leder::fraNomRessurs).sorted().toList();
+            List<Leder> ledere = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).distinct().map(Leder::fraNomRessurs).sorted().toList();
+            Optional<Leder> lederSelv = lederrepository.findByIdent(brukerIdent);
+            if (lederSelv.isPresent() && ledere.stream().noneMatch(leder -> leder.getIdent().equals(lederSelv.get().getIdent()))) {
+                List<Leder> ledereMedLederSelv = new ArrayList<>(ledere);
+                ledereMedLederSelv.add(lederSelv.get());
+                return ledereMedLederSelv;
+            }
+            return ledere;
+
         } else {
             throw new AuthorizationException("Bruker med ident "+ brukerIdent + " er ikke HR ansatt");
         }
