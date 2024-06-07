@@ -239,10 +239,11 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         if (bruker.isPresent() && erHR) {
             List<NomOrgEnhet> orgenheter = bruker.get().getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
             Optional<NomRessurs> lederRessurs = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).filter((ressurs) -> ressurs.getNavident().equals(representertLeder.getIdent())).findFirst();
-            if (lederRessurs.isPresent()) {
-                Leder leder;
+            boolean erLederSelv = bruker.get().getIdent().equals(representertLeder.getIdent());
+            if (lederRessurs.isPresent() || erLederSelv) {
                 Optional<Leder> eksisterendeLeder = lederrepository.findByIdent(representertLeder.getIdent());
-                leder = eksisterendeLeder.orElseGet(() -> lederrepository.save(Leder.fraNomRessurs(lederRessurs.get())));
+                if (erLederSelv && eksisterendeLeder.isEmpty()) throw new AuthorizationException("Bruker med ident " + brukerIdent + " er ikke mulig å velge som leder.");
+                Leder leder = eksisterendeLeder.orElseGet(() -> lederrepository.save(Leder.fraNomRessurs(lederRessurs.get())));
 
                 Bruker brukerMedLeder = bruker.get();
                 brukerMedLeder.setSistAksessert(new Date());
