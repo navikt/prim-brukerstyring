@@ -13,7 +13,7 @@ public class NomOrgEnhet {
     List<NomOrganisering> organiseringer;
     List<NomLeder> leder;
 
-    public NomOrgEnhet(String id, String navn, String orgEnhetsType) {
+    /*public NomOrgEnhet(String id, String navn, String orgEnhetsType) {
         this.id = id;
         this.navn = navn;
         this.orgEnhetsType = orgEnhetsType;
@@ -30,5 +30,5 @@ public class NomOrgEnhet {
         this.id = id;
         this.navn = navn;
         this.leder = leder;
-    }
+    }*/
 }

@@ -7,8 +7,8 @@ public class NomLeder {
     Boolean erDagligOppfolging;
     NomRessurs ressurs;
 
-    public NomLeder(Boolean erDagligOppfolging, NomRessurs ressurs) {
+    /*public NomLeder(Boolean erDagligOppfolging, NomRessurs ressurs) {
         this.erDagligOppfolging = erDagligOppfolging;
         this.ressurs = ressurs;
-    }
+    }*/
 }

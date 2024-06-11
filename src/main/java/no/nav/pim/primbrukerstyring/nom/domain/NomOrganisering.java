@@ -6,7 +6,7 @@ import lombok.Data;
 public class NomOrganisering {
     NomOrgEnhet orgEnhet;
 
-    public NomOrganisering(NomOrgEnhet orgEnhet) {
+    /*public NomOrganisering(NomOrgEnhet orgEnhet) {
         this.orgEnhet = orgEnhet;
-    }
+    }*/
 }

@@ -6,7 +6,7 @@ import lombok.Data;
 public class NomKobling {
     NomRessurs ressurs;
 
-    public NomKobling (NomRessurs ressurs) {
+    /*public NomKobling (NomRessurs ressurs) {
         this.ressurs = ressurs;
-    }
+    }*/
 }

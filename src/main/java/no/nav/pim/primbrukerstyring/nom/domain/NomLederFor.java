@@ -6,7 +6,7 @@ import lombok.Data;
 public class NomLederFor {
     NomOrgEnhet orgEnhet;
 
-    public NomLederFor(NomOrgEnhet orgEnhet) {
+    /*public NomLederFor(NomOrgEnhet orgEnhet) {
         this.orgEnhet = orgEnhet;
-    }
+    }*/
 }
