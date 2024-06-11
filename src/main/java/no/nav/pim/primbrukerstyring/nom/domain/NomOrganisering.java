@@ -1,12 +1,10 @@
 package no.nav.pim.primbrukerstyring.nom.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class NomOrganisering {
     NomOrgEnhet orgEnhet;
-
-    /*public NomOrganisering(NomOrgEnhet orgEnhet) {
-        this.orgEnhet = orgEnhet;
-    }*/
 }

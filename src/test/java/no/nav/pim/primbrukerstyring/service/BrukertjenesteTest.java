@@ -41,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @WebMvcTest(Brukertjeneste.class)
 public class BrukertjenesteTest {
-/*
+
     @Autowired
     MockMvc mvc;
 
@@ -78,7 +78,7 @@ public class BrukertjenesteTest {
     @Test
     public void hentBrukerForRessursMedLederForSetterStatusLeder() throws Exception {
         NomRessurs nomRessursLeder = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
-                List.of(), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", ""))), List.of(NomSektor.NAV_STATLIG), List.of());
+                List.of(), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", "", List.of(), List.of(), List.of()))), List.of(NomSektor.NAV_STATLIG), List.of());
 
         given(brukerrepository.findByIdent(anyString())).willReturn(Optional.empty());
         given(nomGraphQLClient.getLedersResurser(any(), anyString())).willReturn(nomRessursLeder);
@@ -177,11 +177,11 @@ public class BrukertjenesteTest {
         NomRessurs nomRessursLederMedAnsatte = nyRessurs(nomRessursLeder);
         nomRessursLederMedAnsatte.setLederFor(List.of(
             new NomLederFor(
-                new NomOrgEnhet("aa000a", "Test Org", List.of(new NomKobling(ansatt1)), List.of(
+                new NomOrgEnhet("aa000a", "Test Org", "", List.of(new NomKobling(ansatt1)), List.of(
                     new NomOrganisering(
-                        new NomOrgEnhet("aa000a", "Test Org", List.of(new NomLeder(true, ansatt2)))
+                        new NomOrgEnhet("aa000a", "Test Org", "", List.of(), List.of(), List.of(new NomLeder(true, ansatt2)))
                     )
-                ))
+                ), List.of())
             )
         ));
 
@@ -223,11 +223,11 @@ public class BrukertjenesteTest {
         NomRessurs nomRessursLederMedAnsatte = nyRessurs(nomRessursLeder);
         nomRessursLederMedAnsatte.setLederFor(List.of(
                 new NomLederFor(
-                        new NomOrgEnhet("aa000a", "Test Org", List.of(new NomKobling(ansatt1)), List.of(
+                        new NomOrgEnhet("aa000a", "Test Org", "", List.of(new NomKobling(ansatt1)), List.of(
                                 new NomOrganisering(
-                                        new NomOrgEnhet("aa000a", "Test Org", List.of(new NomLeder(true, ansatt2)))
+                                        new NomOrgEnhet("aa000a", "Test Org", "", List.of(), List.of(), List.of(new NomLeder(true, ansatt2)))
                                 )
-                        ))
+                        ), List.of())
                 )
         ));
 
@@ -271,5 +271,5 @@ public class BrukertjenesteTest {
     @Configuration
     @ComponentScan(basePackageClasses = {Brukertjeneste.class})
     public static class TestConf {
-    }*/
+    }
 }
