@@ -17,16 +17,16 @@ import static org.junit.Assert.assertTrue;
 @RunWith(SpringRunner.class)
 public class AnsattTest {
 
-    /*@Test
+    @Test
     public void hentAnsattFraNomSetterOverstyrtLederForst() {
         NomRessurs nomLederRessurs = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
-                List.of(), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", ""))), List.of(NomSektor.NAV_STATLIG), List.of());
+                List.of(), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", "", List.of(), List.of(), List.of()))), List.of(NomSektor.NAV_STATLIG), List.of());
 
         NomRessurs nomAnsattRessurs = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
                 List.of(), List.of(), List.of(NomSektor.NAV_STATLIG), List.of(new NomLeder(true, nomLederRessurs)));
 
         NomRessurs nomOverstyrtLederRessurs = new NomRessurs("O123456", "Overstyrt Leder", "Overstyrt@Leder.no",
-                List.of(), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", ""))), List.of(NomSektor.NAV_STATLIG), List.of());
+                List.of(), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", "", List.of(), List.of(), List.of()))), List.of(NomSektor.NAV_STATLIG), List.of());
 
 
         AnsattStillingsavtale ansattStillingsavtale = AnsattStillingsavtale.fraOverstyrendeLeder(
@@ -47,5 +47,5 @@ public class AnsattTest {
         assertTrue(ikkeDirekteRapporterende.isPresent());
         assertThat(ikkeDirekteRapporterende.get().getLeder().getIdent(), is(nomLederRessurs.getNavident()));
 
-    }*/
+    }
 }
