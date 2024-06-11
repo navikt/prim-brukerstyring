@@ -236,7 +236,7 @@ public class NomGraphQLClient {
             """;
         try {
             HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();
-            return graphQlClient.document(document).retrieve("orgEnheter").toEntityList(NomOrganisering.class).block();
+            return graphQlClient.document(document).retrieve("data.orgEnheter").toEntityList(NomOrganisering.class).block();
         } catch (Exception e) {
             log.info("Noe gikk galt med henting av organisasjons pyramiden. Feilmelding: {}", e.getMessage());
         }
@@ -442,9 +442,9 @@ public class NomGraphQLClient {
             """.formatted(organisasjonsId);
         try {
             HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();
-            return graphQlClient.document(document).retrieve("orgEnhet").toEntity(NomOrgEnhet.class).block();
+            return graphQlClient.document(document).retrieve("data.orgEnhet").toEntity(NomOrgEnhet.class).block();
         } catch (Exception e) {
-            log.info("Noe gikk galt med henting av organisasjons pyramiden. Feilmelding: {}", e.getMessage());
+            log.info("Noe gikk galt med henting av organisasjon {}. Feilmelding: {}", organisasjonsId, e.getMessage());
         }
         return null;
     }
