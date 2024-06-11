@@ -17,41 +17,18 @@ public class LederTest {
 
     @Test
     public void hentLederFraNomSetterRiktigTelefonnummer() {
-        NomTelefon privat = NomTelefon.builder().nummer("11111111").type(NomTelefonType.PRIVAT_TELEFON).build();
-        NomTelefon tjeneste = NomTelefon.builder().nummer("22222222").type(NomTelefonType.NAV_TJENESTE_TELEFON).build();
-        NomTelefon kontor = NomTelefon.builder().nummer("33333333").type(NomTelefonType.NAV_KONTOR_TELEFON).build();
-        NomRessurs nomRessursAlleTelefoner = NomRessurs.builder()
-            .navident("T123456")
-            .visningsnavn("Test Testesen")
-            .epost("Test@Testesen.no")
-            .telefon(List.of(privat, tjeneste, kontor))
-            .sektor(List.of(NomSektor.NAV_STATLIG))
-            .lederFor(List.of(
-                NomLederFor.builder().orgEnhet(NomOrgEnhet.builder().id("aa000a").navn("Test Org").build()).build()
-            ))
-            .build();
+        NomTelefon privat = new NomTelefon("11111111", NomTelefonType.PRIVAT_TELEFON);
+        NomTelefon tjeneste = new NomTelefon("22222222", NomTelefonType.NAV_TJENESTE_TELEFON);
+        NomTelefon kontor = new NomTelefon("33333333", NomTelefonType.NAV_KONTOR_TELEFON);
 
-        NomRessurs nomRessursUtenTjenesteTelefon = NomRessurs.builder()
-                .navident("T123456")
-                .visningsnavn("Test Testesen")
-                .epost("Test@Testesen.no")
-                .telefon(List.of(privat, kontor))
-                .sektor(List.of(NomSektor.NAV_STATLIG))
-                .lederFor(List.of(
-                        NomLederFor.builder().orgEnhet(NomOrgEnhet.builder().id("aa000a").navn("Test Org").build()).build()
-                ))
-                .build();
+        NomRessurs nomRessursAlleTelefoner = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
+                List.of(privat, tjeneste, kontor), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", ""))), List.of(NomSektor.NAV_STATLIG), List.of());
 
-        NomRessurs nomRessursBarePrivatTelefon = NomRessurs.builder()
-                .navident("T123456")
-                .visningsnavn("Test Testesen")
-                .epost("Test@Testesen.no")
-                .telefon(List.of(privat))
-                .sektor(List.of(NomSektor.NAV_STATLIG))
-                .lederFor(List.of(
-                        NomLederFor.builder().orgEnhet(NomOrgEnhet.builder().id("aa000a").navn("Test Org").build()).build()
-                ))
-                .build();
+        NomRessurs nomRessursUtenTjenesteTelefon = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
+                List.of(privat, kontor), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", ""))), List.of(NomSektor.NAV_STATLIG), List.of());
+
+        NomRessurs nomRessursBarePrivatTelefon = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
+                List.of(privat), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", ""))), List.of(NomSektor.NAV_STATLIG), List.of());
 
         assertThat(Leder.fraNomRessurs(nomRessursAlleTelefoner).getTlf(), is(tjeneste.getNummer()));
         assertThat(Leder.fraNomRessurs(nomRessursUtenTjenesteTelefon).getTlf(), is(kontor.getNummer()));
@@ -60,26 +37,11 @@ public class LederTest {
 
     @Test
     public void hentLederFraNomSetterDirektoratslederRiktig() {
-        NomRessurs nomRessursDirektoratleder = NomRessurs.builder()
-                .navident("T123456")
-                .visningsnavn("Test Testesen")
-                .epost("Test@Testesen.no")
-                .telefon(List.of())
-                .sektor(List.of(NomSektor.NAV_STATLIG))
-                .lederFor(List.of(
-                        NomLederFor.builder().orgEnhet(NomOrgEnhet.builder().id("aa000a").navn("Test Org").orgEnhetsType("DIREKTORAT").build()).build()
-                ))
-                .build();
-        NomRessurs nomRessursIkkeDirektoratleder = NomRessurs.builder()
-                .navident("T123456")
-                .visningsnavn("Test Testesen")
-                .epost("Test@Testesen.no")
-                .telefon(List.of())
-                .sektor(List.of(NomSektor.NAV_STATLIG))
-                .lederFor(List.of(
-                        NomLederFor.builder().orgEnhet(NomOrgEnhet.builder().id("aa000a").navn("Test Org").orgEnhetsType("DIR").build()).build()
-                ))
-                .build();
+        NomRessurs nomRessursDirektoratleder = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
+                List.of(), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", "DIREKTORAT"))), List.of(NomSektor.NAV_STATLIG), List.of());
+
+        NomRessurs nomRessursIkkeDirektoratleder = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
+                List.of(), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", "DIR"))), List.of(NomSektor.NAV_STATLIG), List.of());
 
         assertTrue(Leder.fraNomRessurs(nomRessursDirektoratleder).getErDirektoratsleder());
         assertFalse(Leder.fraNomRessurs(nomRessursIkkeDirektoratleder).getErDirektoratsleder());

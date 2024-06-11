@@ -1,13 +1,16 @@
 package no.nav.pim.primbrukerstyring.nom.domain;
 
-import lombok.Builder;
 import lombok.Data;
 
 @Data
-@Builder
 public class NomTelefon implements Comparable<NomTelefon> {
     String nummer;
     NomTelefonType type;
+
+    public NomTelefon(String nummer, NomTelefonType type) {
+        this.nummer = nummer;
+        this.type = type;
+    }
 
     @Override
     public int compareTo(NomTelefon other) {

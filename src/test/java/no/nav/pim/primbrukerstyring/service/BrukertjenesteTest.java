@@ -77,16 +77,8 @@ public class BrukertjenesteTest {
 
     @Test
     public void hentBrukerForRessursMedLederForSetterStatusLeder() throws Exception {
-        NomRessurs nomRessursLeder = NomRessurs.builder()
-            .navident("T123456")
-            .visningsnavn("Test Testesen")
-            .epost("Test@Testesen.no")
-            .telefon(List.of())
-            .sektor(List.of(NomSektor.NAV_STATLIG))
-            .lederFor(List.of(
-                    NomLederFor.builder().orgEnhet(NomOrgEnhet.builder().id("aa000a").navn("Test Org").build()).build()
-            ))
-            .build();
+        NomRessurs nomRessursLeder = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
+                List.of(), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", ""))), List.of(NomSektor.NAV_STATLIG), List.of());
 
         given(brukerrepository.findByIdent(anyString())).willReturn(Optional.empty());
         given(nomGraphQLClient.getLedersResurser(any(), anyString())).willReturn(nomRessursLeder);
@@ -103,14 +95,8 @@ public class BrukertjenesteTest {
 
     @Test
     public void hentBrukerForRessursUtenLederForSetterStatusMedarbeider() throws Exception {
-        NomRessurs nomRessursLeder = NomRessurs.builder()
-                .navident("T123456")
-                .visningsnavn("Test Testesen")
-                .epost("Test@Testesen.no")
-                .telefon(List.of())
-                .sektor(List.of(NomSektor.NAV_STATLIG))
-                .lederFor(List.of())
-                .build();
+        NomRessurs nomRessursLeder = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
+                List.of(), List.of(), List.of(NomSektor.NAV_STATLIG), List.of());
 
         given(brukerrepository.findByIdent(anyString())).willReturn(Optional.empty());
         given(nomGraphQLClient.getLedersResurser(any(), anyString())).willReturn(nomRessursLeder);
@@ -152,7 +138,7 @@ public class BrukertjenesteTest {
     }
 
     @Test
-    public void hentBrukerForRessursMedHRMedarbeiderMedUtgåttLederReturnererNull() throws Exception {
+    public void hentBrukerForRessursMedHRMedarbeiderMedUtgattLederReturnererNull() throws Exception {
         Leder leder = Leder.builder()
                 .ident("A123456")
                 .navn("Test Testesen")
@@ -179,36 +165,24 @@ public class BrukertjenesteTest {
 
     @Test
     public void hentLedersRessurserReturnererKoblingerOgLedereForOrganisasjoner() throws Exception {
-        NomRessurs nomRessursLeder = NomRessurs.builder()
-                .navident("T123456")
-                .visningsnavn("Test Testesen")
-                .epost("Test@Testesen.no")
-                .telefon(List.of())
-                .sektor(List.of(NomSektor.NAV_STATLIG))
-                .build();
+        NomRessurs nomRessursLeder = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
+                List.of(), List.of(), List.of(NomSektor.NAV_STATLIG), List.of());
 
-        NomRessurs ansatt1 = NomRessurs.builder().navident("A111111").visningsnavn("Anders And").sektor(List.of(NomSektor.NAV_STATLIG)).ledere(List.of(
-                NomLeder.builder().erDagligOppfolging(true).ressurs(nomRessursLeder).build()
-        )).build();
+        NomRessurs ansatt1 = new NomRessurs("A111111", "Anders And", "Test@Testesen.no",
+                List.of(), List.of(), List.of(NomSektor.NAV_STATLIG), List.of(new NomLeder(true, nomRessursLeder)));
 
-        NomRessurs ansatt2 = NomRessurs.builder().navident("B222222").visningsnavn("Bjornar Bjorn").sektor(List.of(NomSektor.NAV_STATLIG)).ledere(List.of(
-                NomLeder.builder().erDagligOppfolging(true).ressurs(nomRessursLeder).build()
-        )).build();
+        NomRessurs ansatt2 = new NomRessurs("B222222", "Bjornar Bjorn", "Test@Testesen.no",
+                List.of(), List.of(), List.of(NomSektor.NAV_STATLIG), List.of(new NomLeder(true, nomRessursLeder)));
 
         NomRessurs nomRessursLederMedAnsatte = nyRessurs(nomRessursLeder);
         nomRessursLederMedAnsatte.setLederFor(List.of(
-            NomLederFor.builder().orgEnhet(
-                NomOrgEnhet.builder()
-                    .id("aa000a")
-                    .navn("Test Org")
-                    .koblinger(List.of(NomKobling.builder().ressurs(ansatt1).build()))
-                    .organiseringer(List.of(
-                        NomOrganisering.builder()
-                            .orgEnhet(NomOrgEnhet.builder().id("aa000a").navn("Test Org").leder(List.of(NomLeder.builder().ressurs(ansatt2).build())).build())
-                            .build()
-                    ))
-                    .build()
-            ).build()
+            new NomLederFor(
+                new NomOrgEnhet("aa000a", "Test Org", List.of(new NomKobling(ansatt1)), List.of(
+                    new NomOrganisering(
+                        new NomOrgEnhet("aa000a", "Test Org", List.of(new NomLeder(true, ansatt2)))
+                    )
+                ))
+            )
         ));
 
         Leder leder = Leder.builder()
@@ -237,36 +211,24 @@ public class BrukertjenesteTest {
 
     @Test
     public void hentLedersRessurserReturnererOverstyrteLedere() throws Exception {
-        NomRessurs nomRessursLeder = NomRessurs.builder()
-                .navident("T123456")
-                .visningsnavn("Test Testesen")
-                .epost("Test@Testesen.no")
-                .telefon(List.of())
-                .sektor(List.of(NomSektor.NAV_STATLIG))
-                .build();
+        NomRessurs nomRessursLeder = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
+                List.of(), List.of(), List.of(NomSektor.NAV_STATLIG), List.of());
 
-        NomRessurs ansatt1 = NomRessurs.builder().navident("A111111").visningsnavn("Anders And").sektor(List.of(NomSektor.NAV_STATLIG)).ledere(List.of(
-                NomLeder.builder().erDagligOppfolging(true).ressurs(nomRessursLeder).build()
-        )).build();
+        NomRessurs ansatt1 = new NomRessurs("A111111", "Anders And", "Test@Testesen.no",
+                List.of(), List.of(), List.of(NomSektor.NAV_STATLIG), List.of(new NomLeder(true, nomRessursLeder)));
 
-        NomRessurs ansatt2 = NomRessurs.builder().navident("B222222").visningsnavn("Bjornar Bjorn").sektor(List.of(NomSektor.NAV_STATLIG)).ledere(List.of(
-                NomLeder.builder().erDagligOppfolging(true).ressurs(nomRessursLeder).build()
-        )).build();
+        NomRessurs ansatt2 = new NomRessurs("B222222", "Bjornar Bjorn", "Test@Testesen.no",
+                List.of(), List.of(), List.of(NomSektor.NAV_STATLIG), List.of(new NomLeder(true, nomRessursLeder)));
 
         NomRessurs nomRessursLederMedAnsatte = nyRessurs(nomRessursLeder);
         nomRessursLederMedAnsatte.setLederFor(List.of(
-                NomLederFor.builder().orgEnhet(
-                        NomOrgEnhet.builder()
-                                .id("aa000a")
-                                .navn("Test Org")
-                                .koblinger(List.of(NomKobling.builder().ressurs(ansatt1).build()))
-                                .organiseringer(List.of(
-                                        NomOrganisering.builder()
-                                                .orgEnhet(NomOrgEnhet.builder().id("aa000a").navn("Test Org").leder(List.of(NomLeder.builder().ressurs(ansatt2).build())).build())
-                                                .build()
-                                ))
-                                .build()
-                ).build()
+                new NomLederFor(
+                        new NomOrgEnhet("aa000a", "Test Org", List.of(new NomKobling(ansatt1)), List.of(
+                                new NomOrganisering(
+                                        new NomOrgEnhet("aa000a", "Test Org", List.of(new NomLeder(true, ansatt2)))
+                                )
+                        ))
+                )
         ));
 
         Leder leder = Leder.builder()
@@ -302,15 +264,8 @@ public class BrukertjenesteTest {
 
 
     private NomRessurs nyRessurs(NomRessurs ressurs) {
-        return NomRessurs.builder()
-                .navident(ressurs.getNavident())
-                .visningsnavn(ressurs.getVisningsnavn())
-                .epost(ressurs.getEpost())
-                .telefon(ressurs.getTelefon())
-                .sektor(ressurs.getSektor())
-                .lederFor(ressurs.getLederFor())
-                .ledere(ressurs.getLedere())
-                .build();
+        return new NomRessurs(ressurs.getNavident(), ressurs.getVisningsnavn(), ressurs.getEpost(), ressurs.getTelefon(),
+                ressurs.getLederFor(), ressurs.getSektor(), ressurs.getLedere());
     }
 
     @Configuration

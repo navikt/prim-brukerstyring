@@ -19,34 +19,15 @@ public class AnsattTest {
 
     @Test
     public void hentAnsattFraNomSetterOverstyrtLederForst() {
-        NomRessurs nomLederRessurs = NomRessurs.builder()
-            .navident("T123456")
-            .visningsnavn("Test Testesen")
-            .epost("Test@Testesen.no")
-            .telefon(List.of())
-            .lederFor(List.of(
-                    NomLederFor.builder().orgEnhet(NomOrgEnhet.builder().id("aa000a").navn("Test Org").build()).build()
-            ))
-            .build();
+        NomRessurs nomLederRessurs = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
+                List.of(), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", ""))), List.of(NomSektor.NAV_STATLIG), List.of());
 
-        NomRessurs nomAnsattRessurs = NomRessurs.builder()
-            .navident("T123456")
-            .visningsnavn("Test Testesen")
-            .sektor(List.of(NomSektor.NAV_STATLIG))
-            .ledere(List.of(
-                NomLeder.builder().erDagligOppfolging(true).ressurs(nomLederRessurs).build()
-            ))
-            .build();
+        NomRessurs nomAnsattRessurs = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
+                List.of(), List.of(), List.of(NomSektor.NAV_STATLIG), List.of(new NomLeder(true, nomLederRessurs)));
 
-        NomRessurs nomOverstyrtLederRessurs = NomRessurs.builder()
-            .navident("O123456")
-            .visningsnavn("Overstyrt Leder")
-            .epost("Overstyrt@Leder.no")
-            .telefon(List.of())
-            .lederFor(List.of(
-                    NomLederFor.builder().orgEnhet(NomOrgEnhet.builder().id("aa000a").navn("Test Org").build()).build()
-            ))
-            .build();
+        NomRessurs nomOverstyrtLederRessurs = new NomRessurs("O123456", "Overstyrt Leder", "Overstyrt@Leder.no",
+                List.of(), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", ""))), List.of(NomSektor.NAV_STATLIG), List.of());
+
 
         AnsattStillingsavtale ansattStillingsavtale = AnsattStillingsavtale.fraOverstyrendeLeder(
             OverstyrendeLeder.builder()
