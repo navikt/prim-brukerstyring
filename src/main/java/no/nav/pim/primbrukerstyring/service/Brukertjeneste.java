@@ -178,23 +178,27 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         }
         if (!Objects.isNull(lederIdent)) {
             NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, lederIdent);
+            System.out.println(ledersRessurser.getLederFor().size());
             List<Ansatt> ansatte = ledersRessurser.getLederFor().stream()
-                    .flatMap((lederFor) -> {
-                        Stream<NomRessurs> koblinger = lederFor.getOrgEnhet().getKoblinger().stream().map((NomKobling::getRessurs));
-                        Stream<NomRessurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
-                                .flatMap(org -> org.getOrgEnhet().getLeder().stream().map(NomLeder::getRessurs));
-                        return Stream.concat(koblinger, organiseringer);
-                    }).filter(ressurs -> !ressurs.getNavident().equals(lederIdent) && ressurs.getLedere().stream().anyMatch(leder -> leder.getRessurs().getNavident().equals(lederIdent)))
-                    .distinct().map((ressurs -> {
-                        Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsNull(ressurs.getNavident());
-                        AnsattStillingsavtale ansattStillingsavtale = null;
-                        if (overstyrendeLeder.isPresent()) {
-                            ansattStillingsavtale = AnsattStillingsavtale.fraOverstyrendeLeder(overstyrendeLeder.get());
-                        }
-                        Ansatt ansatt = Ansatt.fraNomRessurs(ressurs, ansattStillingsavtale);
-                        log.info("Oppretter ressurs {} med {} stillingsavtaler", ansatt.getIdent(), ansatt.getStillingsavtaler().size());
-                        return ansatt;
-                    })).toList();
+                .flatMap((lederFor) -> {
+                    Stream<NomRessurs> koblinger = lederFor.getOrgEnhet().getKoblinger().stream().map((NomKobling::getRessurs));
+                    Stream<NomRessurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
+                            .flatMap(org -> org.getOrgEnhet().getLeder().stream().map(NomLeder::getRessurs));
+                    return Stream.concat(koblinger, organiseringer);
+                })
+                .filter(ressurs -> !ressurs.getNavident().equals(lederIdent)
+                            && ressurs.getLedere().stream().anyMatch(leder -> leder.getRessurs().getNavident().equals(lederIdent))
+                )
+                .distinct().map((ressurs -> {
+                    Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsNull(ressurs.getNavident());
+                    AnsattStillingsavtale ansattStillingsavtale = null;
+                    if (overstyrendeLeder.isPresent()) {
+                        ansattStillingsavtale = AnsattStillingsavtale.fraOverstyrendeLeder(overstyrendeLeder.get());
+                    }
+                    Ansatt ansatt = Ansatt.fraNomRessurs(ressurs, ansattStillingsavtale);
+                    log.info("Oppretter ressurs {} med {} stillingsavtaler", ansatt.getIdent(), ansatt.getStillingsavtaler().size());
+                    return ansatt;
+                })).toList();
             Stream<Ansatt> overstyrteAnsatte = overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(lederIdent).stream()
                     .filter(overstyrtLeder -> ansatte.stream().noneMatch(ansatt -> ansatt.getIdent().equals(overstyrtLeder.getAnsattIdent())))
                     .map(overstyrtLeder ->  ansatttjeneste.hentAnsatt(authorization, overstyrtLeder.getAnsattIdent()));

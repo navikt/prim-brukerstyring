@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import static no.nav.pim.primbrukerstyring.utils.NomUtils.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -41,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @WebMvcTest(Brukertjeneste.class)
 public class BrukertjenesteTest {
-/*
+
     @Autowired
     MockMvc mvc;
 
@@ -69,16 +70,19 @@ public class BrukertjenesteTest {
     @MockBean
     NomGraphQLClient nomGraphQLClient;
 
+    private String ident;
+
     @Before
     public void setUp() {
-        given(oidcUtil.finnClaimFraOIDCToken(anyString(), anyString())).willReturn(Optional.of("T123456"));
+        ident = "T123456";
+        given(oidcUtil.finnClaimFraOIDCToken(anyString(), anyString())).willReturn(Optional.of(ident));
         given(metricsRegistry.counter(anyString(), anyString(), anyString(), anyString(), anyString())).willReturn(mock(Counter.class));
     }
 
     @Test
     public void hentBrukerForRessursMedLederForSetterStatusLeder() throws Exception {
-        NomRessurs nomRessursLeder = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
-                List.of(), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", "", List.of(), List.of(), List.of()))), List.of(NomSektor.NAV_STATLIG), List.of());
+
+        NomRessurs nomRessursLeder = lagNomRessurs(ident, null, List.of(lagNomLederFor(false)), null);
 
         given(brukerrepository.findByIdent(anyString())).willReturn(Optional.empty());
         given(nomGraphQLClient.getLedersResurser(any(), anyString())).willReturn(nomRessursLeder);
@@ -95,8 +99,7 @@ public class BrukertjenesteTest {
 
     @Test
     public void hentBrukerForRessursUtenLederForSetterStatusMedarbeider() throws Exception {
-        NomRessurs nomRessursLeder = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
-                List.of(), List.of(), List.of(NomSektor.NAV_STATLIG), List.of());
+        NomRessurs nomRessursLeder = lagNomRessurs(null, null, null, null);
 
         given(brukerrepository.findByIdent(anyString())).willReturn(Optional.empty());
         given(nomGraphQLClient.getLedersResurser(any(), anyString())).willReturn(nomRessursLeder);
@@ -165,33 +168,27 @@ public class BrukertjenesteTest {
 
     @Test
     public void hentLedersRessurserReturnererKoblingerOgLedereForOrganisasjoner() throws Exception {
-        NomRessurs nomRessursLeder = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
-                List.of(), List.of(), List.of(NomSektor.NAV_STATLIG), List.of());
+        NomRessurs nomRessursLeder = lagNomRessurs(ident, null, null, null);
+        NomRessurs ansatt1 = lagNomRessurs(null, null, null, List.of(lagNomLeder(true, nomRessursLeder)));
+        NomRessurs ansatt2 = lagNomRessurs(null, null, null, List.of(lagNomLeder(true, nomRessursLeder)));
 
-        NomRessurs ansatt1 = new NomRessurs("A111111", "Anders And", "Test@Testesen.no",
-                List.of(), List.of(), List.of(NomSektor.NAV_STATLIG), List.of(new NomLeder(true, nomRessursLeder)));
-
-        NomRessurs ansatt2 = new NomRessurs("B222222", "Bjornar Bjorn", "Test@Testesen.no",
-                List.of(), List.of(), List.of(NomSektor.NAV_STATLIG), List.of(new NomLeder(true, nomRessursLeder)));
-
-        NomRessurs nomRessursLederMedAnsatte = nyRessurs(nomRessursLeder);
-        nomRessursLederMedAnsatte.setLederFor(List.of(
-            new NomLederFor(
-                new NomOrgEnhet("aa000a", "Test Org", "", List.of(new NomKobling(ansatt1)), List.of(
-                    new NomOrganisering(
-                        new NomOrgEnhet("aa000a", "Test Org", "", List.of(), List.of(), List.of(new NomLeder(true, ansatt2)))
-                    )
-                ), List.of())
-            )
-        ));
+        NomRessurs nomRessursLederMedAnsatte = kopierRessurs(nomRessursLeder);
+        nomRessursLederMedAnsatte.setLederFor(
+            List.of(lagNomLederFor(
+                true,
+                List.of(lagNomKobling(ansatt1)),
+                List.of(lagNomOrganisering(lagNomLeder(true, ansatt2))),
+                null
+            ))
+        );
 
         Leder leder = Leder.builder()
-                .ident("A123456")
-                .navn("Test Testesen")
+                .ident(nomRessursLeder.getNavident())
+                .navn(nomRessursLeder.getVisningsnavn())
                 .build();
         Bruker bruker = Bruker.builder()
-                .ident("T123456")
-                .navn("Test Testesen")
+                .ident(nomRessursLeder.getNavident())
+                .navn(nomRessursLeder.getVisningsnavn())
                 .rolle(Rolle.LEDER)
                 .sistAksessert(new Date())
                 .representertLeder(leder)
@@ -211,33 +208,28 @@ public class BrukertjenesteTest {
 
     @Test
     public void hentLedersRessurserReturnererOverstyrteLedere() throws Exception {
-        NomRessurs nomRessursLeder = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
-                List.of(), List.of(), List.of(NomSektor.NAV_STATLIG), List.of());
+        NomRessurs nomRessursLeder = lagNomRessurs(ident, null, null, null);
+        NomRessurs ansatt1 = lagNomRessurs(null, null, null, List.of(lagNomLeder(true, nomRessursLeder)));
+        NomRessurs ansatt2 = lagNomRessurs(null, null, null, List.of(lagNomLeder(true, nomRessursLeder)));
 
-        NomRessurs ansatt1 = new NomRessurs("A111111", "Anders And", "Test@Testesen.no",
-                List.of(), List.of(), List.of(NomSektor.NAV_STATLIG), List.of(new NomLeder(true, nomRessursLeder)));
-
-        NomRessurs ansatt2 = new NomRessurs("B222222", "Bjornar Bjorn", "Test@Testesen.no",
-                List.of(), List.of(), List.of(NomSektor.NAV_STATLIG), List.of(new NomLeder(true, nomRessursLeder)));
-
-        NomRessurs nomRessursLederMedAnsatte = nyRessurs(nomRessursLeder);
-        nomRessursLederMedAnsatte.setLederFor(List.of(
-                new NomLederFor(
-                        new NomOrgEnhet("aa000a", "Test Org", "", List.of(new NomKobling(ansatt1)), List.of(
-                                new NomOrganisering(
-                                        new NomOrgEnhet("aa000a", "Test Org", "", List.of(), List.of(), List.of(new NomLeder(true, ansatt2)))
-                                )
-                        ), List.of())
-                )
-        ));
+        NomRessurs nomRessursLederMedAnsatte = kopierRessurs(nomRessursLeder);
+        nomRessursLederMedAnsatte.setLederFor(
+            List.of(lagNomLederFor(
+                false,
+                List.of(lagNomKobling(ansatt1)),
+                List.of(lagNomOrganisering(lagNomLeder(true, ansatt2))),
+                null
+            ))
+        );
+        System.out.println(nomRessursLederMedAnsatte.getVisningsnavn() + ": " + nomRessursLederMedAnsatte.getLederFor().get(0).getOrgEnhet().getKoblinger().size());
 
         Leder leder = Leder.builder()
-                .ident("A123456")
-                .navn("Test Testesen")
+                .ident(nomRessursLeder.getNavident())
+                .navn(nomRessursLeder.getVisningsnavn())
                 .build();
         Bruker bruker = Bruker.builder()
-                .ident("T123456")
-                .navn("Test Testesen")
+                .ident(nomRessursLeder.getNavident())
+                .navn(nomRessursLeder.getVisningsnavn())
                 .rolle(Rolle.LEDER)
                 .sistAksessert(new Date())
                 .representertLeder(leder)
@@ -247,7 +239,7 @@ public class BrukertjenesteTest {
                 .ansattIdent(ansatt1.getNavident())
                 .ansattNavn(ansatt1.getVisningsnavn())
                 .fra(new Date())
-                .overstyrendeLeder(Leder.builder().erDirektoratsleder(true).ident("S666666").navn("Sina Slange").build())
+                .overstyrendeLeder(Leder.builder().erDirektoratsleder(true).ident("O123456").navn("Overstyrende Leder").build())
                 .build();
 
         given(brukerrepository.findByIdent(anyString())).willReturn(Optional.of(bruker));
@@ -262,16 +254,9 @@ public class BrukertjenesteTest {
                 //.andExpect(jsonPath("$[*].stillingsavtaler[*].stillingsavtale").value(containsInAnyOrder(List.of("DR"), List.of("DR", "MR"))));
     }
 
-
-    private NomRessurs nyRessurs(NomRessurs ressurs) {
-        return new NomRessurs(ressurs.getNavident(), ressurs.getVisningsnavn(), ressurs.getEpost(), ressurs.getTelefon(),
-                ressurs.getLederFor(), ressurs.getSektor(), ressurs.getLedere());
-    }
-
     @Configuration
     @ComponentScan(basePackageClasses = {Brukertjeneste.class})
     public static class TestConf {
     }
 
- */
 }

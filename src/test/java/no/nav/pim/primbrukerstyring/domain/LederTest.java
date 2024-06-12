@@ -8,6 +8,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
+import static no.nav.pim.primbrukerstyring.utils.NomUtils.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
@@ -17,18 +18,13 @@ public class LederTest {
 
     @Test
     public void hentLederFraNomSetterRiktigTelefonnummer() {
-        NomTelefon privat = new NomTelefon("11111111", NomTelefonType.PRIVAT_TELEFON);
-        NomTelefon tjeneste = new NomTelefon("22222222", NomTelefonType.NAV_TJENESTE_TELEFON);
-        NomTelefon kontor = new NomTelefon("33333333", NomTelefonType.NAV_KONTOR_TELEFON);
+        NomTelefon privat = lagNomTelefon(NomTelefonType.PRIVAT_TELEFON);
+        NomTelefon tjeneste = lagNomTelefon(NomTelefonType.NAV_TJENESTE_TELEFON);
+        NomTelefon kontor = lagNomTelefon(NomTelefonType.NAV_KONTOR_TELEFON);
 
-        NomRessurs nomRessursAlleTelefoner = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
-                List.of(privat, tjeneste, kontor), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", "", List.of(), List.of(), List.of()))), List.of(NomSektor.NAV_STATLIG), List.of());
-
-        NomRessurs nomRessursUtenTjenesteTelefon = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
-                List.of(privat, kontor), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", "", List.of(), List.of(), List.of()))), List.of(NomSektor.NAV_STATLIG), List.of());
-
-        NomRessurs nomRessursBarePrivatTelefon = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
-                List.of(privat), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", "", List.of(), List.of(), List.of()))), List.of(NomSektor.NAV_STATLIG), List.of());
+        NomRessurs nomRessursAlleTelefoner = lagNomRessurs(null, List.of(privat, tjeneste, kontor), null, null);
+        NomRessurs nomRessursUtenTjenesteTelefon = lagNomRessurs(null, List.of(privat, kontor), null, null);
+        NomRessurs nomRessursBarePrivatTelefon = lagNomRessurs(null, List.of(privat), null, null);
 
         assertThat(Leder.fraNomRessurs(nomRessursAlleTelefoner).getTlf(), is(tjeneste.getNummer()));
         assertThat(Leder.fraNomRessurs(nomRessursUtenTjenesteTelefon).getTlf(), is(kontor.getNummer()));
@@ -37,11 +33,8 @@ public class LederTest {
 
     @Test
     public void hentLederFraNomSetterDirektoratslederRiktig() {
-        NomRessurs nomRessursDirektoratleder = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
-                List.of(), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", "DIREKTORAT", List.of(), List.of(), List.of()))), List.of(NomSektor.NAV_STATLIG), List.of());
-
-        NomRessurs nomRessursIkkeDirektoratleder = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
-                List.of(), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", "DIR", List.of(), List.of(), List.of()))), List.of(NomSektor.NAV_STATLIG), List.of());
+        NomRessurs nomRessursDirektoratleder = lagNomRessurs(null, null, List.of(lagNomLederFor(true)), null);
+        NomRessurs nomRessursIkkeDirektoratleder = lagNomRessurs(null, null, List.of(lagNomLederFor(false)), null);
 
         assertTrue(Leder.fraNomRessurs(nomRessursDirektoratleder).getErDirektoratsleder());
         assertFalse(Leder.fraNomRessurs(nomRessursIkkeDirektoratleder).getErDirektoratsleder());

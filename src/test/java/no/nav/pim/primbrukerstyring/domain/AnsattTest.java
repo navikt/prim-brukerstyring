@@ -10,23 +10,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import static no.nav.pim.primbrukerstyring.utils.NomUtils.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 public class AnsattTest {
-
     @Test
     public void hentAnsattFraNomSetterOverstyrtLederForst() {
-        NomRessurs nomLederRessurs = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
-                List.of(), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", "", List.of(), List.of(), List.of()))), List.of(NomSektor.NAV_STATLIG), List.of());
-
-        NomRessurs nomAnsattRessurs = new NomRessurs("T123456", "Test Testesen", "Test@Testesen.no",
-                List.of(), List.of(), List.of(NomSektor.NAV_STATLIG), List.of(new NomLeder(true, nomLederRessurs)));
-
-        NomRessurs nomOverstyrtLederRessurs = new NomRessurs("O123456", "Overstyrt Leder", "Overstyrt@Leder.no",
-                List.of(), List.of(new NomLederFor(new NomOrgEnhet("aa000a", "Test Org", "", List.of(), List.of(), List.of()))), List.of(NomSektor.NAV_STATLIG), List.of());
+        NomRessurs nomLederRessurs = lagNomRessurs(null, null, List.of(lagNomLederFor(false)), null);
+        NomRessurs nomAnsattRessurs = lagNomRessurs(null, null, null, List.of(lagNomLeder(true, nomLederRessurs)));
+        NomRessurs nomOverstyrtLederRessurs = lagNomRessurs(null, null, List.of(lagNomLederFor(false)), null);
 
 
         AnsattStillingsavtale ansattStillingsavtale = AnsattStillingsavtale.fraOverstyrendeLeder(
