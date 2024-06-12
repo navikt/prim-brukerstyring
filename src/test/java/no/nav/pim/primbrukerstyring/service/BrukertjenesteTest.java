@@ -6,7 +6,7 @@ import no.nav.pim.primbrukerstyring.domain.Bruker;
 import no.nav.pim.primbrukerstyring.domain.Leder;
 import no.nav.pim.primbrukerstyring.domain.OverstyrendeLeder;
 import no.nav.pim.primbrukerstyring.domain.Rolle;
-import no.nav.pim.primbrukerstyring.nom.NomGraphQLClientInterface;
+import no.nav.pim.primbrukerstyring.nom.NomGraphQLClient;
 import no.nav.pim.primbrukerstyring.nom.domain.*;
 import no.nav.pim.primbrukerstyring.repository.BrukerRepository;
 import no.nav.pim.primbrukerstyring.repository.DriftOgVedlikeholdRepository;
@@ -67,7 +67,7 @@ public class BrukertjenesteTest {
     OIDCUtil oidcUtil;
 
     @MockBean
-    NomGraphQLClientInterface nomGraphQLClient;
+    NomGraphQLClient nomGraphQLClient;
 
     @Before
     public void setUp() {

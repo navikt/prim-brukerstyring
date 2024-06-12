@@ -3,11 +3,13 @@ package no.nav.pim.primbrukerstyring;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
 
 
 @SpringBootApplication
+@EnableWebMvc
 @ComponentScan(excludeFilters = {@ComponentScan.Filter(type = ASSIGNABLE_TYPE, value = {PrimBrukerstyringApplication.class})})
 public class PrimBrukerstyringApplicationLocal {
 
