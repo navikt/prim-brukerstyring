@@ -1,5 +1,6 @@
 package no.nav.pim.primbrukerstyring;
 
+import no.nav.pim.primbrukerstyring.config.BrukerstyringConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
@@ -10,7 +11,7 @@ import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
 
 @SpringBootApplication
 @EnableWebMvc
-@ComponentScan(excludeFilters = {@ComponentScan.Filter(type = ASSIGNABLE_TYPE, value = {PrimBrukerstyringApplication.class})})
+@ComponentScan(excludeFilters = {@ComponentScan.Filter(type = ASSIGNABLE_TYPE, value = {PrimBrukerstyringApplication.class, BrukerstyringConfig.class})})
 public class PrimBrukerstyringApplicationLocal {
 
 	public static void main(String[] args) {
