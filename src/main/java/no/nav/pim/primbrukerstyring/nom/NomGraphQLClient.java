@@ -17,7 +17,7 @@ import java.util.List;
 
 
 @Component
-public class NomGraphQLClient {
+public class NomGraphQLClient implements NomGraphQLClientInterface {
 
     @Value("${nom.url}")
     String url;
