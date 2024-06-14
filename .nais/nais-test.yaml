@@ -10,6 +10,11 @@ metadata:
   labels:
     team: pim
 spec:
+  env:
+    - name: NOM_URL
+      value: http://nom-api.nom.svc.cluster.local/graphql
+    - name: NOM_SCOPE
+      value: api://dev-gcp.nom.nom-api/.default
   gcp:
     sqlInstances:
       - name: prim-brukerstyring-test
@@ -69,4 +74,18 @@ spec:
           cluster: dev-gcp
         - application: pim-bemanning-test
           namespace: pim
+          cluster: dev-gcp
+        - application: bemanningsbehov-test
+          namespace: pim
+          cluster: dev-gcp
+        - application: nedbemanning-test
+          namespace: pim
+          cluster: dev-gcp
+        - application: ferdig-utprovd-test
+          namespace: pim
+          cluster: dev-gcp
+    outbound:
+      rules:
+        - application: nom-api
+          namespace: nom
           cluster: dev-gcp

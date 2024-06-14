@@ -3,7 +3,7 @@ package no.nav.pim.primbrukerstyring.service;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.validation.Valid;
 import no.nav.pim.primbrukerstyring.domain.DriftOgVedlikehold;
-import no.nav.pim.primbrukerstyring.repository.DriftOgVedlikeholdrepository;
+import no.nav.pim.primbrukerstyring.repository.DriftOgVedlikeholdRepository;
 import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +24,7 @@ public class Admintjeneste implements AdmintjenesteInterface {
     MeterRegistry metricsRegistry;
 
     @Autowired
-    DriftOgVedlikeholdrepository driftogvedlikeholdrepository;
+    DriftOgVedlikeholdRepository driftogvedlikeholdrepository;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
