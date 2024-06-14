@@ -20,6 +20,7 @@ import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,6 +59,9 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     @Autowired
     NomGraphQLClient nomGraphQLClient;
 
+    @Value("${representertLeder.synkronisering.intervall:8}")
+    private int representertLederSynkroniseringsIntervall;
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
     @GetMapping()
@@ -85,7 +89,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             Bruker oppdatertBruker = bruker.get();
             if (oppdatertBruker.getRolle() != Rolle.LEDER) {
                 if (oppdatertBruker.getSistAksessert().toInstant()
-                        .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusHours(1).toInstant())) {
+                        .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusHours(representertLederSynkroniseringsIntervall).toInstant())) {
                     oppdatertBruker.setRepresentertLeder(null);
                 }
                 oppdatertBruker.setSistAksessert(new Date());
