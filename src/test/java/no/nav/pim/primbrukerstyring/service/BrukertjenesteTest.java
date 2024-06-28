@@ -93,8 +93,7 @@ public class BrukertjenesteTest {
         mvc.perform(get("/bruker")
                         .header("Authorization", "Bearer token"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.rolle").value(Rolle.LEDER.toString()))
-                .andExpect(jsonPath("$.representertLeder.ident").value(nomRessursLeder.getNavident()));
+                .andExpect(jsonPath("$.rolle").value(Rolle.LEDER.toString()));
     }
 
     @Test
@@ -110,8 +109,7 @@ public class BrukertjenesteTest {
         mvc.perform(get("/bruker")
                         .header("Authorization", "Bearer token"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.rolle").value(Rolle.MEDARBEIDER.toString()))
-                .andExpect(jsonPath("$.representertLeder").isEmpty());
+                .andExpect(jsonPath("$.rolle").value(Rolle.MEDARBEIDER.toString()));
     }
 
     @Test
@@ -125,8 +123,8 @@ public class BrukertjenesteTest {
                 .navn("Test Testesen")
                 .rolle(Rolle.HR_MEDARBEIDER)
                 .tilganger(List.of())
+                .ledere(List.of(leder))
                 .sistAksessert(new Date())
-                .representertLeder(leder)
                 .build();
 
         given(brukerrepository.findByIdent(anyString())).willReturn(Optional.of(bruker));
@@ -136,34 +134,7 @@ public class BrukertjenesteTest {
         mvc.perform(get("/bruker")
                         .header("Authorization", "Bearer token"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.rolle").value(Rolle.HR_MEDARBEIDER.toString()))
-                .andExpect(jsonPath("$.representertLeder.ident").value(leder.getIdent()));
-    }
-
-    @Test
-    public void hentBrukerForRessursMedHRMedarbeiderMedUtgattLederReturnererNull() throws Exception {
-        Leder leder = Leder.builder()
-                .ident("A123456")
-                .navn("Test Testesen")
-                .build();
-        Bruker bruker = Bruker.builder()
-                .ident("T123456")
-                .navn("Test Testesen")
-                .rolle(Rolle.HR_MEDARBEIDER)
-                .tilganger(List.of())
-                .sistAksessert(Date.from(new Date().toInstant().minusSeconds(2 * 3600)))
-                .representertLeder(leder)
-                .build();
-
-        given(brukerrepository.findByIdent(anyString())).willReturn(Optional.of(bruker));
-        given(brukerrepository.save(any())).willAnswer(i -> i.getArguments()[0]);
-
-
-        mvc.perform(get("/bruker")
-                        .header("Authorization", "Bearer token"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.rolle").value(Rolle.HR_MEDARBEIDER.toString()))
-                .andExpect(jsonPath("$.representertLeder").isEmpty());
+                .andExpect(jsonPath("$.rolle").value(Rolle.HR_MEDARBEIDER.toString()));
     }
 
     @Test
@@ -190,16 +161,17 @@ public class BrukertjenesteTest {
                 .ident(nomRessursLeder.getNavident())
                 .navn(nomRessursLeder.getVisningsnavn())
                 .rolle(Rolle.LEDER)
+                .ledere(List.of(leder))
                 .sistAksessert(new Date())
-                .representertLeder(leder)
                 .build();
 
         given(brukerrepository.findByIdent(anyString())).willReturn(Optional.of(bruker));
+        given(lederrepository.findByIdent(anyString())).willReturn(Optional.of(leder));
         given(nomGraphQLClient.getLedersResurser(anyString(), anyString())).willReturn(nomRessursLederMedAnsatte);
         given(overstyrendelederrepository.findByAnsattIdentAndTilIsNull(anyString())).willReturn(Optional.empty());
         given(overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(anyString())).willReturn(List.of());
 
-        mvc.perform(get("/bruker/ressurser")
+        mvc.perform(get("/bruker/leder/" + bruker.getIdent() + "/ressurser")
                         .header("Authorization", "Bearer token"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
@@ -221,7 +193,6 @@ public class BrukertjenesteTest {
                 null
             ))
         );
-        System.out.println(nomRessursLederMedAnsatte.getVisningsnavn() + ": " + nomRessursLederMedAnsatte.getLederFor().get(0).getOrgEnhet().getKoblinger().size());
 
         Leder leder = Leder.builder()
                 .ident(nomRessursLeder.getNavident())
@@ -232,7 +203,7 @@ public class BrukertjenesteTest {
                 .navn(nomRessursLeder.getVisningsnavn())
                 .rolle(Rolle.LEDER)
                 .sistAksessert(new Date())
-                .representertLeder(leder)
+                .ledere(List.of(leder))
                 .build();
 
         OverstyrendeLeder overstyrendeLeder = OverstyrendeLeder.builder()
@@ -243,11 +214,12 @@ public class BrukertjenesteTest {
                 .build();
 
         given(brukerrepository.findByIdent(anyString())).willReturn(Optional.of(bruker));
+        given(lederrepository.findByIdent(anyString())).willReturn(Optional.of(leder));
         given(nomGraphQLClient.getLedersResurser(anyString(), anyString())).willReturn(nomRessursLederMedAnsatte);
         given(overstyrendelederrepository.findByAnsattIdentAndTilIsNull(overstyrendeLeder.getAnsattIdent())).willReturn(Optional.of(overstyrendeLeder));
         given(overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(anyString())).willReturn(List.of());
 
-        mvc.perform(get("/bruker/ressurser")
+        mvc.perform(get("/bruker/leder/" + bruker.getIdent() + "/ressurser")
                         .header("Authorization", "Bearer token"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2));

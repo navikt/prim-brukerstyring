@@ -187,9 +187,10 @@ public class Brukertjeneste implements BrukertjenesteInterface {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
-    @GetMapping(path = "leder/{lederIdent}/ressurser")
+    @GetMapping(path = "/leder/{lederIdent}/ressurser")
     public List<Ansatt> hentLedersRessurser(@RequestHeader(value = "Authorization") String authorization, @PathVariable String lederIdent) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentLedersRessurser").increment();
+        System.out.println("KOMMER HIT");
         Leder validertLeder = validerLeder(authorization, lederIdent);
         if (validertLeder != null) {
             NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, lederIdent);
