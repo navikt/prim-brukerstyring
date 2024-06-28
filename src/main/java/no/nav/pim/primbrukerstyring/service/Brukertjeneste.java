@@ -73,7 +73,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                 if (ressurs.getLederFor().size() > 0 || overstyrteAnsatte.size() > 0) {
                     Optional<Leder> finnesLeder = lederrepository.findByIdent(ressurs.getNavident());
                     Leder leder = finnesLeder.orElseGet(() -> Leder.fraNomRessurs(ressurs));
-                    brukerrepository.save(Bruker.builder().ident(brukerIdent).navn(ressurs.getVisningsnavn()).sistAksessert(new Date()).representertLeder(leder).rolle(Rolle.LEDER).build());
+                    brukerrepository.save(Bruker.builder().ident(brukerIdent).navn(ressurs.getVisningsnavn()).sistAksessert(new Date()).ledere(List.of(leder)).rolle(Rolle.LEDER).build());
                     return new BrukerDto(Rolle.LEDER, leder);
                 } else {
                     return new BrukerDto(Rolle.MEDARBEIDER, null);
@@ -82,16 +82,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             log.error("###Kunne ikke hente bruker i NOM: {}", brukerIdent);
             return new BrukerDto(Rolle.UKJENT, null);
         } else {
-            Bruker oppdatertBruker = bruker.get();
-            if (oppdatertBruker.getRolle() != Rolle.LEDER) {
-                if (oppdatertBruker.getSistAksessert().toInstant()
-                        .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusHours(1).toInstant())) {
-                    oppdatertBruker.setRepresentertLeder(null);
-                }
-                oppdatertBruker.setSistAksessert(new Date());
-                brukerrepository.save(oppdatertBruker);
-            }
-            return new BrukerDto(oppdatertBruker.getRolle(), oppdatertBruker.getRepresentertLeder());
+            return new BrukerDto(bruker.get().getRolle(), null);
         }
     }
 
@@ -164,52 +155,6 @@ public class Brukertjeneste implements BrukertjenesteInterface {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
-    @GetMapping(path = "/ressurser")
-    public List<Ansatt> hentLedersRessurser(@RequestHeader(value = "Authorization") String authorization) {
-        metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentLedersRessurser").increment();
-        String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
-        Optional<Bruker> bruker = brukerrepository.findByIdent(brukerIdent);
-        boolean erHR = bruker.isPresent() && List.of(Rolle.HR_MEDARBEIDER, Rolle.HR_MEDARBEIDER_BEMANNING).contains(bruker.get().getRolle());
-        String lederIdent;
-        if (erHR) {
-            lederIdent = bruker.get().getRepresentertLeder().getIdent();
-        } else {
-            lederIdent = brukerIdent;
-        }
-        if (!Objects.isNull(lederIdent)) {
-            NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, lederIdent);
-            System.out.println(ledersRessurser.getLederFor().size());
-            List<Ansatt> ansatte = ledersRessurser.getLederFor().stream()
-                .flatMap((lederFor) -> {
-                    Stream<NomRessurs> koblinger = lederFor.getOrgEnhet().getKoblinger().stream().map((NomKobling::getRessurs));
-                    Stream<NomRessurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
-                            .flatMap(org -> org.getOrgEnhet().getLeder().stream().map(NomLeder::getRessurs));
-                    return Stream.concat(koblinger, organiseringer);
-                })
-                .filter(ressurs -> !ressurs.getNavident().equals(lederIdent)
-                            && ressurs.getLedere().stream().anyMatch(leder -> leder.getRessurs().getNavident().equals(lederIdent))
-                )
-                .distinct().map((ressurs -> {
-                    Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsNull(ressurs.getNavident());
-                    AnsattStillingsavtale ansattStillingsavtale = null;
-                    if (overstyrendeLeder.isPresent()) {
-                        ansattStillingsavtale = AnsattStillingsavtale.fraOverstyrendeLeder(overstyrendeLeder.get());
-                    }
-                    Ansatt ansatt = Ansatt.fraNomRessurs(ressurs, ansattStillingsavtale);
-                    log.info("Oppretter ressurs {} med {} stillingsavtaler", ansatt.getIdent(), ansatt.getStillingsavtaler().size());
-                    return ansatt;
-                })).toList();
-            Stream<Ansatt> overstyrteAnsatte = overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(lederIdent).stream()
-                    .filter(overstyrtLeder -> ansatte.stream().noneMatch(ansatt -> ansatt.getIdent().equals(overstyrtLeder.getAnsattIdent())))
-                    .map(overstyrtLeder ->  ansatttjeneste.hentAnsatt(authorization, overstyrtLeder.getAnsattIdent()));
-            return Stream.concat(ansatte.stream(), overstyrteAnsatte).toList();
-        } else {
-            throw new AuthorizationException("Representert leder er ikke satt for bruker med ident " + brukerIdent);
-        }
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
     @GetMapping(path = "/ledere")
     public List<Leder> hentLedere(@RequestHeader(value = "Authorization") String authorization) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentLedere").increment();
@@ -217,45 +162,23 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         Optional<Bruker> bruker = brukerrepository.findByIdent(brukerIdent);
         boolean erHR = bruker.isPresent() && List.of(Rolle.HR_MEDARBEIDER, Rolle.HR_MEDARBEIDER_BEMANNING).contains(bruker.get().getRolle());
         if (erHR) {
-            List<NomOrgEnhet> orgenheter = bruker.get().getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
-            List<Leder> ledere = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).distinct().map(Leder::fraNomRessurs).sorted().toList();
-            Optional<Leder> lederSelv = lederrepository.findByIdent(brukerIdent);
-            if (lederSelv.isPresent() && ledere.stream().noneMatch(leder -> leder.getIdent().equals(lederSelv.get().getIdent()))) {
-                List<Leder> ledereMedLederSelv = new ArrayList<>(ledere);
-                ledereMedLederSelv.add(lederSelv.get());
-                return ledereMedLederSelv;
-            }
-            return ledere;
-
-        } else {
-            throw new AuthorizationException("Bruker med ident "+ brukerIdent + " er ikke HR ansatt");
-        }
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
-    @PutMapping(path = "/leder", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Leder settRepresentertLeder(@RequestHeader(value = "Authorization") String authorization, @RequestBody Leder representertLeder) {
-        metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "settRepresentertLeder").increment();
-        String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
-        Optional<Bruker> bruker = brukerrepository.findByIdent(brukerIdent);
-        boolean erHR = bruker.isPresent() && List.of(Rolle.HR_MEDARBEIDER, Rolle.HR_MEDARBEIDER_BEMANNING).contains(bruker.get().getRolle());
-        if (bruker.isPresent() && erHR) {
-            List<NomOrgEnhet> orgenheter = bruker.get().getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
-            Optional<NomRessurs> lederRessurs = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).filter((ressurs) -> ressurs.getNavident().equals(representertLeder.getIdent())).findFirst();
-            boolean erLederSelv = bruker.get().getIdent().equals(representertLeder.getIdent());
-            if (lederRessurs.isPresent() || erLederSelv) {
-                Optional<Leder> eksisterendeLeder = lederrepository.findByIdent(representertLeder.getIdent());
-                if (erLederSelv && eksisterendeLeder.isEmpty()) throw new AuthorizationException("Bruker med ident " + brukerIdent + " er ikke mulig å velge som leder.");
-                Leder leder = eksisterendeLeder.orElseGet(() -> lederrepository.save(Leder.fraNomRessurs(lederRessurs.get())));
-
-                Bruker brukerMedLeder = bruker.get();
-                brukerMedLeder.setSistAksessert(new Date());
-                brukerMedLeder.setRepresentertLeder(leder);
-                brukerrepository.save(brukerMedLeder);
-                return leder;
+            Bruker hrBruker = bruker.get();
+            if (hrBruker.getSistAksessert().toInstant()
+                    .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusHours(1).toInstant())) {
+                List<NomOrgEnhet> orgenheter = bruker.get().getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
+                List<Leder> ledere = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).distinct().map(Leder::fraNomRessurs).sorted().toList();
+                hrBruker.setLedere(ledere);
+                hrBruker.setSistAksessert(new Date());
+                brukerrepository.save(hrBruker);
+                Optional<Leder> lederSelv = lederrepository.findByIdent(brukerIdent);
+                if (lederSelv.isPresent() && ledere.stream().noneMatch(leder -> leder.getIdent().equals(lederSelv.get().getIdent()))) {
+                    List<Leder> ledereMedLederSelv = new ArrayList<>(ledere);
+                    ledereMedLederSelv.add(lederSelv.get());
+                    return ledereMedLederSelv;
+                }
+                return ledere;
             } else {
-                throw new AuthorizationException("Bruker med ident " + brukerIdent + " har ikke tilgang til leder " + representertLeder.getIdent());
+                return hrBruker.getLedere();
             }
         } else {
             throw new AuthorizationException("Bruker med ident "+ brukerIdent + " er ikke HR ansatt");
@@ -264,18 +187,51 @@ public class Brukertjeneste implements BrukertjenesteInterface {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
-    @DeleteMapping(path = "/leder")
-    public void fjernRepresentertLeder(@RequestHeader(value = "Authorization") String authorization) {
-        metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "fjernRepresentertLeder").increment();
+    @GetMapping(path = "leder/{lederIdent}/ressurser")
+    public List<Ansatt> hentLedersRessurser(@RequestHeader(value = "Authorization") String authorization, @PathVariable String lederIdent) {
+        metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentLedersRessurser").increment();
+        Leder validertLeder = validerLeder(authorization, lederIdent);
+        if (validertLeder != null) {
+            NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, lederIdent);
+            List<Ansatt> ansatte = ledersRessurser.getLederFor().stream()
+                    .flatMap((lederFor) -> {
+                        Stream<NomRessurs> koblinger = lederFor.getOrgEnhet().getKoblinger().stream().map((NomKobling::getRessurs));
+                        Stream<NomRessurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
+                                .flatMap(org -> org.getOrgEnhet().getLeder().stream().map(NomLeder::getRessurs));
+                        return Stream.concat(koblinger, organiseringer);
+                    })
+                    .filter(ressurs -> !ressurs.getNavident().equals(lederIdent)
+                            && ressurs.getLedere().stream().anyMatch(leder -> leder.getRessurs().getNavident().equals(lederIdent))
+                    )
+                    .distinct().map((ressurs -> {
+                        Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsNull(ressurs.getNavident());
+                        AnsattStillingsavtale ansattStillingsavtale = null;
+                        if (overstyrendeLeder.isPresent()) {
+                            ansattStillingsavtale = AnsattStillingsavtale.fraOverstyrendeLeder(overstyrendeLeder.get());
+                        }
+                        return Ansatt.fraNomRessurs(ressurs, ansattStillingsavtale);
+                    })).toList();
+            Stream<Ansatt> overstyrteAnsatte = overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(lederIdent).stream()
+                    .filter(overstyrtLeder -> ansatte.stream().noneMatch(ansatt -> ansatt.getIdent().equals(overstyrtLeder.getAnsattIdent())))
+                    .map(overstyrtLeder -> ansatttjeneste.hentAnsatt(authorization, overstyrtLeder.getAnsattIdent()));
+            return Stream.concat(ansatte.stream(), overstyrteAnsatte).toList();
+        } else {
+            throw new NotFoundException("Leder med ident " + lederIdent + " finnes ikke i PRIM.");
+        }
+    }
+
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
+    @PutMapping(path = "/leder/{lederIdent}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Leder validerLeder(@RequestHeader(value = "Authorization") String authorization, @PathVariable String lederIdent) {
+        metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "validerLeder").increment();
         String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
         Optional<Bruker> bruker = brukerrepository.findByIdent(brukerIdent);
-        if (bruker.isPresent()) {
-            Bruker brukerUtenLeder = bruker.get();
-            brukerUtenLeder.setRepresentertLeder(null);
-            brukerUtenLeder.setSistAksessert(new Date());
-            brukerrepository.save(brukerUtenLeder);
+        if (bruker.isPresent() && bruker.get().getLedere().stream().anyMatch(leder -> leder.getIdent().equals(lederIdent))) {
+            return lederrepository.findByIdent(lederIdent).orElseThrow(() -> new NotFoundException("Leder med ident " + lederIdent + " finnes ikke i PRIM."));
         } else {
-            throw new NotFoundException("Kunne ikke finne bruker " + brukerIdent + " i PRIM.");
+            throw new AuthorizationException("Bruker med ident " + brukerIdent + " har ikke tilgang til leder " + lederIdent);
         }
     }
 

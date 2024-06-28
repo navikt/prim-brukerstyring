@@ -21,11 +21,9 @@ public interface BrukertjenesteInterface {
 
     List<Bruker> hentAlleHRMedarbeidere(String authorization);
 
-    List<Ansatt> hentLedersRessurser(String authorization);
+    List<Ansatt> hentLedersRessurser(String authorization, String lederIdent);
 
     List<Leder> hentLedere(String authorization);
 
-    Leder settRepresentertLeder(String authorization, Leder representertLeder);
-
-    void fjernRepresentertLeder(String authorization);
+    Leder validerLeder(String authorization, String lederIdent);
 }
