@@ -167,16 +167,15 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                     .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusHours(1).toInstant())) {
                 List<NomOrgEnhet> orgenheter = bruker.get().getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
                 List<Leder> ledere = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).distinct().map(Leder::fraNomRessurs).sorted().toList();
-                hrBruker.setLedere(ledere);
-                hrBruker.setSistAksessert(new Date());
-                brukerrepository.save(hrBruker);
+                List<Leder> alleLedere = new ArrayList<>(ledere);
                 Optional<Leder> lederSelv = lederrepository.findByIdent(brukerIdent);
                 if (lederSelv.isPresent() && ledere.stream().noneMatch(leder -> leder.getIdent().equals(lederSelv.get().getIdent()))) {
-                    List<Leder> ledereMedLederSelv = new ArrayList<>(ledere);
-                    ledereMedLederSelv.add(lederSelv.get());
-                    return ledereMedLederSelv;
+                    alleLedere.add(lederSelv.get());
                 }
-                return ledere;
+                hrBruker.setLedere(alleLedere);
+                hrBruker.setSistAksessert(new Date());
+                brukerrepository.save(hrBruker);
+                return alleLedere;
             } else {
                 return hrBruker.getLedere();
             }
