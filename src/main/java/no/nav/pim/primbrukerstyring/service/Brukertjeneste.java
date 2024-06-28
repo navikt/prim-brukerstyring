@@ -174,6 +174,11 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                 }
                 hrBruker.setLedere(alleLedere);
                 hrBruker.setSistAksessert(new Date());
+                System.out.println("HR BRUKER: " + hrBruker.getIdent());
+                System.out.println("Ledere : " + hrBruker.getLedere().size());
+                System.out.println("Rolle: " + hrBruker.getRolle());
+                System.out.println("Tilganger: " + hrBruker.getTilganger().size());
+                System.out.println("Sist aksessert: " + hrBruker.getSistAksessert().toString());
                 brukerrepository.save(hrBruker);
                 return alleLedere;
             } else {
