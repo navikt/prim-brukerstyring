@@ -74,6 +74,9 @@ public class Leder implements Comparable<Leder> {
     @NotNull
     private Boolean erDirektoratsleder;
 
+    @ManyToMany(mappedBy = "bruker")
+    private Set<Bruker> brukere = new HashSet<>();
+
     @ElementCollection
     @CollectionTable(name = "orgenhet")
     private Set<OrgEnhet> orgEnheter = new HashSet<>();

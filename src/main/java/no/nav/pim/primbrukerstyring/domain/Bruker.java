@@ -42,7 +42,7 @@ public class Bruker {
         name = "bruker_leder",
         joinColumns = @JoinColumn(name = "ident"),
         inverseJoinColumns = @JoinColumn(name = "leder_id"))
-    private List<Leder> ledere;
+    private Set<Leder> ledere;
 
     @Column(name = "sist_aksessert")
     @Temporal(TemporalType.TIMESTAMP)

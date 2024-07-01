@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
@@ -73,7 +74,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                 if (ressurs.getLederFor().size() > 0 || overstyrteAnsatte.size() > 0) {
                     Optional<Leder> finnesLeder = lederrepository.findByIdent(ressurs.getNavident());
                     Leder leder = finnesLeder.orElseGet(() -> Leder.fraNomRessurs(ressurs));
-                    brukerrepository.save(Bruker.builder().ident(brukerIdent).navn(ressurs.getVisningsnavn()).sistAksessert(new Date()).ledere(List.of(leder)).rolle(Rolle.LEDER).build());
+                    brukerrepository.save(Bruker.builder().ident(brukerIdent).navn(ressurs.getVisningsnavn()).sistAksessert(new Date()).ledere(Set.of(leder)).rolle(Rolle.LEDER).build());
                     return new BrukerDto(Rolle.LEDER, leder);
                 } else {
                     return new BrukerDto(Rolle.MEDARBEIDER, null);
@@ -166,20 +167,19 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             if (hrBruker.getSistAksessert().toInstant()
                     .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusHours(1).toInstant())) {
                 List<NomOrgEnhet> orgenheter = bruker.get().getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
-                List<Leder> ledere = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).distinct().map(Leder::fraNomRessurs).sorted().toList();
-                List<Leder> alleLedere = new ArrayList<>(ledere);
+                Set<Leder> ledere = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).distinct().map(Leder::fraNomRessurs).collect(Collectors.toSet());
                 Optional<Leder> lederSelv = lederrepository.findByIdent(brukerIdent);
                 if (lederSelv.isPresent() && ledere.stream().noneMatch(leder -> leder.getIdent().equals(lederSelv.get().getIdent()))) {
-                    alleLedere.add(lederSelv.get());
+                    ledere.add(lederSelv.get());
                 }
-                hrBruker.setLedere(alleLedere);
+                hrBruker.setLedere(ledere);
                 hrBruker.setSistAksessert(new Date());
                 System.out.println("HR BRUKER: " + hrBruker.getIdent());
                 System.out.println("Ledere : " + hrBruker.getLedere().size());
                 System.out.println("Rolle: " + hrBruker.getRolle());
                 System.out.println("Tilganger: " + hrBruker.getTilganger().size());
                 System.out.println("Sist aksessert: " + hrBruker.getSistAksessert().toString());
-                alleLedere.forEach(leder -> {
+                ledere.forEach(leder -> {
                     System.out.println("ident: " + leder.getIdent());
                     System.out.println("email: " + leder.getEmail());
                     System.out.println("navn: " + leder.getNavn());
@@ -188,9 +188,9 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                     System.out.println("erDirektoratsleder: " + leder.getErDirektoratsleder());
                 });
                 brukerrepository.save(hrBruker);
-                return alleLedere;
+                return ledere.stream().sorted().toList();
             } else {
-                return hrBruker.getLedere();
+                return hrBruker.getLedere().stream().sorted().toList();
             }
         } else {
             throw new AuthorizationException("Bruker med ident "+ brukerIdent + " er ikke HR ansatt");
