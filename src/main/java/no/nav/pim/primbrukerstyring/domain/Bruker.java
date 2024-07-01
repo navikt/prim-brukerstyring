@@ -37,7 +37,7 @@ public class Bruker {
     @Convert(converter = StringToListConverter.class)
     private List<String> tilganger;
 
-    @ManyToMany(fetch=FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(
         name = "bruker_leder",
         joinColumns = @JoinColumn(name = "ident"),
