@@ -178,7 +178,6 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                 brukerrepository.save(hrBruker);
                 return ledere.stream().map(LederDto::fraLeder).sorted().toList();
             } else {
-                System.out.println("LEDERE: " + hrBruker.getLedere().size());
                 return hrBruker.getLedere().stream().map(LederDto::fraLeder).sorted().toList();
             }
         } else {
