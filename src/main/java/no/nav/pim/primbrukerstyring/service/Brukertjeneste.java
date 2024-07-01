@@ -179,6 +179,14 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                 System.out.println("Rolle: " + hrBruker.getRolle());
                 System.out.println("Tilganger: " + hrBruker.getTilganger().size());
                 System.out.println("Sist aksessert: " + hrBruker.getSistAksessert().toString());
+                alleLedere.forEach(leder -> {
+                    System.out.println("ident: " + leder.getIdent());
+                    System.out.println("email: " + leder.getEmail());
+                    System.out.println("navn: " + leder.getNavn());
+                    System.out.println("telefonnummer: " + leder.getTlf());
+                    System.out.println("orgEnheter: " + leder.getOrgEnheter().size());
+                    System.out.println("erDirektoratsleder: " + leder.getErDirektoratsleder());
+                });
                 brukerrepository.save(hrBruker);
                 return alleLedere;
             } else {

@@ -39,13 +39,6 @@ public class Leder implements Comparable<Leder> {
                 .map(NomTelefon::getNummer)
                 .findFirst();
 
-        System.out.println("ident: " + ressurs.getNavident());
-        System.out.println("epost: " + ressurs.getEpost());
-        System.out.println("navn: " + ressurs.getVisningsnavn());
-        System.out.println("telefonnummer: " + telefonnummer.orElse(null));
-        System.out.println("orgEnheter: " + orgEnheter.size());
-        System.out.println("erDirektoratsleder: " + (ressurs.getLederFor() != null && ressurs.getLederFor().stream().anyMatch((nomLederFor -> nomLederFor.getOrgEnhet().getOrgEnhetsType() != null && nomLederFor.getOrgEnhet().getOrgEnhetsType().equals("DIREKTORAT")))));
-
         return Leder.builder()
                 .ident(ressurs.getNavident())
                 .navn(ressurs.getVisningsnavn())
