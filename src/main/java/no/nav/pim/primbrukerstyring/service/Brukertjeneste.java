@@ -15,6 +15,7 @@ import no.nav.pim.primbrukerstyring.repository.BrukerRepository;
 import no.nav.pim.primbrukerstyring.repository.LederRepository;
 import no.nav.pim.primbrukerstyring.repository.OverstyrendeLederRepository;
 import no.nav.pim.primbrukerstyring.service.dto.BrukerDto;
+import no.nav.pim.primbrukerstyring.service.dto.LederDto;
 import no.nav.pim.primbrukerstyring.util.OIDCUtil;
 import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
@@ -157,7 +158,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
     @GetMapping(path = "/ledere")
-    public List<Leder> hentLedere(@RequestHeader(value = "Authorization") String authorization) {
+    public List<LederDto> hentLedere(@RequestHeader(value = "Authorization") String authorization) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentLedere").increment();
         String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
         Optional<Bruker> bruker = brukerrepository.findByIdent(brukerIdent);
@@ -174,23 +175,10 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                 }
                 hrBruker.setLedere(ledere);
                 hrBruker.setSistAksessert(new Date());
-                System.out.println("HR BRUKER: " + hrBruker.getIdent());
-                System.out.println("Ledere : " + hrBruker.getLedere().size());
-                System.out.println("Rolle: " + hrBruker.getRolle());
-                System.out.println("Tilganger: " + hrBruker.getTilganger().size());
-                System.out.println("Sist aksessert: " + hrBruker.getSistAksessert().toString());
-                ledere.forEach(leder -> {
-                    System.out.println("ident: " + leder.getIdent());
-                    System.out.println("email: " + leder.getEmail());
-                    System.out.println("navn: " + leder.getNavn());
-                    System.out.println("telefonnummer: " + leder.getTlf());
-                    System.out.println("orgEnheter: " + leder.getOrgEnheter().size());
-                    System.out.println("erDirektoratsleder: " + leder.getErDirektoratsleder());
-                });
                 brukerrepository.save(hrBruker);
-                return ledere.stream().sorted().toList();
+                return ledere.stream().map(LederDto::fraLeder).sorted().toList();
             } else {
-                return hrBruker.getLedere().stream().sorted().toList();
+                return hrBruker.getLedere().stream().map(LederDto::fraLeder).sorted().toList();
             }
         } else {
             throw new AuthorizationException("Bruker med ident "+ brukerIdent + " er ikke HR ansatt");
@@ -202,7 +190,6 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     @GetMapping(path = "/leder/{lederIdent}/ressurser")
     public List<Ansatt> hentLedersRessurser(@RequestHeader(value = "Authorization") String authorization, @PathVariable String lederIdent) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentLedersRessurser").increment();
-        System.out.println("KOMMER HIT");
         Leder validertLeder = validerLeder(authorization, lederIdent);
         if (validertLeder != null) {
             NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, lederIdent);
