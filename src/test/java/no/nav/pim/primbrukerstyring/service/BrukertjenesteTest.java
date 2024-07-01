@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static no.nav.pim.primbrukerstyring.utils.NomUtils.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -123,7 +124,7 @@ public class BrukertjenesteTest {
                 .navn("Test Testesen")
                 .rolle(Rolle.HR_MEDARBEIDER)
                 .tilganger(List.of())
-                .ledere(List.of(leder))
+                .ledere(Set.of(leder))
                 .sistAksessert(new Date())
                 .build();
 
@@ -161,7 +162,7 @@ public class BrukertjenesteTest {
                 .ident(nomRessursLeder.getNavident())
                 .navn(nomRessursLeder.getVisningsnavn())
                 .rolle(Rolle.LEDER)
-                .ledere(List.of(leder))
+                .ledere(Set.of(leder))
                 .sistAksessert(new Date())
                 .build();
 
@@ -203,7 +204,7 @@ public class BrukertjenesteTest {
                 .navn(nomRessursLeder.getVisningsnavn())
                 .rolle(Rolle.LEDER)
                 .sistAksessert(new Date())
-                .ledere(List.of(leder))
+                .ledere(Set.of(leder))
                 .build();
 
         OverstyrendeLeder overstyrendeLeder = OverstyrendeLeder.builder()
