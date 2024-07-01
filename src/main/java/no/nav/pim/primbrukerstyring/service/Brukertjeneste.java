@@ -178,6 +178,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                 brukerrepository.save(hrBruker);
                 return ledere.stream().map(LederDto::fraLeder).sorted().toList();
             } else {
+                System.out.println("LEDERE: " + hrBruker.getLedere().size());
                 return hrBruker.getLedere().stream().map(LederDto::fraLeder).sorted().toList();
             }
         } else {
@@ -223,7 +224,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
-    @PutMapping(path = "/leder/{lederIdent}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/leder/{lederIdent}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Leder validerLeder(@RequestHeader(value = "Authorization") String authorization, @PathVariable String lederIdent) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "validerLeder").increment();
         String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
