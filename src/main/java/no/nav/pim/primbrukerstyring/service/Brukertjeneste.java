@@ -165,10 +165,17 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         boolean erHR = bruker.isPresent() && List.of(Rolle.HR_MEDARBEIDER, Rolle.HR_MEDARBEIDER_BEMANNING).contains(bruker.get().getRolle());
         if (erHR) {
             Bruker hrBruker = bruker.get();
-            if (hrBruker.getSistAksessert().toInstant()
-                    .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusHours(1).toInstant())) {
+            if (hrBruker.getLedere().size() == 0) {
                 List<NomOrgEnhet> orgenheter = bruker.get().getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
-                Set<Leder> ledere = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).distinct().map(Leder::fraNomRessurs).collect(Collectors.toSet());
+                Set<Leder> ledere = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).distinct().map(leder -> {
+                    Optional<Leder> eksisterendeLeder = lederrepository.findByIdent(leder.getNavident());
+                    Leder nyLeder = Leder.fraNomRessurs(leder);
+                    if (eksisterendeLeder.isPresent()) {
+                        return eksisterendeLeder.get().oppdaterMed(nyLeder);
+                    } else {
+                        return nyLeder;
+                    }
+                }).collect(Collectors.toSet());
                 Optional<Leder> lederSelv = lederrepository.findByIdent(brukerIdent);
                 if (lederSelv.isPresent() && ledere.stream().noneMatch(leder -> leder.getIdent().equals(lederSelv.get().getIdent()))) {
                     ledere.add(lederSelv.get());
@@ -178,7 +185,31 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                 brukerrepository.save(hrBruker);
                 return ledere.stream().map(LederDto::fraLeder).sorted().toList();
             } else {
-                return hrBruker.getLedere().stream().map(LederDto::fraLeder).sorted().toList();
+                if (hrBruker.getSistAksessert().toInstant()
+                        .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusHours(1).toInstant())) {
+                    Set<Leder> ledere = hrBruker.getLedere();
+                    List<NomOrgEnhet> orgenheter = bruker.get().getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
+                    List<Leder> oppdaterteLedere = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).distinct().map(Leder::fraNomRessurs).toList();
+                    List<Leder> utdaterteLedere = ledere.stream().filter(leder -> oppdaterteLedere.stream().noneMatch(oppdatertLeder -> oppdatertLeder.getIdent().equals(leder.getIdent()))).toList();
+                    utdaterteLedere.forEach(ledere::remove);
+                    oppdaterteLedere.forEach(oppdatertLeder -> {
+                        Optional<Leder> gammelLeder = ledere.stream().filter(leder -> oppdatertLeder.getIdent().equals(leder.getIdent())).findFirst();
+                        if (gammelLeder.isPresent()) {
+                            ledere.remove(gammelLeder.get());
+                            ledere.add(gammelLeder.get().oppdaterMed(oppdatertLeder));
+                        } else {
+                            ledere.add(oppdatertLeder);
+                        }
+                    });
+                    Optional<Leder> lederSelv = lederrepository.findByIdent(brukerIdent);
+                    if (lederSelv.isPresent() && ledere.stream().noneMatch(leder -> leder.getIdent().equals(lederSelv.get().getIdent()))) {
+                        NomRessurs ressurs = nomGraphQLClient.getRessurs(authorization, brukerIdent);
+                        ledere.add(lederSelv.get().oppdaterMed(Leder.fraNomRessurs(ressurs)));
+                    }
+                    return ledere.stream().map(LederDto::fraLeder).sorted().toList();
+                } else {
+                    return hrBruker.getLedere().stream().map(LederDto::fraLeder).sorted().toList();
+                }
             }
         } else {
             throw new AuthorizationException("Bruker med ident "+ brukerIdent + " er ikke HR ansatt");

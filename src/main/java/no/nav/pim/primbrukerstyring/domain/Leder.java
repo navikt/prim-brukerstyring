@@ -81,6 +81,15 @@ public class Leder {
     @CollectionTable(name = "orgenhet")
     private Set<OrgEnhet> orgEnheter = new HashSet<>();
 
+    public Leder oppdaterMed(Leder oppdatertLeder) {
+        this.navn = oppdatertLeder.getNavn();
+        this.email = oppdatertLeder.getEmail();
+        this.tlf = oppdatertLeder.getTlf();
+        this.erDirektoratsleder = oppdatertLeder.getErDirektoratsleder();
+        this.orgEnheter = oppdatertLeder.getOrgEnheter();
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
