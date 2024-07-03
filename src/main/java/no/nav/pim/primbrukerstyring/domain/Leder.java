@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class Leder implements Comparable<Leder> {
+public class Leder {
 
     static public Leder fraNomRessurs(NomRessurs ressurs) {
         Set<OrgEnhet> orgEnheter;
@@ -74,13 +74,20 @@ public class Leder implements Comparable<Leder> {
     @NotNull
     private Boolean erDirektoratsleder;
 
+    @ManyToMany(mappedBy = "ledere")
+    private Set<Bruker> brukere = new HashSet<>();
+
     @ElementCollection
     @CollectionTable(name = "orgenhet")
     private Set<OrgEnhet> orgEnheter = new HashSet<>();
 
-    @Override
-    public int compareTo(Leder other) {
-        return this.navn.compareTo(other.navn);
+    public Leder oppdaterMed(Leder oppdatertLeder) {
+        this.navn = oppdatertLeder.getNavn();
+        this.email = oppdatertLeder.getEmail();
+        this.tlf = oppdatertLeder.getTlf();
+        this.erDirektoratsleder = oppdatertLeder.getErDirektoratsleder();
+        this.orgEnheter = oppdatertLeder.getOrgEnheter();
+        return this;
     }
 
     @Override

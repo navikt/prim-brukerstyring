@@ -37,9 +37,12 @@ public class Bruker {
     @Convert(converter = StringToListConverter.class)
     private List<String> tilganger;
 
-    @ManyToOne(fetch=FetchType.EAGER, cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "representert_leder_id", referencedColumnName = "leder_id")
-    private Leder representertLeder;
+    @ManyToMany(cascade = { CascadeType.ALL })
+    @JoinTable(
+        name = "bruker_leder",
+        joinColumns = @JoinColumn(name = "ident"),
+        inverseJoinColumns = @JoinColumn(name = "leder_id"))
+    private Set<Leder> ledere = new HashSet<>();
 
     @Column(name = "sist_aksessert")
     @Temporal(TemporalType.TIMESTAMP)

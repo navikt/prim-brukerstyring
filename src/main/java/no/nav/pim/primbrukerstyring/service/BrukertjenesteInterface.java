@@ -4,6 +4,7 @@ import no.nav.pim.primbrukerstyring.domain.Ansatt;
 import no.nav.pim.primbrukerstyring.domain.Bruker;
 import no.nav.pim.primbrukerstyring.domain.Leder;
 import no.nav.pim.primbrukerstyring.service.dto.BrukerDto;
+import no.nav.pim.primbrukerstyring.service.dto.LederDto;
 
 import java.util.List;
 
@@ -21,11 +22,9 @@ public interface BrukertjenesteInterface {
 
     List<Bruker> hentAlleHRMedarbeidere(String authorization);
 
-    List<Ansatt> hentLedersRessurser(String authorization);
+    List<Ansatt> hentLedersRessurser(String authorization, String lederIdent);
 
-    List<Leder> hentLedere(String authorization);
+    List<LederDto> hentLedere(String authorization);
 
-    Leder settRepresentertLeder(String authorization, Leder representertLeder);
-
-    void fjernRepresentertLeder(String authorization);
+    Leder validerLeder(String authorization, String lederIdent);
 }
