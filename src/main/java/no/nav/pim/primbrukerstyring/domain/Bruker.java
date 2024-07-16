@@ -1,5 +1,6 @@
 package no.nav.pim.primbrukerstyring.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -37,6 +38,7 @@ public class Bruker {
     @Convert(converter = StringToListConverter.class)
     private List<String> tilganger;
 
+    @JsonBackReference
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(
         name = "bruker_leder",

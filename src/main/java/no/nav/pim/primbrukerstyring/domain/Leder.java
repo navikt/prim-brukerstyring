@@ -1,6 +1,7 @@
 package no.nav.pim.primbrukerstyring.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -74,6 +75,7 @@ public class Leder {
     @NotNull
     private Boolean erDirektoratsleder;
 
+    @JsonManagedReference
     @ManyToMany(mappedBy = "ledere")
     private Set<Bruker> brukere = new HashSet<>();
 
