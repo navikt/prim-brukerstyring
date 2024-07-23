@@ -15,6 +15,7 @@ import no.nav.pim.primbrukerstyring.repository.BrukerRepository;
 import no.nav.pim.primbrukerstyring.repository.LederRepository;
 import no.nav.pim.primbrukerstyring.repository.OverstyrendeLederRepository;
 import no.nav.pim.primbrukerstyring.service.dto.BrukerDto;
+import no.nav.pim.primbrukerstyring.service.dto.BrukerRolleTilgangerDto;
 import no.nav.pim.primbrukerstyring.service.dto.LederDto;
 import no.nav.pim.primbrukerstyring.util.OIDCUtil;
 import no.nav.security.token.support.core.api.Protected;
@@ -110,12 +111,12 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
     @PutMapping(path = "/rolle/{ident}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Bruker endreBrukerRolle(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident, @Valid @RequestBody Rolle rolle) {
-        metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "endreBrukerRolle").increment();
+    public Bruker endreBrukerRolle(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident, @Valid @RequestBody BrukerRolleTilgangerDto bruker) {
+        metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "endreBruker").increment();
         Optional<Bruker> eksisterendeBruker = brukerrepository.findByIdent(ident);
         if (eksisterendeBruker.isPresent()) {
             Bruker oppdatertBruker = eksisterendeBruker.get();
-            oppdatertBruker.setRolle(rolle);
+            oppdatertBruker.setRolle(bruker.getRolle());
             return brukerrepository.save(oppdatertBruker);
         } else {
             Metrics.counter("prim_error", "exception", "UserDoesntExistException").increment();
@@ -126,12 +127,12 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
     @PutMapping(path = "/tilganger/{ident}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Bruker endreBrukerTilganger(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident, @Valid @RequestBody List<String> tilganger) {
+    public Bruker endreBrukerTilganger(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident, @Valid @RequestBody BrukerRolleTilgangerDto bruker) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "endreBrukerTilganger").increment();
         Optional<Bruker> eksisterendeBruker = brukerrepository.findByIdent(ident);
         if (eksisterendeBruker.isPresent()) {
             Bruker oppdatertBruker = eksisterendeBruker.get();
-            oppdatertBruker.setTilganger(tilganger);
+            oppdatertBruker.setTilganger(bruker.getTilganger());
             return brukerrepository.save(oppdatertBruker);
         } else {
             Metrics.counter("prim_error", "exception", "UserDoesntExistException").increment();
