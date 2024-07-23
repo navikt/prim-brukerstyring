@@ -212,6 +212,9 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                         NomRessurs ressurs = nomGraphQLClient.getRessurs(authorization, brukerIdent);
                         ledere.add(lederSelv.get().oppdaterMed(Leder.fraNomRessurs(ressurs)));
                     }
+                    hrBruker.setLedere(ledere);
+                    hrBruker.setSistAksessert(new Date());
+                    brukerrepository.save(hrBruker);
                     return ledere.stream().map(LederDto::fraLeder).sorted().toList();
                 } else {
                     return hrBruker.getLedere().stream().map(LederDto::fraLeder).sorted().toList();
