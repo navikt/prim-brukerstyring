@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class BrukerRolleTilgangerDto {
+    String ident;
     Rolle rolle;
-    private List<String> tilganger;
+    List<String> tilganger;
 }
