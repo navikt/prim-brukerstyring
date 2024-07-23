@@ -4,6 +4,7 @@ import no.nav.pim.primbrukerstyring.domain.Ansatt;
 import no.nav.pim.primbrukerstyring.domain.Bruker;
 import no.nav.pim.primbrukerstyring.domain.Leder;
 import no.nav.pim.primbrukerstyring.service.dto.BrukerDto;
+import no.nav.pim.primbrukerstyring.service.dto.BrukerRolleTilgangerDto;
 import no.nav.pim.primbrukerstyring.service.dto.LederDto;
 
 import java.util.List;
@@ -12,11 +13,11 @@ public interface BrukertjenesteInterface {
 
     BrukerDto hentBruker(String authorization);
 
-    Bruker leggTilBrukerRolle(String authorization, Bruker bruker);
+    Bruker leggTilBrukerRolle(String authorization, BrukerRolleTilgangerDto brukerDto);
 
-    Bruker endreBrukerRolle(String authorization, String ident, Bruker bruker);
+    Bruker endreBrukerRolle(String authorization, String ident, BrukerRolleTilgangerDto bruker);
 
-    Bruker endreBrukerTilganger(String authorization, String ident, Bruker bruker);
+    Bruker endreBrukerTilganger(String authorization, String ident, BrukerRolleTilgangerDto bruker);
 
     void slettBrukerRolle(String authorization, String ident);
 
