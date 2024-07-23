@@ -110,12 +110,12 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
     @PutMapping(path = "/rolle/{ident}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Bruker endreBrukerRolle(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident, @Valid @RequestBody Bruker bruker) {
+    public Bruker endreBrukerRolle(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident, @Valid @RequestBody Rolle rolle) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "endreBrukerRolle").increment();
-        Optional<Bruker> eksisterendeBrukerRolle = brukerrepository.findByIdent(ident);
-        if (eksisterendeBrukerRolle.isPresent()) {
-            Bruker oppdatertBruker = eksisterendeBrukerRolle.get();
-            oppdatertBruker.setRolle(bruker.getRolle());
+        Optional<Bruker> eksisterendeBruker = brukerrepository.findByIdent(ident);
+        if (eksisterendeBruker.isPresent()) {
+            Bruker oppdatertBruker = eksisterendeBruker.get();
+            oppdatertBruker.setRolle(rolle);
             return brukerrepository.save(oppdatertBruker);
         } else {
             Metrics.counter("prim_error", "exception", "UserDoesntExistException").increment();
@@ -126,12 +126,12 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
     @PutMapping(path = "/tilganger/{ident}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Bruker endreBrukerTilganger(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident, @Valid @RequestBody Bruker bruker) {
-        metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "endreBrukerRolle").increment();
-        Optional<Bruker> eksisterendeBrukerRolle = brukerrepository.findByIdent(ident);
-        if (eksisterendeBrukerRolle.isPresent()) {
-            Bruker oppdatertBruker = eksisterendeBrukerRolle.get();
-            oppdatertBruker.setTilganger(bruker.getTilganger());
+    public Bruker endreBrukerTilganger(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident, @Valid @RequestBody List<String> tilganger) {
+        metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "endreBrukerTilganger").increment();
+        Optional<Bruker> eksisterendeBruker = brukerrepository.findByIdent(ident);
+        if (eksisterendeBruker.isPresent()) {
+            Bruker oppdatertBruker = eksisterendeBruker.get();
+            oppdatertBruker.setTilganger(tilganger);
             return brukerrepository.save(oppdatertBruker);
         } else {
             Metrics.counter("prim_error", "exception", "UserDoesntExistException").increment();
