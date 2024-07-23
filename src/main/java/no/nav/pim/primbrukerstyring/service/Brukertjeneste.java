@@ -94,22 +94,22 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     @PostMapping(path = "/rolle", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Bruker leggTilBrukerRolle(@RequestHeader(value = "Authorization") String authorization, @Valid @RequestBody BrukerRolleTilgangerDto brukerDto) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "leggTilBrukerRolle").increment();
+        String ident = brukerDto.getIdent();
         Bruker bruker = new Bruker();
+        bruker.setIdent(ident);
+        bruker.setRolle(brukerDto.getRolle());
+        bruker.setTilganger(brukerDto.getTilganger());
+        bruker.setSistAksessert(new Date());
 
-        Optional<Bruker> finnesBrukerRolle = brukerrepository.findByIdent(brukerDto.getIdent());
+        Optional<Bruker> finnesBrukerRolle = brukerrepository.findByIdent(ident);
         if (finnesBrukerRolle.isEmpty()) {
-            NomRessurs ressurs = nomGraphQLClient.getLedersResurser(authorization, bruker.getIdent());
+            NomRessurs ressurs = nomGraphQLClient.getLedersResurser(authorization, ident);
             if (ressurs != null) {
                 bruker.setNavn(ressurs.getVisningsnavn());
             }
         } else {
             bruker.setNavn(finnesBrukerRolle.get().getNavn());
         }
-
-        bruker.setIdent(brukerDto.getIdent());
-        bruker.setRolle(brukerDto.getRolle());
-        bruker.setTilganger(brukerDto.getTilganger());
-        bruker.setSistAksessert(new Date());
         return brukerrepository.save(bruker);
     }
 
