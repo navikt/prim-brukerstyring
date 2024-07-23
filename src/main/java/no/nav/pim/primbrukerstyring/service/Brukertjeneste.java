@@ -106,6 +106,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             bruker.setNavn(finnesBrukerRolle.get().getNavn());
         }
 
+        bruker.setIdent(brukerDto.getIdent());
         bruker.setRolle(brukerDto.getRolle());
         bruker.setTilganger(brukerDto.getTilganger());
         bruker.setSistAksessert(new Date());
