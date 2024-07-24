@@ -221,6 +221,9 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                         ledere.add(lederSelv.get().oppdaterMed(Leder.fraNomRessurs(ressurs)));
                         log.info("###Lagt til seg selv som leder");
                     }
+                    hrBruker.setLedere(ledere);
+                    hrBruker.setSistAksessert(new Date());
+                    brukerrepository.save(hrBruker);
                     log.info("###Returnerer {} ledere", ledere.size());
                     return ledere.stream().map(LederDto::fraLeder).sorted().toList();
                 } else {
@@ -275,7 +278,9 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "validerLeder").increment();
         String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
         Optional<Bruker> bruker = brukerrepository.findByIdent(brukerIdent);
-        if (bruker.isPresent() && bruker.get().getLedere().stream().anyMatch(leder -> leder.getIdent().equals(lederIdent))) {
+        if (bruker.isPresent() &&
+                ((bruker.get().getRolle() == Rolle.LEDER && bruker.get().getIdent().equals(lederIdent)) ||
+                bruker.get().getLedere().stream().anyMatch(leder -> leder.getIdent().equals(lederIdent)))) {
             return lederrepository.findByIdent(lederIdent).orElseThrow(() -> new NotFoundException("Leder med ident " + lederIdent + " finnes ikke i PRIM."));
         } else {
             throw new AuthorizationException("Bruker med ident " + brukerIdent + " har ikke tilgang til leder " + lederIdent);
