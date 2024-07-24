@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -192,26 +193,35 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                 return ledere.stream().map(LederDto::fraLeder).sorted().toList();
             } else {
                 if (hrBruker.getSistAksessert().toInstant()
-                        .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusHours(1).toInstant())) {
+                        .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusMinutes(1).toInstant())) {
                     Set<Leder> ledere = hrBruker.getLedere();
+                    log.info("###Henter {} ledere for HR-medarbeider {}", ledere.size(), brukerIdent);
                     List<NomOrgEnhet> orgenheter = bruker.get().getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
                     List<Leder> oppdaterteLedere = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).distinct().map(Leder::fraNomRessurs).toList();
                     List<Leder> utdaterteLedere = ledere.stream().filter(leder -> oppdaterteLedere.stream().noneMatch(oppdatertLeder -> oppdatertLeder.getIdent().equals(leder.getIdent()))).toList();
                     utdaterteLedere.forEach(ledere::remove);
+                    log.info("###Fjernet {} utdaterte ledere, gjenstår {} ledere", utdaterteLedere.size(), ledere.size());
+                    AtomicInteger oppdaterteLedereAntall = new AtomicInteger();
+                    AtomicInteger nyeLedereAntall = new AtomicInteger();
                     oppdaterteLedere.forEach(oppdatertLeder -> {
                         Optional<Leder> gammelLeder = ledere.stream().filter(leder -> oppdatertLeder.getIdent().equals(leder.getIdent())).findFirst();
                         if (gammelLeder.isPresent()) {
                             ledere.remove(gammelLeder.get());
                             ledere.add(gammelLeder.get().oppdaterMed(oppdatertLeder));
+                            oppdaterteLedereAntall.addAndGet(1);
                         } else {
                             ledere.add(oppdatertLeder);
+                            nyeLedereAntall.getAndIncrement();
                         }
                     });
+                    log.info("###Lagt til {} nye ledere, og endret {} gamle ledere. gjenstår {} ledere", nyeLedereAntall.get(), oppdaterteLedereAntall.get(), ledere.size());
                     Optional<Leder> lederSelv = lederrepository.findByIdent(brukerIdent);
                     if (lederSelv.isPresent() && ledere.stream().noneMatch(leder -> leder.getIdent().equals(lederSelv.get().getIdent()))) {
                         NomRessurs ressurs = nomGraphQLClient.getRessurs(authorization, brukerIdent);
                         ledere.add(lederSelv.get().oppdaterMed(Leder.fraNomRessurs(ressurs)));
+                        log.info("###Lagt til seg selv som leder");
                     }
+                    log.info("###Returnerer {} ledere", ledere.size());
                     return ledere.stream().map(LederDto::fraLeder).sorted().toList();
                 } else {
                     return hrBruker.getLedere().stream().map(LederDto::fraLeder).sorted().toList();
