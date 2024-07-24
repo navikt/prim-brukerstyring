@@ -279,7 +279,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
         Optional<Bruker> bruker = brukerrepository.findByIdent(brukerIdent);
         if (bruker.isPresent() &&
-                ((bruker.get().getRolle() == Rolle.LEDER && bruker.get().getIdent().equals(lederIdent)) ||
+                ((bruker.get().getRolle().equals(Rolle.LEDER) && bruker.get().getIdent().equals(lederIdent)) ||
                 bruker.get().getLedere().stream().anyMatch(leder -> leder.getIdent().equals(lederIdent)))) {
             return lederrepository.findByIdent(lederIdent).orElseThrow(() -> new NotFoundException("Leder med ident " + lederIdent + " finnes ikke i PRIM."));
         } else {
