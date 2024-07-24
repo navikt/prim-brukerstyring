@@ -173,7 +173,9 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         if (erHR) {
             Bruker hrBruker = bruker.get();
             if (hrBruker.getLedere().size() == 0) {
+                log.info("###Henter ledere for HR-medarbeider {}", brukerIdent);
                 List<NomOrgEnhet> orgenheter = bruker.get().getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
+                log.info("###Hentet {} orgenheter", orgenheter.size());
                 Set<Leder> ledere = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).distinct().map(leder -> {
                     Optional<Leder> eksisterendeLeder = lederrepository.findByIdent(leder.getNavident());
                     Leder nyLeder = Leder.fraNomRessurs(leder);
@@ -183,10 +185,13 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                         return nyLeder;
                     }
                 }).collect(Collectors.toSet());
+                log.info("###Hentet {} ledere", ledere.size());
                 Optional<Leder> lederSelv = lederrepository.findByIdent(brukerIdent);
                 if (lederSelv.isPresent() && ledere.stream().noneMatch(leder -> leder.getIdent().equals(lederSelv.get().getIdent()))) {
                     ledere.add(lederSelv.get());
+                    log.info("###La til seg selv som leder");
                 }
+                log.info("###Hentet {} ledere", ledere.size());
                 hrBruker.setLedere(ledere);
                 hrBruker.setSistAksessert(new Date());
                 brukerrepository.save(hrBruker);
