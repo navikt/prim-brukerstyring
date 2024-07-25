@@ -189,7 +189,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         if (erHR) {
             Bruker hrBruker = bruker.get();
             if (hrBruker.getLedere().isEmpty() || hrBruker.getSistAksessert().toInstant()
-                    .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusHours(1).toInstant())) {
+                    .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusHours(4).toInstant())) {
                 Set<Leder> ledere = hentLedere(authorization, hrBruker);
                 hrBruker.setLedere(ledere);
                 hrBruker.setSistAksessert(new Date());
