@@ -39,7 +39,7 @@ public class Bruker {
     private List<String> tilganger;
 
     @JsonBackReference
-    @ManyToMany(cascade = { CascadeType.PERSIST })
+    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
     @JoinTable(
         name = "bruker_leder",
         joinColumns = @JoinColumn(name = "ident"),
