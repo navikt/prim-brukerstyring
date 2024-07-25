@@ -262,39 +262,23 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     }
 
     private Set<Leder> hentLedere(String authorization, Bruker bruker) {
-        Set<Leder> ledere = bruker.getLedere();
-        log.info("###Henter ledere, starter med: {}", ledere.size());
+        Set<Leder> ledere = new HashSet<>();
         List<NomOrgEnhet> orgenheter = bruker.getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
-        log.info("###Hentet {} orgenheter", orgenheter.size());
         List<Leder> oppdaterteLedere = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).distinct().map(Leder::fraNomRessurs).toList();
-        log.info("###Hentet {} oppdaterte ledere", oppdaterteLedere.size());
-        List<Leder> utdaterteLedere = ledere.stream().filter(leder -> oppdaterteLedere.stream().noneMatch(oppdatertLeder -> oppdatertLeder.getIdent().equals(leder.getIdent()))).toList();
-        log.info("###Fantes {} utdaterte ledere", utdaterteLedere.size());
-        utdaterteLedere.forEach(ledere::remove);
-        log.info("##Slettet ledere");
         oppdaterteLedere.forEach(oppdatertLeder -> {
-            Optional<Leder> gammelLeder = ledere.stream().filter(leder -> oppdatertLeder.getIdent().equals(leder.getIdent())).findFirst();
-            if (gammelLeder.isPresent()) {
-                ledere.remove(gammelLeder.get());
-                ledere.add(gammelLeder.get().oppdaterMed(oppdatertLeder));
+            Optional<Leder> eksisterendeLeder = lederrepository.findByIdent(oppdatertLeder.getIdent());
+            if (eksisterendeLeder.isPresent()) {
+                ledere.add(eksisterendeLeder.get().oppdaterMed(oppdatertLeder));
             } else {
-                Optional<Leder> eksisterendeLeder = lederrepository.findByIdent(oppdatertLeder.getIdent());
-                if (eksisterendeLeder.isPresent()) {
-                    ledere.add(eksisterendeLeder.get().oppdaterMed(oppdatertLeder));
-                } else {
-                    ledere.add(oppdatertLeder);
-                }
+                ledere.add(oppdatertLeder);
             }
         });
-        log.info("##Oppdatert ledere. Har igjen: {}", ledere.size());
 
         Optional<Leder> lederSelv = lederrepository.findByIdent(bruker.getIdent());
         if (lederSelv.isPresent() && ledere.stream().noneMatch(leder -> leder.getIdent().equals(lederSelv.get().getIdent()))) {
-            log.info("##Legger til seg selv som leder");
             NomRessurs ressurs = nomGraphQLClient.getRessurs(authorization, bruker.getIdent());
             ledere.add(lederSelv.get().oppdaterMed(Leder.fraNomRessurs(ressurs)));
         }
-        log.info("##Ferdig hentet ledere. Har igjen: {}", ledere.size());
         return ledere;
     }
 }
