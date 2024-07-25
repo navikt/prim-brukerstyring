@@ -30,8 +30,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
@@ -78,15 +76,28 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                     Optional<Leder> finnesLeder = lederrepository.findByIdent(ressurs.getNavident());
                     Leder leder = finnesLeder.orElseGet(() -> Leder.fraNomRessurs(ressurs));
                     brukerrepository.save(Bruker.builder().ident(brukerIdent).navn(ressurs.getVisningsnavn()).sistAksessert(new Date()).ledere(Set.of(leder)).rolle(Rolle.LEDER).build());
-                    return new BrukerDto(Rolle.LEDER, leder);
+                    return new BrukerDto(Rolle.LEDER);
                 } else {
-                    return new BrukerDto(Rolle.MEDARBEIDER, null);
+                    return new BrukerDto(Rolle.MEDARBEIDER);
                 }
             }
             log.error("###Kunne ikke hente bruker i NOM: {}", brukerIdent);
-            return new BrukerDto(Rolle.UKJENT, null);
+            return new BrukerDto(Rolle.UKJENT);
         } else {
-            return new BrukerDto(bruker.get().getRolle(), null);
+            if (bruker.get().getRolle().equals(Rolle.LEDER)) {
+                Bruker oppdatertBruker = bruker.get();
+                if (bruker.get().getSistAksessert().toInstant()
+                        .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusMinutes(1).toInstant())) {
+                    NomRessurs ressurs = nomGraphQLClient.getLedersResurser(authorization, brukerIdent);
+                    Optional<Leder> finnesLeder = lederrepository.findByIdent(ressurs.getNavident());
+                    Leder leder = finnesLeder.orElseThrow(() -> new NotFoundException("Leder med ident " + brukerIdent + " finnes ikke i PRIM."));
+                    oppdatertBruker.setSistAksessert(new Date());
+                    oppdatertBruker.setLedere(Set.of(leder.oppdaterMed(Leder.fraNomRessurs(ressurs))));
+                    brukerrepository.save(oppdatertBruker);
+                }
+                return new BrukerDto(Rolle.LEDER);
+            }
+            return new BrukerDto(bruker.get().getRolle());
         }
     }
 
@@ -101,6 +112,8 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         bruker.setRolle(brukerDto.getRolle());
         bruker.setTilganger(brukerDto.getTilganger());
         bruker.setSistAksessert(new Date());
+        Set<Leder> ledere = hentLedere(authorization, bruker);
+        bruker.setLedere(ledere);
 
         Optional<Bruker> finnesBrukerRolle = brukerrepository.findByIdent(ident);
         if (finnesBrukerRolle.isEmpty()) {
@@ -139,6 +152,9 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         if (eksisterendeBruker.isPresent()) {
             Bruker oppdatertBruker = eksisterendeBruker.get();
             oppdatertBruker.setTilganger(bruker.getTilganger());
+            Set<Leder> ledere = hentLedere(authorization, oppdatertBruker);
+            oppdatertBruker.setLedere(ledere);
+            oppdatertBruker.setSistAksessert(new Date());
             return brukerrepository.save(oppdatertBruker);
         } else {
             Metrics.counter("prim_error", "exception", "UserDoesntExistException").increment();
@@ -172,68 +188,16 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         boolean erHR = bruker.isPresent() && List.of(Rolle.HR_MEDARBEIDER, Rolle.HR_MEDARBEIDER_BEMANNING).contains(bruker.get().getRolle());
         if (erHR) {
             Bruker hrBruker = bruker.get();
-            if (hrBruker.getLedere().size() == 0) {
-                log.info("###Henter ledere for HR-medarbeider {}", brukerIdent);
-                List<NomOrgEnhet> orgenheter = bruker.get().getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
-                log.info("###Hentet {} orgenheter", orgenheter.size());
-                Set<Leder> ledere = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).distinct().map(leder -> {
-                    Optional<Leder> eksisterendeLeder = lederrepository.findByIdent(leder.getNavident());
-                    Leder nyLeder = Leder.fraNomRessurs(leder);
-                    if (eksisterendeLeder.isPresent()) {
-                        return eksisterendeLeder.get().oppdaterMed(nyLeder);
-                    } else {
-                        return nyLeder;
-                    }
-                }).collect(Collectors.toSet());
-                log.info("###Hentet {} ledere", ledere.size());
-                Optional<Leder> lederSelv = lederrepository.findByIdent(brukerIdent);
-                if (lederSelv.isPresent() && ledere.stream().noneMatch(leder -> leder.getIdent().equals(lederSelv.get().getIdent()))) {
-                    ledere.add(lederSelv.get());
-                    log.info("###La til seg selv som leder");
-                }
-                log.info("###Hentet {} ledere", ledere.size());
+            if (hrBruker.getIdent().isEmpty() || hrBruker.getSistAksessert().toInstant()
+                    .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusMinutes(1).toInstant())) {
+                Set<Leder> ledere = hentLedere(authorization, hrBruker);
                 hrBruker.setLedere(ledere);
                 hrBruker.setSistAksessert(new Date());
                 brukerrepository.save(hrBruker);
+
                 return ledere.stream().map(LederDto::fraLeder).sorted().toList();
             } else {
-                if (hrBruker.getSistAksessert().toInstant()
-                        .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusMinutes(1).toInstant())) {
-                    Set<Leder> ledere = hrBruker.getLedere();
-                    log.info("###Henter {} ledere for HR-medarbeider {}", ledere.size(), brukerIdent);
-                    List<NomOrgEnhet> orgenheter = bruker.get().getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
-                    List<Leder> oppdaterteLedere = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).distinct().map(Leder::fraNomRessurs).toList();
-                    List<Leder> utdaterteLedere = ledere.stream().filter(leder -> oppdaterteLedere.stream().noneMatch(oppdatertLeder -> oppdatertLeder.getIdent().equals(leder.getIdent()))).toList();
-                    utdaterteLedere.forEach(ledere::remove);
-                    log.info("###Fjernet {} utdaterte ledere, gjenstår {} ledere", utdaterteLedere.size(), ledere.size());
-                    AtomicInteger oppdaterteLedereAntall = new AtomicInteger();
-                    AtomicInteger nyeLedereAntall = new AtomicInteger();
-                    oppdaterteLedere.forEach(oppdatertLeder -> {
-                        Optional<Leder> gammelLeder = ledere.stream().filter(leder -> oppdatertLeder.getIdent().equals(leder.getIdent())).findFirst();
-                        if (gammelLeder.isPresent()) {
-                            ledere.remove(gammelLeder.get());
-                            ledere.add(gammelLeder.get().oppdaterMed(oppdatertLeder));
-                            oppdaterteLedereAntall.addAndGet(1);
-                        } else {
-                            ledere.add(oppdatertLeder);
-                            nyeLedereAntall.getAndIncrement();
-                        }
-                    });
-                    log.info("###Lagt til {} nye ledere, og endret {} gamle ledere. gjenstår {} ledere", nyeLedereAntall.get(), oppdaterteLedereAntall.get(), ledere.size());
-                    Optional<Leder> lederSelv = lederrepository.findByIdent(brukerIdent);
-                    if (lederSelv.isPresent() && ledere.stream().noneMatch(leder -> leder.getIdent().equals(lederSelv.get().getIdent()))) {
-                        NomRessurs ressurs = nomGraphQLClient.getRessurs(authorization, brukerIdent);
-                        ledere.add(lederSelv.get().oppdaterMed(Leder.fraNomRessurs(ressurs)));
-                        log.info("###Lagt til seg selv som leder");
-                    }
-                    hrBruker.setLedere(ledere);
-                    hrBruker.setSistAksessert(new Date());
-                    brukerrepository.save(hrBruker);
-                    log.info("###Returnerer {} ledere", ledere.size());
-                    return ledere.stream().map(LederDto::fraLeder).sorted().toList();
-                } else {
-                    return hrBruker.getLedere().stream().map(LederDto::fraLeder).sorted().toList();
-                }
+                return hrBruker.getLedere().stream().map(LederDto::fraLeder).sorted().toList();
             }
         } else {
             throw new AuthorizationException("Bruker med ident "+ brukerIdent + " er ikke HR ansatt");
@@ -295,5 +259,35 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     private Stream<NomRessurs> hentOrgenhetsLedere(NomOrgEnhet orgEnhet){
         if (orgEnhet == null) return Stream.empty();
         return Stream.concat(orgEnhet.getLeder().stream().map(NomLeder::getRessurs), orgEnhet.getOrganiseringer().stream().flatMap((organisering -> hentOrgenhetsLedere(organisering.getOrgEnhet()))));
+    }
+
+    private Set<Leder> hentLedere(String authorization, Bruker bruker) {
+        Set<Leder> ledere = bruker.getLedere();
+        List<NomOrgEnhet> orgenheter = bruker.getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
+        List<Leder> oppdaterteLedere = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).distinct().map(Leder::fraNomRessurs).toList();
+        List<Leder> utdaterteLedere = ledere.stream().filter(leder -> oppdaterteLedere.stream().noneMatch(oppdatertLeder -> oppdatertLeder.getIdent().equals(leder.getIdent()))).toList();
+        utdaterteLedere.forEach(ledere::remove);
+
+        oppdaterteLedere.forEach(oppdatertLeder -> {
+            Optional<Leder> gammelLeder = ledere.stream().filter(leder -> oppdatertLeder.getIdent().equals(leder.getIdent())).findFirst();
+            if (gammelLeder.isPresent()) {
+                ledere.remove(gammelLeder.get());
+                ledere.add(gammelLeder.get().oppdaterMed(oppdatertLeder));
+            } else {
+                Optional<Leder> eksisterendeLeder = lederrepository.findByIdent(oppdatertLeder.getIdent());
+                if (eksisterendeLeder.isPresent()) {
+                    ledere.add(eksisterendeLeder.get().oppdaterMed(oppdatertLeder));
+                } else {
+                    ledere.add(oppdatertLeder);
+                }
+            }
+        });
+
+        Optional<Leder> lederSelv = lederrepository.findByIdent(bruker.getIdent());
+        if (lederSelv.isPresent() && ledere.stream().noneMatch(leder -> leder.getIdent().equals(lederSelv.get().getIdent()))) {
+            NomRessurs ressurs = nomGraphQLClient.getRessurs(authorization, bruker.getIdent());
+            ledere.add(lederSelv.get().oppdaterMed(Leder.fraNomRessurs(ressurs)));
+        }
+        return ledere;
     }
 }

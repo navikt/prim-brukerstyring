@@ -2,7 +2,6 @@ package no.nav.pim.primbrukerstyring.service.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import no.nav.pim.primbrukerstyring.domain.Leder;
 import no.nav.pim.primbrukerstyring.domain.Rolle;
 
 @Data
@@ -10,6 +9,4 @@ import no.nav.pim.primbrukerstyring.domain.Rolle;
 public class BrukerDto {
 
     Rolle rolle;
-
-    Leder representertLeder;
 }
