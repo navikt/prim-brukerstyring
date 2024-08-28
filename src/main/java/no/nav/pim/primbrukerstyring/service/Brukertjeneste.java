@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
@@ -233,7 +234,9 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             Stream<Ansatt> overstyrteAnsatte = overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(lederIdent).stream()
                     .filter(overstyrtLeder -> ansatte.stream().noneMatch(ansatt -> ansatt.getIdent().equals(overstyrtLeder.getAnsattIdent())))
                     .map(overstyrtLeder -> ansatttjeneste.hentAnsatt(authorization, overstyrtLeder.getAnsattIdent()));
-            return Stream.concat(ansatte.stream(), overstyrteAnsatte).toList();
+            List<Ansatt> ressurser = Stream.concat(ansatte.stream(), overstyrteAnsatte).toList();
+            log.info("Returnerer {} ansatte for {} | {}",ressurser.size(), lederIdent, ressurser.stream().map(Ansatt::getIdent).collect(Collectors.joining(", ")));
+            return ressurser;
         } else {
             throw new NotFoundException("Leder med ident " + lederIdent + " finnes ikke i PRIM.");
         }
