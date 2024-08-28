@@ -79,18 +79,6 @@ public class OIDCUtil {
         }
     }
 
-    public HttpHeaders setHeaders(String auth, String scope) throws Exception {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
-        headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        if (LOCAL.equals(naisCluster)) {
-            headers.set("Authorization", "Bearer localtoken");
-        } else {
-            headers.add("Authorization", "bearer " + getAccessToken(auth, scope));
-        }
-        return headers;
-    }
-
     private String getAccessToken(String auth, String scope) throws Exception {
         String grantType = (auth == null) ? CLIENT_CREDENTIAL : finnGranttype(finnToken(auth));
         if (token == null ||
@@ -110,7 +98,7 @@ public class OIDCUtil {
         try {
             String tokenGrantType = finnGranttype(token.getAccessToken());
             String mottaker = finnMottaker(token.getAccessToken());
-            log.debug("Eksisterende granttype:{}, mottaker:{}, bruker:{}, expiry:{}", tokenGrantType, mottaker, finnBruker(token.getAccessToken()), token.getExpires());
+            log.info("Eksisterende granttype:{}, mottaker:{}, bruker:{}, expiry:{}", tokenGrantType, mottaker, finnBruker(token.getAccessToken()), token.getExpires());
             log.info("Nytt token: scope:{}, granttype:{}, expiry:{}", scope, grantType, (auth != null) ? finnExpiryTime(auth) : null);
             return tokenGrantType.equals(grantType)
                     && tidsgyldig(token)
