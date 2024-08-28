@@ -23,6 +23,7 @@ spec:
         databases:
           - name: prim-brukerstyring-test
             envVarPrefix: DB
+        tier: db-f1-micro
         diskAutoresize: true
         highAvailability: true
         diskType: SSD
