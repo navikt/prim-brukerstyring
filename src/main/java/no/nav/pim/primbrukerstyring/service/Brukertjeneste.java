@@ -213,31 +213,6 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         Leder validertLeder = validerLeder(authorization, lederIdent);
         if (validertLeder != null) {
             NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, lederIdent);
-            List<NomRessurs> test1 = ledersRessurser.getLederFor().stream()
-                    .flatMap((lederFor) -> {
-                        Stream<NomRessurs> koblinger = lederFor.getOrgEnhet().getKoblinger().stream().map((NomKobling::getRessurs));
-                        Stream<NomRessurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
-                                .flatMap(org -> org.getOrgEnhet().getLeder().stream().map(NomLeder::getRessurs));
-                        return Stream.concat(koblinger, organiseringer);
-                    }).toList();
-            List<NomRessurs> test2 = ledersRessurser.getLederFor().stream()
-                    .flatMap((lederFor) -> {
-                        Stream<NomRessurs> koblinger = lederFor.getOrgEnhet().getKoblinger().stream().map((NomKobling::getRessurs));
-                        Stream<NomRessurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
-                                .flatMap(org -> org.getOrgEnhet().getLeder().stream().map(NomLeder::getRessurs));
-                        return Stream.concat(koblinger, organiseringer);
-                    }).filter(ressurs -> !ressurs.getNavident().equals(lederIdent)
-                            && ressurs.getLedere().stream().anyMatch(leder -> leder.getRessurs().getNavident().equals(lederIdent))
-                    ).toList();
-            List<NomRessurs> test3 = ledersRessurser.getLederFor().stream()
-                    .flatMap((lederFor) -> {
-                        Stream<NomRessurs> koblinger = lederFor.getOrgEnhet().getKoblinger().stream().map((NomKobling::getRessurs));
-                        Stream<NomRessurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
-                                .flatMap(org -> org.getOrgEnhet().getLeder().stream().map(NomLeder::getRessurs));
-                        return Stream.concat(koblinger, organiseringer);
-                    }).filter(ressurs -> !ressurs.getNavident().equals(lederIdent)
-                            && ressurs.getLedere().stream().anyMatch(leder -> leder.getRessurs().getNavident().equals(lederIdent))
-                    ).distinct().toList();
             List<Ansatt> ansatte = ledersRessurser.getLederFor().stream()
                     .flatMap((lederFor) -> {
                         Stream<NomRessurs> koblinger = lederFor.getOrgEnhet().getKoblinger().stream().map((NomKobling::getRessurs));
@@ -256,14 +231,13 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                         }
                         return Ansatt.fraNomRessurs(ressurs, ansattStillingsavtale);
                     }).toList();
-            log.info("###Test 1: {} | {}", test1.size(), test1.stream().map(NomRessurs::getNavident).collect(Collectors.joining(", ")));
-            log.info("###Test 2: {} | {}", test2.size(), test2.stream().map(NomRessurs::getNavident).collect(Collectors.joining(", ")));
-            log.info("###Test 3: {} | {}", test3.size(), test3.stream().map(NomRessurs::getNavident).collect(Collectors.joining(", ")));
-            log.info("###Ansatte: {} | {}", ansatte.size(), ansatte.stream().map(Ansatt::getIdent).collect(Collectors.joining(", ")));
+            log.info("###Ansatte: {} | {}", ansatte.size(), ansatte.stream().map(ansatt -> ansatt.getIdent() + ": " + ansatt.getStillingsavtaler().stream().map(sa -> sa.getLeder().getIdent()+": "+sa.getStillingsavtale().getStillingsavtaleBeskrivelse()+"-"+sa.getAnsattType()).collect(Collectors.joining(", "))).collect(Collectors.joining(" ||||| ")));
             Stream<Ansatt> overstyrteAnsatte = overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(lederIdent).stream()
                     .filter(overstyrtLeder -> ansatte.stream().noneMatch(ansatt -> ansatt.getIdent().equals(overstyrtLeder.getAnsattIdent())))
                     .map(overstyrtLeder -> ansatttjeneste.hentAnsatt(authorization, overstyrtLeder.getAnsattIdent()));
-            return Stream.concat(ansatte.stream(), overstyrteAnsatte).toList();
+            List<Ansatt> alleAnsatte = Stream.concat(ansatte.stream(), overstyrteAnsatte).toList();
+            log.info("###Alle ansatte: {} | {}", alleAnsatte.size(), alleAnsatte.stream().map(ansatt -> ansatt.getIdent() + ": " + ansatt.getStillingsavtaler().stream().map(sa -> sa.getLeder().getIdent()+": "+sa.getStillingsavtale().getStillingsavtaleBeskrivelse()+"-"+sa.getAnsattType()).collect(Collectors.joining(", "))).collect(Collectors.joining(" ||||| ")));
+            return alleAnsatte;
         } else {
             throw new NotFoundException("Leder med ident " + lederIdent + " finnes ikke i PRIM.");
         }
