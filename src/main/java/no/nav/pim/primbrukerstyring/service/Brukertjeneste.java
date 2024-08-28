@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
@@ -231,13 +230,10 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                         }
                         return Ansatt.fraNomRessurs(ressurs, ansattStillingsavtale);
                     }).toList();
-            log.info("###Ansatte: {} | {}", ansatte.size(), ansatte.stream().map(ansatt -> ansatt.getIdent() + ": " + ansatt.getStillingsavtaler().stream().map(sa -> sa.getLeder().getIdent()+": "+sa.getStillingsavtale().getStillingsavtaleBeskrivelse()+"-"+sa.getAnsattType()).collect(Collectors.joining(", "))).collect(Collectors.joining(" ||||| ")));
             Stream<Ansatt> overstyrteAnsatte = overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(lederIdent).stream()
                     .filter(overstyrtLeder -> ansatte.stream().noneMatch(ansatt -> ansatt.getIdent().equals(overstyrtLeder.getAnsattIdent())))
                     .map(overstyrtLeder -> ansatttjeneste.hentAnsatt(authorization, overstyrtLeder.getAnsattIdent()));
-            List<Ansatt> alleAnsatte = Stream.concat(ansatte.stream(), overstyrteAnsatte).toList();
-            log.info("###Alle ansatte: {} | {}", alleAnsatte.size(), alleAnsatte.stream().map(ansatt -> ansatt.getIdent() + ": " + ansatt.getStillingsavtaler().stream().map(sa -> sa.getLeder().getIdent()+": "+sa.getStillingsavtale().getStillingsavtaleBeskrivelse()+"-"+sa.getAnsattType()).collect(Collectors.joining(", "))).collect(Collectors.joining(" ||||| ")));
-            return alleAnsatte;
+            return Stream.concat(ansatte.stream(), overstyrteAnsatte).toList();
         } else {
             throw new NotFoundException("Leder med ident " + lederIdent + " finnes ikke i PRIM.");
         }
