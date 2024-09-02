@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
@@ -87,13 +86,13 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         } else {
             if (bruker.get().getRolle().equals(Rolle.LEDER)) {
                 Bruker oppdatertBruker = bruker.get();
-                if (bruker.get().getSistAksessert().toInstant()
+                if (oppdatertBruker.getSistAksessert().toInstant()
                         .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusMinutes(1).toInstant())) {
                     NomRessurs ressurs = nomGraphQLClient.getLedersResurser(authorization, brukerIdent);
-                    Optional<Leder> finnesLeder = lederrepository.findByIdent(ressurs.getNavident());
-                    Leder leder = finnesLeder.orElseThrow(() -> new NotFoundException("Leder med ident " + brukerIdent + " finnes ikke i PRIM."));
+                    oppdatertBruker.getLedere().stream()
+                            .filter(leder -> leder.getIdent().equals(ressurs.getNavident()))
+                            .forEach(leder -> leder.oppdaterMed(Leder.fraNomRessurs(ressurs)));
                     oppdatertBruker.setSistAksessert(new Date());
-                    oppdatertBruker.setLedere(Set.of(leder.oppdaterMed(Leder.fraNomRessurs(ressurs))));
                     brukerrepository.save(oppdatertBruker);
                 }
                 return new BrukerDto(Rolle.LEDER);
@@ -234,9 +233,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             Stream<Ansatt> overstyrteAnsatte = overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(lederIdent).stream()
                     .filter(overstyrtLeder -> ansatte.stream().noneMatch(ansatt -> ansatt.getIdent().equals(overstyrtLeder.getAnsattIdent())))
                     .map(overstyrtLeder -> ansatttjeneste.hentAnsatt(authorization, overstyrtLeder.getAnsattIdent()));
-            List<Ansatt> ressurser = Stream.concat(ansatte.stream(), overstyrteAnsatte).toList();
-            log.info("Returnerer {} ansatte for {} | {}",ressurser.size(), lederIdent, ressurser.stream().map(Ansatt::getIdent).collect(Collectors.joining(", ")));
-            return ressurser;
+            return Stream.concat(ansatte.stream(), overstyrteAnsatte).toList();
         } else {
             throw new NotFoundException("Leder med ident " + lederIdent + " finnes ikke i PRIM.");
         }
