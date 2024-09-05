@@ -1,5 +1,5 @@
-ALTER TABLE leder
+ALTER TABLE bruker
     ADD COLUMN IF NOT EXISTS sluttet BOOLEAN;
 
-UPDATE leder
+UPDATE bruker
 SET sluttet = false;
