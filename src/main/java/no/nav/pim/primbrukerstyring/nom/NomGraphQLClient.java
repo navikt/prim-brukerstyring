@@ -141,6 +141,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                   nummer
                                   type
                                 }
+                                sluttdato
                                 ledere {
                                     erDagligOppfolging
                                     ressurs {

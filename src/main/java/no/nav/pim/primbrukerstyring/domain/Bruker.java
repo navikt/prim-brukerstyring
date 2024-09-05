@@ -51,6 +51,9 @@ public class Bruker {
     @LastModifiedDate
     private Date sistAksessert;
 
+    @Column
+    private boolean sluttet = false;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

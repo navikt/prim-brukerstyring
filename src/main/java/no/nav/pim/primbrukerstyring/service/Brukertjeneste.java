@@ -117,9 +117,10 @@ public class Brukertjeneste implements BrukertjenesteInterface {
 
         Optional<Bruker> finnesBrukerRolle = brukerrepository.findByIdent(ident);
         if (finnesBrukerRolle.isEmpty()) {
-            NomRessurs ressurs = nomGraphQLClient.getLedersResurser(authorization, ident);
+            NomRessurs ressurs = nomGraphQLClient.getRessurs(authorization, ident);
             if (ressurs != null) {
                 bruker.setNavn(ressurs.getVisningsnavn());
+                bruker.setSluttet(ressurs.getSluttdato() != null && ressurs.getSluttdato().before(new Date()));
             }
         } else {
             bruker.setNavn(finnesBrukerRolle.get().getNavn());
