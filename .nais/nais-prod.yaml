@@ -10,6 +10,11 @@ metadata:
   labels:
     team: pim
 spec:
+  env:
+    - name: NOM_URL
+      value: https://nom-api.intern.nav.no/graphql
+    - name: NOM_SCOPE
+      value: api://prod-gcp.nom.nom-api/.default
   gcp:
     sqlInstances:
       - name: prim-brukerstyring
@@ -79,3 +84,8 @@ spec:
         - application: ferdig-utprovd
           namespace: pim
           cluster: prod-gcp
+    outbound:
+      rules:
+        - application: nom-api
+          namespace: nom
+          cluster: dev-gcp
