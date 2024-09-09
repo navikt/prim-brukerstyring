@@ -265,16 +265,20 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     private Set<Leder> hentLedere(String authorization, Bruker bruker) {
         Set<Leder> ledere = new HashSet<>();
         if (bruker.getTilganger() != null) {
-            List<NomOrgEnhet> orgenheter = bruker.getTilganger().stream().map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id)).toList();
-            List<Leder> oppdaterteLedere = orgenheter.stream().flatMap(this::hentOrgenhetsLedere).distinct().map(Leder::fraNomRessurs).toList();
-            oppdaterteLedere.forEach(oppdatertLeder -> {
-                Optional<Leder> eksisterendeLeder = lederrepository.findByIdent(oppdatertLeder.getIdent());
-                if (eksisterendeLeder.isPresent()) {
-                    ledere.add(eksisterendeLeder.get().oppdaterMed(oppdatertLeder));
-                } else {
-                    ledere.add(oppdatertLeder);
-                }
-            });
+            bruker.getTilganger().stream()
+                .map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id))
+                .flatMap(this::hentOrgenhetsLedere)
+                .distinct()
+                .filter(nomLeder -> nomLeder.getSluttdato().before(new Date()))
+                .map(Leder::fraNomRessurs)
+                .forEach(oppdatertLeder -> {
+                    Optional<Leder> eksisterendeLeder = lederrepository.findByIdent(oppdatertLeder.getIdent());
+                    if (eksisterendeLeder.isPresent()) {
+                        ledere.add(eksisterendeLeder.get().oppdaterMed(oppdatertLeder));
+                    } else {
+                        ledere.add(oppdatertLeder);
+                    }
+                });
         }
 
         Optional<Leder> lederSelv = lederrepository.findByIdent(bruker.getIdent());

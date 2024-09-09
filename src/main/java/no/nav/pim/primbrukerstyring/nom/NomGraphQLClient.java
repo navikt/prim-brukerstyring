@@ -261,6 +261,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                               nummer
                               type
                             }
+                            sluttdato
                             lederFor {
                                 orgEnhet {
                                     id
@@ -283,6 +284,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                       nummer
                                       type
                                     }
+                                    sluttdato
                                     lederFor {
                                         orgEnhet {
                                             id
@@ -305,6 +307,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                               nummer
                                               type
                                             }
+                                            sluttdato
                                             lederFor {
                                                 orgEnhet {
                                                     id
@@ -327,6 +330,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                                       nummer
                                                       type
                                                     }
+                                                    sluttdato
                                                     lederFor {
                                                         orgEnhet {
                                                             id
@@ -349,6 +353,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                                               nummer
                                                               type
                                                             }
+                                                            sluttdato
                                                             lederFor {
                                                                 orgEnhet {
                                                                     id
@@ -371,6 +376,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                                                       nummer
                                                                       type
                                                                     }
+                                                                    sluttdato
                                                                     lederFor {
                                                                         orgEnhet {
                                                                             id
@@ -393,6 +399,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                                                               nummer
                                                                               type
                                                                             }
+                                                                            sluttdato
                                                                             lederFor {
                                                                                 orgEnhet {
                                                                                     id
@@ -415,11 +422,62 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                                                                       nummer
                                                                                       type
                                                                                     }
+                                                                                    sluttdato
                                                                                     lederFor {
                                                                                         orgEnhet {
                                                                                             id
                                                                                             navn
                                                                                             orgEnhetsType
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                            organiseringer(retning: under) {
+                                                                                orgEnhet {
+                                                                                    navn
+                                                                                    id
+                                                                                    leder {
+                                                                                        ressurs {
+                                                                                            navident
+                                                                                            visningsnavn
+                                                                                            epost
+                                                                                            telefon {
+                                                                                              nummer
+                                                                                              type
+                                                                                            }
+                                                                                            sluttdato
+                                                                                            lederFor {
+                                                                                                orgEnhet {
+                                                                                                    id
+                                                                                                    navn
+                                                                                                    orgEnhetsType
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                    organiseringer(retning: under) {
+                                                                                        orgEnhet {
+                                                                                            navn
+                                                                                            id
+                                                                                            leder {
+                                                                                                ressurs {
+                                                                                                    navident
+                                                                                                    visningsnavn
+                                                                                                    epost
+                                                                                                    telefon {
+                                                                                                      nummer
+                                                                                                      type
+                                                                                                    }
+                                                                                                    sluttdato
+                                                                                                    lederFor {
+                                                                                                        orgEnhet {
+                                                                                                            id
+                                                                                                            navn
+                                                                                                            orgEnhetsType
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                            }
                                                                                         }
                                                                                     }
                                                                                 }
