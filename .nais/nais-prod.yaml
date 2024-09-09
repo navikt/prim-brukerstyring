@@ -88,4 +88,4 @@ spec:
       rules:
         - application: nom-api
           namespace: nom
-          cluster: dev-gcp
+          cluster: prod-gcp
