@@ -70,3 +70,12 @@ spec:
         - application: pim-bemanning
           namespace: pim
           cluster: prod-gcp
+        - application: bemanningsbehov
+          namespace: pim
+          cluster: prod-gcp
+        - application: nedbemanning
+          namespace: pim
+          cluster: prod-gcp
+        - application: ferdig-utprovd
+          namespace: pim
+          cluster: prod-gcp

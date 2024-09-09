@@ -1,5 +1,5 @@
 server:
-  port: 9102
+  port: 9500
 
 spring:
   flyway:
@@ -23,3 +23,17 @@ spring:
           lob:
             non_contextual_creation: true
     show-sql: false
+
+nais_cluster: local-dev
+
+nom:
+  url: na
+  scope: local-dev
+
+token_endpoint: na
+clientId: na
+clientSecret: na
+
+no.nav.security.jwt.issuer.pim:
+  discoveryurl: https://login.microsoftonline.com/navq.onmicrosoft.com/.well-known/openid-configuration
+  accepted_audience: 11d090aa-5a3a-433c-b1f9-f742c2e1f48b

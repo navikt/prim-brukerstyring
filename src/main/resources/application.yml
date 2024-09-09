@@ -1,5 +1,7 @@
 server:
   port: 9500
+  error:
+    include-message: always
 
 spring:
   flyway:
@@ -25,6 +27,17 @@ spring:
           lob:
             non_contextual_creation: true
     show-sql: false
+
+nais_cluster: ${NAIS_CLUSTER_NAME}
+
+
+nom:
+  url: ${NOM_URL}
+  scope: ${NOM_SCOPE}
+
+token_endpoint: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+clientId: ${AZURE_APP_CLIENT_ID}
+clientSecret: ${AZURE_APP_CLIENT_SECRET}
 
 no.nav.security.jwt.issuer.pim:
   discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
