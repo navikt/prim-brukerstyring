@@ -121,6 +121,10 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             if (ressurs != null) {
                 bruker.setNavn(ressurs.getVisningsnavn());
                 bruker.setSluttet(ressurs.getSluttdato() != null && ressurs.getSluttdato().before(new Date()));
+                ressurs.getOrgTilknytning().stream()
+                        .filter(orgTilknytning -> orgTilknytning.getErDagligOppfolging() && orgTilknytning.getGyldigTom() == null)
+                        .findFirst()
+                        .ifPresent(orgTilknytning -> bruker.setEnhet(orgTilknytning.getOrgEnhet().getId()));
             }
         } else {
             bruker.setNavn(finnesBrukerRolle.get().getNavn());
@@ -156,6 +160,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             Set<Leder> ledere = hentLedere(authorization, oppdatertBruker);
             oppdatertBruker.setLedere(ledere);
             oppdatertBruker.setSistAksessert(new Date());
+            oppdatertBruker.setEndretEneht(false);
             return brukerrepository.save(oppdatertBruker);
         } else {
             Metrics.counter("prim_error", "exception", "UserDoesntExistException").increment();

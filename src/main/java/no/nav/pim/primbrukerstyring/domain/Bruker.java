@@ -54,6 +54,12 @@ public class Bruker {
     @Column
     private boolean sluttet = false;
 
+    @Column
+    private boolean endretEneht = false;
+
+    @Column
+    private String enhet;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

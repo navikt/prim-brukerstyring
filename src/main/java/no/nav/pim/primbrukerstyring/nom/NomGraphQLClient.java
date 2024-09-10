@@ -142,6 +142,13 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                   type
                                 }
                                 sluttdato
+                                orgTilknytning {
+                                  erDagligOppfolging
+                                  gyldigTom
+                                  orgEnhet {
+                                    id
+                                  }
+                                }
                                 ledere {
                                     erDagligOppfolging
                                     ressurs {

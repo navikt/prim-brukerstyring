@@ -37,3 +37,7 @@ clientSecret: na
 no.nav.security.jwt.issuer.pim:
   discoveryurl: https://login.microsoftonline.com/navq.onmicrosoft.com/.well-known/openid-configuration
   accepted_audience: 11d090aa-5a3a-433c-b1f9-f742c2e1f48b
+
+
+brukerstatuskontroll:
+  cron-pattern: "0 0 0 * * *"
