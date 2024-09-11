@@ -87,7 +87,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             if (bruker.get().getRolle().equals(Rolle.LEDER)) {
                 Bruker oppdatertBruker = bruker.get();
                 if (oppdatertBruker.getSistAksessert().toInstant()
-                        .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusMinutes(1).toInstant())) {
+                        .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusHours(1).toInstant())) {
                     NomRessurs ressurs = nomGraphQLClient.getLedersResurser(authorization, brukerIdent);
                     oppdatertBruker.getLedere().stream()
                             .filter(leder -> leder.getIdent().equals(ressurs.getNavident()))
@@ -111,7 +111,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         bruker.setIdent(ident);
         bruker.setRolle(brukerDto.getRolle());
         bruker.setTilganger(brukerDto.getTilganger());
-        bruker.setSistAksessert(new Date());
+        bruker.setSistEndret(new Date());
         Set<Leder> ledere = hentLedere(authorization, bruker);
         bruker.setLedere(ledere);
 
@@ -141,6 +141,8 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         if (eksisterendeBruker.isPresent()) {
             Bruker oppdatertBruker = eksisterendeBruker.get();
             oppdatertBruker.setRolle(bruker.getRolle());
+            oppdatertBruker.setSistEndret(new Date());
+            oppdatertBruker.setEndretEnhet(false);
             return brukerrepository.save(oppdatertBruker);
         } else {
             Metrics.counter("prim_error", "exception", "UserDoesntExistException").increment();
@@ -159,8 +161,8 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             oppdatertBruker.setTilganger(bruker.getTilganger());
             Set<Leder> ledere = hentLedere(authorization, oppdatertBruker);
             oppdatertBruker.setLedere(ledere);
-            oppdatertBruker.setSistAksessert(new Date());
-            oppdatertBruker.setEndretEneht(false);
+            oppdatertBruker.setSistEndret(new Date());
+            oppdatertBruker.setEndretEnhet(false);
             return brukerrepository.save(oppdatertBruker);
         } else {
             Metrics.counter("prim_error", "exception", "UserDoesntExistException").increment();
