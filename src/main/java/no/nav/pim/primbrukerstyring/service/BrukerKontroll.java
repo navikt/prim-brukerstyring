@@ -48,7 +48,7 @@ public class BrukerKontroll {
                     .findFirst().ifPresentOrElse(enhet -> {
                         if (!enhet.equals(bruker.getEnhet())) {
                             log.info( "Bruker {} har endret enhet fra {} til {}", bruker.getIdent(), bruker.getEnhet(), enhet );
-                            if (bruker.getEnhet() != null) bruker.setEndretEneht(true);
+                            if (bruker.getEnhet() != null) bruker.setEndretEnhet(true);
                             bruker.setEnhet(enhet);
                         }
                     }, () -> {

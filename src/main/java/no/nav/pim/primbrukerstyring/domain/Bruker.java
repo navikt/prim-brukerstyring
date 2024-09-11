@@ -55,7 +55,7 @@ public class Bruker {
     private boolean sluttet = false;
 
     @Column
-    private boolean endretEneht = false;
+    private boolean endretEnhet = false;
 
     @Column
     private String enhet;
