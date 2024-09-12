@@ -29,7 +29,7 @@ public class BrukerKontroll {
     NomGraphQLClient nomGraphQLClient;
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
-    @Scheduled(cron = "${brukerstatuskontroll.cron-pattern:\"0 0 0 * * *\"}") // Kjører hver time
+    @Scheduled(cron = "${brukerstatuskontroll.cron-pattern:\"0 0 * * * *\"}")
     @SchedulerLock(name = "Brukerstatuskontroll")
     public void sjekkBrukerstatus() {
         log.info( "Brukerstatuskontroll starter {}", new Date() );

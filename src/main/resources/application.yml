@@ -46,4 +46,4 @@ no.nav.security.jwt.issuer.pim:
 
 
 brukerstatuskontroll:
-  cron-pattern: "0 0 0 * * *"
+  cron-pattern: "0 0 * * * *"
