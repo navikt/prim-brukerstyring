@@ -35,7 +35,7 @@ public class BrukerKontroll {
         log.info( "Brukerstatuskontroll starter {}", new Date() );
         List<Bruker> brukere = brukerrepository.findAllByRolleIn(List.of(Rolle.HR_MEDARBEIDER, Rolle.HR_MEDARBEIDER_BEMANNING));
         brukere.forEach(bruker -> {
-            NomRessurs ressurs = nomGraphQLClient.getRessurs("authorization", bruker.getIdent());
+            NomRessurs ressurs = nomGraphQLClient.getRessurs(null, bruker.getIdent());
             if (ressurs != null) {
                 bruker.setNavn(ressurs.getVisningsnavn());
                 if (ressurs.getSluttdato() != null && ressurs.getSluttdato().before(new Date())) {
