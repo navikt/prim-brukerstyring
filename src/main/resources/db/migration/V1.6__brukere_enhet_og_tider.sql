@@ -24,3 +24,6 @@ SET created = sist_aksessert;
 
 UPDATE bruker
 SET updated = sist_aksessert;
+
+UPDATE bruker
+SET sist_aksessert = null
