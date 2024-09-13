@@ -196,7 +196,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         boolean erHR = bruker.isPresent() && List.of(Rolle.HR_MEDARBEIDER, Rolle.HR_MEDARBEIDER_BEMANNING).contains(bruker.get().getRolle());
         if (erHR) {
             Bruker hrBruker = bruker.get();
-            if (hrBruker.getLedere().isEmpty() || hrBruker.getSistAksessert().toInstant()
+            if (hrBruker.getLedere().isEmpty() || hrBruker.getSistAksessert() == null || hrBruker.getSistAksessert().toInstant()
                     .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusHours(4).toInstant())) {
                 Set<Leder> ledere = hentLedere(authorization, hrBruker);
                 hrBruker.setLedere(ledere);
