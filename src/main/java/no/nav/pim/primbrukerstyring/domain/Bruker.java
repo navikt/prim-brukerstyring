@@ -8,6 +8,7 @@ import lombok.*;
 import no.nav.pim.primbrukerstyring.util.StringToListConverter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.*;
 
@@ -18,7 +19,8 @@ import java.util.*;
 @Setter
 @Builder
 @AllArgsConstructor
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@EntityListeners(AuditingEntityListener.class)
+@JsonIgnoreProperties(value = {"created", "updated"}, allowGetters = true)
 public class Bruker {
 
     public Bruker() {}
