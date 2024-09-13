@@ -86,7 +86,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         } else {
             if (bruker.get().getRolle().equals(Rolle.LEDER)) {
                 Bruker oppdatertBruker = bruker.get();
-                if (oppdatertBruker.getSistAksessert().toInstant()
+                if (oppdatertBruker.getSistAksessert() == null || oppdatertBruker.getSistAksessert().toInstant()
                         .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusHours(1).toInstant())) {
                     NomRessurs ressurs = nomGraphQLClient.getLedersResurser(authorization, brukerIdent);
                     oppdatertBruker.getLedere().stream()
