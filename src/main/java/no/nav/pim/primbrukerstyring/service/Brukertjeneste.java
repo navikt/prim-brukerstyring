@@ -86,8 +86,8 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         } else {
             if (bruker.get().getRolle().equals(Rolle.LEDER)) {
                 Bruker oppdatertBruker = bruker.get();
-                if (oppdatertBruker.getSistAksessert().toInstant()
-                        .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusMinutes(1).toInstant())) {
+                if (oppdatertBruker.getSistAksessert() == null || oppdatertBruker.getSistAksessert().toInstant()
+                        .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusHours(1).toInstant())) {
                     NomRessurs ressurs = nomGraphQLClient.getLedersResurser(authorization, brukerIdent);
                     oppdatertBruker.getLedere().stream()
                             .filter(leder -> leder.getIdent().equals(ressurs.getNavident()))
@@ -111,7 +111,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         bruker.setIdent(ident);
         bruker.setRolle(brukerDto.getRolle());
         bruker.setTilganger(brukerDto.getTilganger());
-        bruker.setSistAksessert(new Date());
+        bruker.setSistEndret(new Date());
         Set<Leder> ledere = hentLedere(authorization, bruker);
         bruker.setLedere(ledere);
 
@@ -121,6 +121,10 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             if (ressurs != null) {
                 bruker.setNavn(ressurs.getVisningsnavn());
                 bruker.setSluttet(ressurs.getSluttdato() != null && ressurs.getSluttdato().before(new Date()));
+                ressurs.getOrgTilknytning().stream()
+                        .filter(orgTilknytning -> orgTilknytning.getErDagligOppfolging() && orgTilknytning.getGyldigTom() == null)
+                        .findFirst()
+                        .ifPresent(orgTilknytning -> bruker.setEnhet(orgTilknytning.getOrgEnhet().getId()));
             }
         } else {
             bruker.setNavn(finnesBrukerRolle.get().getNavn());
@@ -137,6 +141,8 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         if (eksisterendeBruker.isPresent()) {
             Bruker oppdatertBruker = eksisterendeBruker.get();
             oppdatertBruker.setRolle(bruker.getRolle());
+            oppdatertBruker.setSistEndret(new Date());
+            oppdatertBruker.setEndretEnhet(false);
             return brukerrepository.save(oppdatertBruker);
         } else {
             Metrics.counter("prim_error", "exception", "UserDoesntExistException").increment();
@@ -155,7 +161,8 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             oppdatertBruker.setTilganger(bruker.getTilganger());
             Set<Leder> ledere = hentLedere(authorization, oppdatertBruker);
             oppdatertBruker.setLedere(ledere);
-            oppdatertBruker.setSistAksessert(new Date());
+            oppdatertBruker.setSistEndret(new Date());
+            oppdatertBruker.setEndretEnhet(false);
             return brukerrepository.save(oppdatertBruker);
         } else {
             Metrics.counter("prim_error", "exception", "UserDoesntExistException").increment();
@@ -189,7 +196,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         boolean erHR = bruker.isPresent() && List.of(Rolle.HR_MEDARBEIDER, Rolle.HR_MEDARBEIDER_BEMANNING).contains(bruker.get().getRolle());
         if (erHR) {
             Bruker hrBruker = bruker.get();
-            if (hrBruker.getLedere().isEmpty() || hrBruker.getSistAksessert().toInstant()
+            if (hrBruker.getLedere().isEmpty() || hrBruker.getSistAksessert() == null || hrBruker.getSistAksessert().toInstant()
                     .isBefore(Instant.now().atZone(ZoneId.of("Europe/Paris")).minusHours(4).toInstant())) {
                 Set<Leder> ledere = hentLedere(authorization, hrBruker);
                 hrBruker.setLedere(ledere);

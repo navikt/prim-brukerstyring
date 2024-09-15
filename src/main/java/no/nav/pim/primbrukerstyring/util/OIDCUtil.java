@@ -84,12 +84,12 @@ public class OIDCUtil {
         if (token == null ||
                 (token != null && !kanTokenGjenbrukes(auth, scope, grantType)))  {
             synchronized (this) {
-                log.info("Fornyer token av type {}, scope {}", grantType, scope);
+                log.debug("Fornyer token av type {}, scope {}", grantType, scope);
                 token = hentAccessToken(auth, grantType, scope);
-                log.info("Ny token utløper {}", token.getExpires());
+                log.debug("Ny token utløper {}", token.getExpires());
             }
         } else {
-            log.info("Token med granttype {} gjenbrukes, utløper {}", grantType, (auth != null) ? finnExpiryTime(auth) : null);
+            log.debug("Token med granttype {} gjenbrukes, utløper {}", grantType, (auth != null) ? finnExpiryTime(auth) : null);
         }
         return token.getAccessToken();
     }
@@ -98,8 +98,8 @@ public class OIDCUtil {
         try {
             String tokenGrantType = finnGranttype(token.getAccessToken());
             String mottaker = finnMottaker(token.getAccessToken());
-            log.info("Eksisterende granttype:{}, mottaker:{}, bruker:{}, expiry:{}", tokenGrantType, mottaker, finnBruker(token.getAccessToken()), token.getExpires());
-            log.info("Nytt token: scope:{}, granttype:{}, expiry:{}", scope, grantType, (auth != null) ? finnExpiryTime(auth) : null);
+            log.debug("Eksisterende granttype:{}, mottaker:{}, bruker:{}, expiry:{}", tokenGrantType, mottaker, finnBruker(token.getAccessToken()), token.getExpires());
+            log.debug("Nytt token: scope:{}, granttype:{}, expiry:{}", scope, grantType, (auth != null) ? finnExpiryTime(auth) : null);
             return tokenGrantType.equals(grantType)
                     && tidsgyldig(token)
                     && (CLIENT_CREDENTIAL.equals(grantType) || sammeBruker(auth, token));

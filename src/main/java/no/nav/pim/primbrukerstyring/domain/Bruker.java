@@ -6,7 +6,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import no.nav.pim.primbrukerstyring.util.StringToListConverter;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.*;
 
@@ -17,7 +19,8 @@ import java.util.*;
 @Setter
 @Builder
 @AllArgsConstructor
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@EntityListeners(AuditingEntityListener.class)
+@JsonIgnoreProperties(value = {"created", "updated"}, allowGetters = true)
 public class Bruker {
 
     public Bruker() {}
@@ -46,13 +49,33 @@ public class Bruker {
         inverseJoinColumns = @JoinColumn(name = "leder_id"))
     private Set<Leder> ledere = new HashSet<>();
 
-    @Column(name = "sist_aksessert")
-    @Temporal(TemporalType.TIMESTAMP)
-    @LastModifiedDate
-    private Date sistAksessert;
-
     @Column
     private boolean sluttet = false;
+
+    @Column
+    private boolean endretEnhet = false;
+
+    @Column
+    private String enhet;
+
+    @Column(name = "sist_aksessert")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date sistAksessert;
+
+    @Column(name = "sist_endret")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date sistEndret;
+
+    @Column(nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    @LastModifiedDate
+    private Date updated;
+
+    @Column(nullable = false, updatable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    @CreatedDate
+    private Date created;
+
 
     @Override
     public boolean equals(Object o) {
