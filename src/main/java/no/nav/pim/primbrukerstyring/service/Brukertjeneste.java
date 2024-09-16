@@ -118,7 +118,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             if (ressurs != null) {
                 log.info("NY BRUKER");
                 for (NomOrgTilknytning orgEnhet : ressurs.getOrgTilknytning()) {
-                    log.info("Orgenhet for {}:  navn: {}, daglig oppfølging: {}, tom dato: {}", ressurs.getNavident(), orgEnhet.getOrgEnhet().getNavn(), orgEnhet.getErDagligOppfolging(), orgEnhet.getGyldigTom().toString());
+                    log.info("Orgenhet for {}:  navn: {}, daglig oppfølging: {}", ressurs.getNavident(), orgEnhet.getOrgEnhet().getNavn(), orgEnhet.getErDagligOppfolging());
                 }
                 bruker.setNavn(ressurs.getVisningsnavn());
                 bruker.setSluttet(ressurs.getSluttdato() != null && ressurs.getSluttdato().before(new Date()));
