@@ -7,10 +7,7 @@ import no.nav.pim.primbrukerstyring.domain.*;
 import no.nav.pim.primbrukerstyring.exceptions.AuthorizationException;
 import no.nav.pim.primbrukerstyring.exceptions.NotFoundException;
 import no.nav.pim.primbrukerstyring.nom.NomGraphQLClient;
-import no.nav.pim.primbrukerstyring.nom.domain.NomKobling;
-import no.nav.pim.primbrukerstyring.nom.domain.NomLeder;
-import no.nav.pim.primbrukerstyring.nom.domain.NomOrgEnhet;
-import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
+import no.nav.pim.primbrukerstyring.nom.domain.*;
 import no.nav.pim.primbrukerstyring.repository.BrukerRepository;
 import no.nav.pim.primbrukerstyring.repository.LederRepository;
 import no.nav.pim.primbrukerstyring.repository.OverstyrendeLederRepository;
@@ -122,7 +119,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                 bruker.setNavn(ressurs.getVisningsnavn());
                 bruker.setSluttet(ressurs.getSluttdato() != null && ressurs.getSluttdato().before(new Date()));
                 ressurs.getOrgTilknytning().stream()
-                        .filter(orgTilknytning -> orgTilknytning.getErDagligOppfolging() && orgTilknytning.getGyldigTom() == null)
+                        .filter(orgTilknytning -> orgTilknytning.getErDagligOppfolging() && (orgTilknytning.getGyldigTom() == null || orgTilknytning.getGyldigTom().after(new Date())))
                         .findFirst()
                         .ifPresent(orgTilknytning -> bruker.setEnhet(orgTilknytning.getOrgEnhet().getId()));
             }
