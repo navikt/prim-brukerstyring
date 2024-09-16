@@ -43,7 +43,7 @@ public class BrukerKontroll {
                     bruker.setSluttet(true);
                 }
                 ressurs.getOrgTilknytning().stream()
-                    .filter(orgTilknytning -> orgTilknytning.getErDagligOppfolging() && orgTilknytning.getGyldigTom() == null)
+                    .filter(orgTilknytning -> orgTilknytning.getErDagligOppfolging() && (orgTilknytning.getGyldigTom() == null || orgTilknytning.getGyldigTom().after(new Date())))
                     .map(orgTilknytning -> orgTilknytning.getOrgEnhet().getId())
                     .findFirst().ifPresentOrElse(enhet -> {
                         if (!enhet.equals(bruker.getEnhet())) {

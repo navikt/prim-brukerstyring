@@ -116,14 +116,10 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         if (finnesBrukerRolle.isEmpty()) {
             NomRessurs ressurs = nomGraphQLClient.getRessurs(authorization, ident);
             if (ressurs != null) {
-                log.info("NY BRUKER");
-                for (NomOrgTilknytning orgEnhet : ressurs.getOrgTilknytning()) {
-                    log.info("Orgenhet for {}:  navn: {}, daglig oppfølging: {}", ressurs.getNavident(), orgEnhet.getOrgEnhet().getNavn(), orgEnhet.getErDagligOppfolging());
-                }
                 bruker.setNavn(ressurs.getVisningsnavn());
                 bruker.setSluttet(ressurs.getSluttdato() != null && ressurs.getSluttdato().before(new Date()));
                 ressurs.getOrgTilknytning().stream()
-                        .filter(orgTilknytning -> orgTilknytning.getErDagligOppfolging() && orgTilknytning.getGyldigTom() == null)
+                        .filter(orgTilknytning -> orgTilknytning.getErDagligOppfolging() && (orgTilknytning.getGyldigTom() == null || orgTilknytning.getGyldigTom().after(new Date())))
                         .findFirst()
                         .ifPresent(orgTilknytning -> bruker.setEnhet(orgTilknytning.getOrgEnhet().getId()));
             }
