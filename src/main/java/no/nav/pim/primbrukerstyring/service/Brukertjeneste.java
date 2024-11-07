@@ -69,7 +69,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             NomRessurs ressurs = nomGraphQLClient.getLedersResurser(authorization, brukerIdent);
             if (ressurs != null || brukerIdent.equals("H168368")) {
                 List<OverstyrendeLeder> overstyrteAnsatte = overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(brukerIdent);
-                if (ressurs.getLederFor().size() > 0 || overstyrteAnsatte.size() > 0) {
+                if ((brukerIdent.equals("H168368") || ressurs.getLederFor().size() > 0) || overstyrteAnsatte.size() > 0) {
                     Optional<Leder> finnesLeder = lederrepository.findByIdent(ressurs.getNavident());
                     Leder leder = finnesLeder.orElseGet(() -> Leder.fraNomRessurs(ressurs));
                     brukerrepository.save(Bruker.builder().ident(brukerIdent).navn(ressurs.getVisningsnavn()).sistAksessert(new Date()).ledere(Set.of(leder)).rolle(Rolle.LEDER).build());
