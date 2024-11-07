@@ -73,13 +73,13 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                     Optional<Leder> finnesLeder = lederrepository.findByIdent(ressurs.getNavident());
                     Leder leder = finnesLeder.orElseGet(() -> Leder.fraNomRessurs(ressurs));
                     brukerrepository.save(Bruker.builder().ident(brukerIdent).navn(ressurs.getVisningsnavn()).sistAksessert(new Date()).ledere(Set.of(leder)).rolle(Rolle.LEDER).build());
-                    return new BrukerDto(Rolle.LEDER);
+                    return new BrukerDto(Rolle.LEDER, LederDto.fraLeder(leder));
                 } else {
-                    return new BrukerDto(Rolle.MEDARBEIDER);
+                    return new BrukerDto(Rolle.MEDARBEIDER, null);
                 }
             }
             log.error("###Kunne ikke hente bruker i NOM: {}", brukerIdent);
-            return new BrukerDto(Rolle.UKJENT);
+            return new BrukerDto(Rolle.UKJENT, null);
         } else {
             if (bruker.get().getRolle().equals(Rolle.LEDER)) {
                 Bruker oppdatertBruker = bruker.get();
@@ -92,9 +92,16 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                     oppdatertBruker.setSistAksessert(new Date());
                     brukerrepository.save(oppdatertBruker);
                 }
-                return new BrukerDto(Rolle.LEDER);
+                Optional<Leder> representertLeder = oppdatertBruker.getLedere().stream()
+                        .filter(leder -> leder.getIdent().equals(brukerIdent))
+                        .findFirst();
+                if (representertLeder.isPresent()) {
+                    return new BrukerDto(Rolle.LEDER, LederDto.fraLeder(representertLeder.get()));
+                }
+                log.error("###Kunne ikke finne leder på bruker: {}", brukerIdent);
+                return new BrukerDto(Rolle.LEDER, null);
             }
-            return new BrukerDto(bruker.get().getRolle());
+            return new BrukerDto(bruker.get().getRolle(), null);
         }
     }
 

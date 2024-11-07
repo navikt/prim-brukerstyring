@@ -9,4 +9,6 @@ import no.nav.pim.primbrukerstyring.domain.Rolle;
 public class BrukerDto {
 
     Rolle rolle;
+
+    LederDto representertLeder;
 }
