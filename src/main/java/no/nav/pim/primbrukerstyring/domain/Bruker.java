@@ -39,7 +39,7 @@ public class Bruker {
 
     @Column(name = "tilganger")
     @Convert(converter = StringToListConverter.class)
-    private List<String> tilganger;
+    private List<String> tilganger = Collections.emptyList();
 
     @JsonBackReference
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
