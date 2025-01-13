@@ -119,7 +119,16 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                         """.formatted(navident);
 
         try {
-            HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();
+            HttpGraphQlClient graphQlClient = HttpGraphQlClient
+                    .create(webClient)
+                    .mutate()
+                    .header("Authorization", oidcUtil.getAuthHeader(authorization, scope))
+                    .codecConfigurer(configurer ->
+                        configurer
+                            .defaultCodecs()
+                            .maxInMemorySize(10 * 1024 * 1024)
+                    )
+                    .build();
             return graphQlClient
                     .document(document)
                     .retrieve("ressurs")
