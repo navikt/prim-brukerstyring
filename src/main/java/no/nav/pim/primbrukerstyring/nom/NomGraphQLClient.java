@@ -120,7 +120,12 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
 
         try {
             HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();
-            return graphQlClient.document(document).retrieve("ressurs").toEntity(NomRessurs.class).block();
+            return graphQlClient
+                    .document(document)
+                    .retrieve("ressurs")
+                    .toEntity(NomRessurs.class)
+                    .doOnError((error) -> log.info("GraphQL feilmelding: {}", error.getMessage()))
+                    .block();
         } catch (Exception e) {
             log.info("Noe gikk galt med henting av leders ressurser i NOM for navident {}. Feilmelding: {}", navident, e.getMessage());
         }
