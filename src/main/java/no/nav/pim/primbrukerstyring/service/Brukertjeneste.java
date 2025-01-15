@@ -273,7 +273,6 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                 .map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id))
                 .flatMap(this::hentOrgenhetsLedere)
                 .distinct()
-                .filter(nomLeder -> nomLeder.getSluttdato() == null || nomLeder.getSluttdato().after(new Date()))
                 .map(Leder::fraNomRessurs)
                 .forEach(oppdatertLeder -> {
                     Optional<Leder> eksisterendeLeder = lederrepository.findByIdent(oppdatertLeder.getIdent());

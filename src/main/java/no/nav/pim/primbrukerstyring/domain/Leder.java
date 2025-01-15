@@ -9,10 +9,7 @@ import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 import no.nav.pim.primbrukerstyring.nom.domain.NomTelefon;
 import no.nav.pim.primbrukerstyring.nom.domain.NomTelefonType;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -46,6 +43,7 @@ public class Leder {
                 .email(ressurs.getEpost())
                 .tlf(telefonnummer.orElse(null))
                 .orgEnheter(orgEnheter)
+                .sluttet(ressurs.getSluttdato() != null && ressurs.getSluttdato().after(new Date()))
                 .erDirektoratsleder(ressurs.getLederFor() != null && ressurs.getLederFor().stream().anyMatch((nomLederFor -> nomLederFor.getOrgEnhet().getOrgEnhetsType() != null && nomLederFor.getOrgEnhet().getOrgEnhetsType().equals("DIREKTORAT"))))
                 .build();
     }
@@ -75,6 +73,9 @@ public class Leder {
     @NotNull
     private Boolean erDirektoratsleder;
 
+    @Column
+    private Boolean sluttet;
+
     @JsonManagedReference
     @ManyToMany(mappedBy = "ledere")
     private Set<Bruker> brukere = new HashSet<>();
@@ -89,6 +90,7 @@ public class Leder {
         this.tlf = oppdatertLeder.getTlf();
         this.erDirektoratsleder = oppdatertLeder.getErDirektoratsleder();
         this.orgEnheter = oppdatertLeder.getOrgEnheter();
+        this.sluttet = oppdatertLeder.getSluttet();
         return this;
     }
 

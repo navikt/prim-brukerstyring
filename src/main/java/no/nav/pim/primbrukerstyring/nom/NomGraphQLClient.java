@@ -173,8 +173,17 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                         """.formatted(navident);
 
         try {
-            HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();
-            return graphQlClient.document(document).retrieve("ressurs").toEntity(NomRessurs.class).block();
+            HttpGraphQlClient graphQlClient = HttpGraphQlClient
+                    .create(webClient)
+                    .mutate()
+                    .header("Authorization", oidcUtil.getAuthHeader(authorization, scope))
+                    .build();
+            return graphQlClient
+                    .document(document)
+                    .retrieve("ressurs")
+                    .toEntity(NomRessurs.class)
+                    .doOnError(Throwable::printStackTrace)
+                    .block();
         } catch (Exception e) {
             log.info("Noe gikk galt med henting av leders ressurser i NOM for navident {}. Feilmelding: {}", navident, e.getMessage());
         }
@@ -243,8 +252,17 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
             }
             """;
         try {
-            HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();
-            return graphQlClient.document(document).retrieve("orgEnheter").toEntityList(NomOrganisering.class).block();
+            HttpGraphQlClient graphQlClient = HttpGraphQlClient
+                    .create(webClient)
+                    .mutate()
+                    .header("Authorization", oidcUtil.getAuthHeader(authorization, scope))
+                    .build();
+            return graphQlClient
+                    .document(document)
+                    .retrieve("orgEnheter")
+                    .toEntityList(NomOrganisering.class)
+                    .doOnError(Throwable::printStackTrace)
+                    .block();
         } catch (Exception e) {
             log.info("Noe gikk galt med henting av organisasjons pyramiden. Feilmelding: {}", e.getMessage());
         }
@@ -507,8 +525,17 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
             }
             """.formatted(organisasjonsId);
         try {
-            HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();
-            return graphQlClient.document(document).retrieve("orgEnhet").toEntity(NomOrgEnhet.class).block();
+            HttpGraphQlClient graphQlClient = HttpGraphQlClient
+                    .create(webClient)
+                    .mutate()
+                    .header("Authorization", oidcUtil.getAuthHeader(authorization, scope))
+                    .build();
+            return graphQlClient
+                    .document(document)
+                    .retrieve("orgEnhet")
+                    .toEntity(NomOrgEnhet.class)
+                    .doOnError(Throwable::printStackTrace)
+                    .block();
         } catch (Exception e) {
             log.info("Noe gikk galt med henting av organisasjon {}. Feilmelding: {}", organisasjonsId, e.getMessage());
         }
