@@ -110,28 +110,21 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     @PostMapping(path = "/rolle", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Bruker leggTilBrukerRolle(@RequestHeader(value = "Authorization") String authorization, @Valid @RequestBody BrukerRolleTilgangerDto brukerDto) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "leggTilBrukerRolle").increment();
-        String ident = brukerDto.getIdent();
-        Bruker bruker = new Bruker();
-        bruker.setIdent(ident);
+        Bruker bruker = brukerrepository.findByIdent(brukerDto.getIdent()).orElse(new Bruker());
+        bruker.setIdent(brukerDto.getIdent());
         bruker.setRolle(brukerDto.getRolle());
-        bruker.setTilganger(brukerDto.getTilganger());
         bruker.setSistEndret(new Date());
         Set<Leder> ledere = hentLedere(authorization, bruker);
         bruker.setLedere(ledere);
 
-        Optional<Bruker> finnesBrukerRolle = brukerrepository.findByIdent(ident);
-        if (finnesBrukerRolle.isEmpty()) {
-            NomRessurs ressurs = nomGraphQLClient.getRessurs(authorization, ident);
-            if (ressurs != null) {
-                bruker.setNavn(ressurs.getVisningsnavn());
-                bruker.setSluttet(ressurs.getSluttdato() != null && ressurs.getSluttdato().before(new Date()));
-                ressurs.getOrgTilknytning().stream()
-                        .filter(orgTilknytning -> orgTilknytning.getErDagligOppfolging() && (orgTilknytning.getGyldigTom() == null || orgTilknytning.getGyldigTom().after(new Date())))
-                        .findFirst()
-                        .ifPresent(orgTilknytning -> bruker.setEnhet(orgTilknytning.getOrgEnhet().getId()));
-            }
-        } else {
-            bruker.setNavn(finnesBrukerRolle.get().getNavn());
+        NomRessurs ressurs = nomGraphQLClient.getRessurs(authorization, brukerDto.getIdent());
+        if (ressurs != null) {
+            bruker.setNavn(ressurs.getVisningsnavn());
+            bruker.setSluttet(ressurs.getSluttdato() != null && ressurs.getSluttdato().before(new Date()));
+            ressurs.getOrgTilknytning().stream()
+                    .filter(orgTilknytning -> orgTilknytning.getErDagligOppfolging() && (orgTilknytning.getGyldigTom() == null || orgTilknytning.getGyldigTom().after(new Date())))
+                    .findFirst()
+                    .ifPresent(orgTilknytning -> bruker.setEnhet(orgTilknytning.getOrgEnhet().getId()));
         }
         return brukerrepository.save(bruker);
     }
@@ -280,7 +273,6 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                 .map((id) -> nomGraphQLClient.hentOrganisasjoner(authorization, id))
                 .flatMap(this::hentOrgenhetsLedere)
                 .distinct()
-                .filter(nomLeder -> nomLeder.getSluttdato() == null || nomLeder.getSluttdato().after(new Date()))
                 .map(Leder::fraNomRessurs)
                 .forEach(oppdatertLeder -> {
                     Optional<Leder> eksisterendeLeder = lederrepository.findByIdent(oppdatertLeder.getIdent());

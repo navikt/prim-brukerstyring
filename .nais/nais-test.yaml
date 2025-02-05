@@ -18,7 +18,7 @@ spec:
   gcp:
     sqlInstances:
       - name: prim-brukerstyring-test
-        type: POSTGRES_14
+        type: POSTGRES_16
         diskSize: 10
         databases:
           - name: prim-brukerstyring-test

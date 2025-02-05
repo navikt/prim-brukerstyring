@@ -15,6 +15,7 @@ public class LederDto implements Comparable<LederDto> {
                 .ident(leder.getIdent())
                 .navn(leder.getNavn())
                 .erDirektoratsleder(leder.getErDirektoratsleder())
+                .sluttet(leder.getSluttet())
                 .email(leder.getEmail())
                 .tlf(leder.getTlf())
                 .orgEnheter(leder.getOrgEnheter())
@@ -26,6 +27,8 @@ public class LederDto implements Comparable<LederDto> {
     String navn;
 
     Boolean erDirektoratsleder;
+
+    Boolean sluttet;
 
     String email;
 
