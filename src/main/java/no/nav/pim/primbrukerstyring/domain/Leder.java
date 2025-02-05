@@ -63,7 +63,6 @@ public class Leder {
     private String navn;
 
     @Column
-    @NotNull
     private String email;
 
     @Column
