@@ -191,6 +191,11 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                     .create(webClient)
                     .mutate()
                     .header("Authorization", oidcUtil.getAuthHeader(authorization, scope))
+                    .codecConfigurer(configurer ->
+                        configurer
+                            .defaultCodecs()
+                            .maxInMemorySize(10 * 1024 * 1024)
+                    )
                     .build();
             return graphQlClient
                     .document(document)
@@ -270,6 +275,11 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                     .create(webClient)
                     .mutate()
                     .header("Authorization", oidcUtil.getAuthHeader(authorization, scope))
+                    .codecConfigurer(configurer ->
+                        configurer
+                            .defaultCodecs()
+                            .maxInMemorySize(10 * 1024 * 1024)
+                    )
                     .build();
             return graphQlClient
                     .document(document)
@@ -543,6 +553,11 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                     .create(webClient)
                     .mutate()
                     .header("Authorization", oidcUtil.getAuthHeader(authorization, scope))
+                    .codecConfigurer(configurer ->
+                        configurer
+                            .defaultCodecs()
+                            .maxInMemorySize(10 * 1024 * 1024)
+                    )
                     .build();
             return graphQlClient
                     .document(document)
