@@ -120,7 +120,8 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
 
         try {
             HttpGraphQlClient graphQlClient = HttpGraphQlClient
-                    .create(webClient).mutate()
+                    .create(webClient)
+                    .mutate()
                     .header("Authorization", oidcUtil.getAuthHeader(authorization, scope))
                     .codecConfigurer(configurer ->
                         configurer
