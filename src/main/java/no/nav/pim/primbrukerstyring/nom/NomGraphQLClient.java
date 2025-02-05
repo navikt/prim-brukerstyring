@@ -132,6 +132,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                     .document(document)
                     .retrieve("ressurs")
                     .toEntity(NomRessurs.class)
+                    .doOnError(Throwable::printStackTrace)
                     .block();
         } catch (Exception e) {
             log.info("Noe gikk galt med henting av leders ressurser i NOM for navident {}. Feilmelding: {}", navident, e.getMessage());
