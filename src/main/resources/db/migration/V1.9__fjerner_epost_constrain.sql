@@ -1,0 +1,2 @@
+ALTER TABLE leder
+    ALTER COLUMN email DROP NOT NULL;
