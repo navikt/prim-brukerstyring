@@ -119,8 +119,20 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                         """.formatted(navident);
 
         try {
-            HttpGraphQlClient graphQlClient = HttpGraphQlClient.create(webClient).mutate().header("Authorization", oidcUtil.getAuthHeader(authorization, scope)).build();
-            return graphQlClient.document(document).retrieve("ressurs").toEntity(NomRessurs.class).block();
+            HttpGraphQlClient graphQlClient = HttpGraphQlClient
+                    .create(webClient).mutate()
+                    .header("Authorization", oidcUtil.getAuthHeader(authorization, scope))
+                    .codecConfigurer(configurer ->
+                        configurer
+                            .defaultCodecs()
+                            .maxInMemorySize(10 * 1024 * 1024)
+                    )
+                    .build();
+            return graphQlClient
+                    .document(document)
+                    .retrieve("ressurs")
+                    .toEntity(NomRessurs.class)
+                    .block();
         } catch (Exception e) {
             log.info("Noe gikk galt med henting av leders ressurser i NOM for navident {}. Feilmelding: {}", navident, e.getMessage());
         }
@@ -177,6 +189,11 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                     .create(webClient)
                     .mutate()
                     .header("Authorization", oidcUtil.getAuthHeader(authorization, scope))
+                    .codecConfigurer(configurer ->
+                        configurer
+                            .defaultCodecs()
+                            .maxInMemorySize(10 * 1024 * 1024)
+                    )
                     .build();
             return graphQlClient
                     .document(document)
@@ -256,6 +273,11 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                     .create(webClient)
                     .mutate()
                     .header("Authorization", oidcUtil.getAuthHeader(authorization, scope))
+                    .codecConfigurer(configurer ->
+                        configurer
+                            .defaultCodecs()
+                            .maxInMemorySize(10 * 1024 * 1024)
+                    )
                     .build();
             return graphQlClient
                     .document(document)
@@ -529,6 +551,11 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                     .create(webClient)
                     .mutate()
                     .header("Authorization", oidcUtil.getAuthHeader(authorization, scope))
+                    .codecConfigurer(configurer ->
+                        configurer
+                            .defaultCodecs()
+                            .maxInMemorySize(10 * 1024 * 1024)
+                    )
                     .build();
             return graphQlClient
                     .document(document)
