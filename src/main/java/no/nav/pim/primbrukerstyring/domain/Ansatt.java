@@ -28,6 +28,18 @@ public class Ansatt {
                 .map(nomLeder -> AnsattStillingsavtale.fraNomLeder(nomLeder, AnsattType.fraNomSektor(ressurs.getSektor()), erOverstyrt)).collect(Collectors.toSet());
         if (erOverstyrt) stillingsavtaler.add(ansattStillingsavtale);
         nyAnsatt.setStillingsavtaler(stillingsavtaler);
+
+        Set<AnsattStillingsavtale> stillingsavtalerUtenDuplikater = stillingsavtaler.stream()
+                .filter(stillingsavtale -> {
+                    if (stillingsavtaler.stream().anyMatch(sa -> sa.getLeder().getIdent().equals(stillingsavtale.getLeder().getIdent())
+                            && sa.getStillingsavtale().equals(Stillingsavtale.DR))) { // Finnes en direkterapporterende avtale koblet på samme leder
+                        return stillingsavtale.getStillingsavtale().equals(Stillingsavtale.DR); // Tar kun med direkterapporterende avtale
+                    }
+                    return true;
+                })
+                .collect(Collectors.toSet());
+
+        nyAnsatt.setStillingsavtaler(stillingsavtalerUtenDuplikater);
         return nyAnsatt;
     }
 
