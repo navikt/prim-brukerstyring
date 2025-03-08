@@ -70,10 +70,7 @@ spec:
         - application: prim-admin-gui-test
           namespace: pim
           cluster: dev-gcp
-        - application: prim-bemanningsbehov-test
-          namespace: pim
-          cluster: dev-gcp
-        - application: pim-bemanning-test
+        - application: prim-test
           namespace: pim
           cluster: dev-gcp
         - application: bemanningsbehov-test
