@@ -69,7 +69,7 @@ spec:
         - application: prim-admin-gui
           namespace: pim
           cluster: prod-gcp
-        - application: prim
+        - application: prim-frontend
           namespace: pim
           cluster: prod-gcp
         - application: bemanningsbehov
