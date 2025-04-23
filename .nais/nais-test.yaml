@@ -41,6 +41,10 @@ spec:
           - "NAVident"
   ingresses:
     - https://prim-brukerstyring-test.intern.dev.nav.no
+  observability:
+    logging:
+      destinations:
+        - id: loki
   liveness:
     path: /internal/isAlive
     port: 8080
