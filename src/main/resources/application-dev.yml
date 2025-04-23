@@ -24,6 +24,10 @@ spring:
             non_contextual_creation: true
     show-sql: false
 
+springdoc:
+  swagger-ui.path: /internal/swagger-ui.html
+  pathsToMatch: /**
+
 nais_cluster: local-dev
 
 nom:
