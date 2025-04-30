@@ -41,10 +41,6 @@ spec:
           - "NAVident"
   ingresses:
     - https://prim-brukerstyring-test.intern.dev.nav.no
-  observability:
-    logging:
-      destinations:
-        - id: loki
   liveness:
     path: /internal/isAlive
     port: 8080
@@ -91,3 +87,10 @@ spec:
         - application: nom-api
           namespace: nom
           cluster: dev-gcp
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: loki
