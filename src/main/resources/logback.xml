@@ -4,6 +4,8 @@
         <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
     </appender>
 
+    <logger name="prim-brukerstyring" level="INFO"/>
+
     <root level="INFO">
         <appender-ref ref="stdout_json" />
     </root>
