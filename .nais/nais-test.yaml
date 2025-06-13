@@ -87,3 +87,10 @@ spec:
         - application: nom-api
           namespace: nom
           cluster: dev-gcp
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: loki
