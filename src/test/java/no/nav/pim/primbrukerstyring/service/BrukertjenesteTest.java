@@ -18,9 +18,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -47,28 +47,28 @@ public class BrukertjenesteTest {
     @Autowired
     MockMvc mvc;
 
-    @MockBean
+    @MockitoBean
     MeterRegistry metricsRegistry;
 
-    @MockBean
+    @MockitoBean
     Ansatttjeneste ansatttjeneste;
 
-    @MockBean
+    @MockitoBean
     BrukerRepository brukerrepository;
 
-    @MockBean
+    @MockitoBean
     LederRepository lederrepository;
 
-    @MockBean
+    @MockitoBean
     DriftOgVedlikeholdRepository driftOgVedlikeholdRepository;
 
-    @MockBean
+    @MockitoBean
     OverstyrendeLederRepository overstyrendelederrepository;
 
-    @MockBean
+    @MockitoBean
     OIDCUtil oidcUtil;
 
-    @MockBean
+    @MockitoBean
     NomGraphQLClient nomGraphQLClient;
 
     private String ident;
