@@ -41,19 +41,10 @@ Dersom du skal nå testmiljø endrer du påfølgende navn til _prim-brukerstyrin
 
 Gjør klar tilganger:
 ```bash
-nais postgres prepare --all-privs prim-brukerstyring
+nais postgres prepare prim-brukerstyring
 nais postgres grant prim-brukerstyring
 ```
 Start proxy-server:
 ```bash
 nais postgres proxy prim-brukerstyring
-```
-
-Denne kan kobles på med bruker og passord som er lagret lokalt på klusteret og du finner med:
-```bash
-kubectl exec -it prim-brukerstyring-XXXXXXX -c prim-brukerstyring -- env
-```
-pod-nummeret XXXXXXX kan du finne med:
-```bash
-kubectl get pods
 ```
