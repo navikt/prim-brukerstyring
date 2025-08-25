@@ -11,7 +11,6 @@ import no.nav.pim.primbrukerstyring.repository.BrukerRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.metrics.data.DefaultRepositoryTagsProvider;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -31,7 +30,6 @@ public class BrukerKontroll {
 
     @Autowired
     NomGraphQLClient nomGraphQLClient;
-    private DefaultRepositoryTagsProvider repositoryTagsProvider;
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
     @Scheduled(cron = "${brukerstatuskontroll.cron-pattern:\"0 0 0 * * *\"}")
