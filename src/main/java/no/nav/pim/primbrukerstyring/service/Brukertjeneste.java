@@ -156,6 +156,9 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         if (eksisterendeBruker.isPresent()) {
             Bruker oppdatertBruker = eksisterendeBruker.get();
             oppdatertBruker.setTilganger(bruker.getTilganger());
+            oppdatertBruker.setUkjentTilgang(
+                oppdatertBruker.getUkjentTilgang().stream().filter((id) -> bruker.getTilganger().contains(id)).toList()
+            );
             Set<Leder> ledere = hentLedere(authorization, oppdatertBruker);
             oppdatertBruker.setLedere(ledere);
             oppdatertBruker.setSistEndret(new Date());

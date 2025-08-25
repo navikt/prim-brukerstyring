@@ -1,6 +1,7 @@
 package no.nav.pim.primbrukerstyring.repository;
 
 import no.nav.pim.primbrukerstyring.domain.OverstyrendeLeder;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,4 +14,8 @@ public interface OverstyrendeLederRepository extends JpaRepository<OverstyrendeL
     Optional<OverstyrendeLeder> findByAnsattIdentAndTilIsNull(String ansattIdent);
 
     List<OverstyrendeLeder> findByOverstyrendeLeder_IdentAndTilIsNull(String ident);
+
+    List<OverstyrendeLeder> findAllByTilIsNull(Sort sort);
+
+    List<OverstyrendeLeder> findAllByTilIsNotNull(Sort sort);
 }

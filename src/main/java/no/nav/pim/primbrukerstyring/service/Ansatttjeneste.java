@@ -117,6 +117,10 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
     public List<OverstyrendeLeder> hentAlleOverstyrendeLedere(@RequestHeader(value = "Authorization") String authorization) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "hentAlleOverstyrendeLedere").increment();
 
-        return overstyrendelederrepository.findAll(Sort.by(List.of(new Sort.Order(Sort.Direction.DESC, "til", Sort.NullHandling.NULLS_FIRST), new Sort.Order(Sort.Direction.DESC,"fra"))));
+        List<OverstyrendeLeder> deaktiveOverstyrendeLeder = overstyrendelederrepository.findAllByTilIsNotNull(Sort.by(Sort.Direction.DESC, "til"));
+        List<OverstyrendeLeder> overstyrendeLedere = overstyrendelederrepository.findAllByTilIsNull(Sort.by(Sort.Direction.DESC, "fra"));
+
+        overstyrendeLedere.addAll(deaktiveOverstyrendeLeder);
+        return overstyrendeLedere;
     }
 }

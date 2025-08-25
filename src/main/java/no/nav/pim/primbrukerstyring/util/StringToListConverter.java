@@ -18,7 +18,7 @@ public class StringToListConverter implements AttributeConverter<List<String>, S
 
     @Override
     public List<String> convertToEntityAttribute(String joined) {
-        if(joined == null) return new ArrayList<>();
+        if(joined == null || joined.isEmpty()) return new ArrayList<>();
         return new ArrayList<>(Arrays.asList(joined.split(",")));
     }
 }

@@ -41,6 +41,10 @@ public class Bruker {
     @Convert(converter = StringToListConverter.class)
     private List<String> tilganger = Collections.emptyList();
 
+    @Column(name = "ukjent_tilgang")
+    @Convert(converter = StringToListConverter.class)
+    private List<String> ukjentTilgang = Collections.emptyList();
+
     @JsonBackReference
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
     @JoinTable(
