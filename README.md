@@ -4,7 +4,13 @@ En av 5 backend applikasjoner for PRIM. PRIM er et lederverktøy og en plattform
 ## Sett opp lokal Postgres DB
 Last ned postgres på din maskin og sett opp databasen med
 ```bash
-createdb -h localhost -p 5432 -U postgres brukerstyring
+createdb -h localhost -p 5432 brukerstyring
+```
+
+Det må også opprettes roller i postgres for at applikasjonen skal kunne starte lokalt:
+```bash
+CREATE ROLE postgres LOGIN;
+CREATE ROLE cloudsqliamuser LOGIN;
 ```
 
 ## Starte lokalt fra IntelliJ
