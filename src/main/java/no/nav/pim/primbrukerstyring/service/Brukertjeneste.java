@@ -69,7 +69,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             NomRessurs ressurs = nomGraphQLClient.getLedersResurser(authorization, brukerIdent);
             if (ressurs != null) {
                 List<OverstyrendeLeder> overstyrteAnsatte = overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(brukerIdent);
-                if (ressurs.getLederFor().size() > 0 || overstyrteAnsatte.size() > 0) {
+                if (!ressurs.getLederFor().isEmpty() || !overstyrteAnsatte.isEmpty()) {
                     Optional<Leder> finnesLeder = lederrepository.findByIdent(ressurs.getNavident());
                     Leder leder = finnesLeder.orElseGet(() -> Leder.fraNomRessurs(ressurs));
                     brukerrepository.save(Bruker.builder().ident(brukerIdent).navn(ressurs.getVisningsnavn()).sistAksessert(new Date()).ledere(Set.of(leder)).rolle(Rolle.LEDER).build());
@@ -89,6 +89,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                     oppdatertBruker.getLedere().stream()
                             .filter(leder -> leder.getIdent().equals(ressurs.getNavident()))
                             .forEach(leder -> leder.oppdaterMed(Leder.fraNomRessurs(ressurs)));
+                    oppdatertBruker.setNavn(ressurs.getVisningsnavn());
                     oppdatertBruker.setSistAksessert(new Date());
                     brukerrepository.save(oppdatertBruker);
                 }
@@ -266,7 +267,10 @@ public class Brukertjeneste implements BrukertjenesteInterface {
 
     private Stream<NomRessurs> hentOrgenhetsLedere(NomOrgEnhet orgEnhet){
         if (orgEnhet == null) return Stream.empty();
-        return Stream.concat(orgEnhet.getLeder().stream().map(NomLeder::getRessurs), orgEnhet.getOrganiseringer().stream().flatMap((organisering -> hentOrgenhetsLedere(organisering.getOrgEnhet()))));
+        return Stream.concat(
+                orgEnhet.getLeder().stream().map(NomLeder::getRessurs),
+                orgEnhet.getOrganiseringer().stream().flatMap((organisering -> hentOrgenhetsLedere(organisering.getOrgEnhet())))
+        );
     }
 
     private Set<Leder> hentLedere(String authorization, Bruker bruker) {
