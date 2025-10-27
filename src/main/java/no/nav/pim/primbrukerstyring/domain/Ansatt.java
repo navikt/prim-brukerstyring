@@ -27,7 +27,6 @@ public class Ansatt {
                 .distinct()
                 .map(nomLeder -> AnsattStillingsavtale.fraNomLeder(nomLeder, AnsattType.fraNomSektor(ressurs.getSektor()), erOverstyrt)).collect(Collectors.toSet());
         if (erOverstyrt) stillingsavtaler.add(ansattStillingsavtale);
-        nyAnsatt.setStillingsavtaler(stillingsavtaler);
 
         Set<AnsattStillingsavtale> stillingsavtalerUtenDuplikater = stillingsavtaler.stream()
                 .filter(stillingsavtale -> {

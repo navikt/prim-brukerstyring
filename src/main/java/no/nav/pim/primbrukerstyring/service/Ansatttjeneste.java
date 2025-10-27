@@ -45,6 +45,21 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
+    @GetMapping(path = "/info/{ident}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public EnkelAnsattInfo hentEnkelAnsattInfo(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident) {
+        metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "hentEnkelAnsattInfo").increment();
+
+        NomRessurs ressurs = nomGraphQLClient.getRessurs(authorization, ident);
+        if (ressurs != null) {
+            return EnkelAnsattInfo.fraNomRessurs(ressurs);
+        } else {
+            log.error("###Kunne ikke hente ansatt informasjon {} i NOM.", ident);
+            throw new NotFoundException("Kunne ikke finne ansatt " + ident + " i NOM.");
+        }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
     @GetMapping(path = "/{ident}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Ansatt hentAnsatt(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "hentAnsatt").increment();
