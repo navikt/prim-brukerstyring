@@ -45,7 +45,7 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-    @GetMapping(path = "/info/{ident}")
+    @GetMapping(path = "/info/{ident}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public EnkelAnsattInfo hentEnkelAnsattInfo(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "hentEnkelAnsattInfo").increment();
 
