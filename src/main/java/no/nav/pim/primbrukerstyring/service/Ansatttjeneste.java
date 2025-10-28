@@ -44,8 +44,8 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
     OverstyrendeLederRepository overstyrendelederrepository;
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
-    @GetMapping(path = "/info/{ident}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+    @GetMapping(path = "/info/{ident}")
     public EnkelAnsattInfo hentEnkelAnsattInfo(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "hentEnkelAnsattInfo").increment();
 
