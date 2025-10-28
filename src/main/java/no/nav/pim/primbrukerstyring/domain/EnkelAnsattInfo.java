@@ -7,6 +7,7 @@ import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 import java.util.Optional;
 
 @Builder
+@Data
 public class EnkelAnsattInfo {
     static public EnkelAnsattInfo fraNomRessurs(NomRessurs ressurs) {
 
