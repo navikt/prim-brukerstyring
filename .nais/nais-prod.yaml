@@ -81,6 +81,9 @@ spec:
         - application: ferdig-utprovd
           namespace: pim
           cluster: prod-gcp
+        - application: prim-pdf
+          namespace: pim
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nom-api
