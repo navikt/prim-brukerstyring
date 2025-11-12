@@ -85,6 +85,9 @@ spec:
         - application: prim-pdf
           namespace: pim
           cluster: dev-gcp
+        - application: org-token-tool
+          namespace: org
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nom-api
