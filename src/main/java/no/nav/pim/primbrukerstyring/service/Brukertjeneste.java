@@ -228,8 +228,9 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                                 .flatMap(org -> org.getOrgEnhet().getLeder().stream().map(NomLeder::getRessurs));
                         return Stream.concat(koblinger, organiseringer);
                     })
-                    .filter(ressurs -> !ressurs.getNavident().equals(lederIdent)
-                            && ressurs.getLedere().stream().anyMatch(leder -> leder.getRessurs().getNavident().equals(lederIdent))
+                    .filter(ressurs -> ressurs.getIdentType() != NomIdentType.ROBOT
+                                       && !ressurs.getNavident().equals(lederIdent)
+                                       && ressurs.getLedere().stream().anyMatch(leder -> leder.getRessurs().getNavident().equals(lederIdent))
                     )
                     .distinct().map(ressurs -> {
                         Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsNull(ressurs.getNavident());
@@ -237,6 +238,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                         if (overstyrendeLeder.isPresent()) {
                             ansattStillingsavtale = AnsattStillingsavtale.fraOverstyrendeLeder(overstyrendeLeder.get());
                         }
+
                         return Ansatt.fraNomRessurs(ressurs, ansattStillingsavtale);
                     }).toList();
             Stream<Ansatt> overstyrteAnsatte = overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(lederIdent).stream()

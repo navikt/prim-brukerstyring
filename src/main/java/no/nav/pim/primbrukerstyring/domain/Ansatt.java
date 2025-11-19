@@ -3,6 +3,8 @@ package no.nav.pim.primbrukerstyring.domain;
 import lombok.*;
 import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -39,12 +41,17 @@ public class Ansatt {
                 .collect(Collectors.toSet());
 
         nyAnsatt.setStillingsavtaler(stillingsavtalerUtenDuplikater);
+        nyAnsatt.setAktiv(ressurs.getOrgTilknytning().stream().anyMatch(orgTilknytning ->
+                !orgTilknytning.getGyldigFom().after(Date.from(Instant.now()))
+        ));
         return nyAnsatt;
     }
 
     String ident;
 
     String navn;
+
+    Boolean aktiv;
 
     Set<AnsattStillingsavtale> stillingsavtaler = new HashSet<>();
 

@@ -8,5 +8,6 @@ import java.util.Date;
 public class NomOrgTilknytning {
     Boolean erDagligOppfolging;
     NomOrgEnhet orgEnhet;
+    Date gyldigFom;
     Date gyldigTom;
 }

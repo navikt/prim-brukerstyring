@@ -60,6 +60,10 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                         navident
                                         visningsnavn
                                         sektor
+                                        identType
+                                        orgTilknytning {
+                                            gyldigFom
+                                        }
                                         ledere {
                                             erDagligOppfolging
                                             ressurs {
@@ -89,6 +93,10 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                                 navident
                                                 visningsnavn
                                                 sektor
+                                                identType
+                                                orgTilknytning {
+                                                    gyldigFom
+                                                }
                                                 ledere {
                                                     erDagligOppfolging
                                                     ressurs {
