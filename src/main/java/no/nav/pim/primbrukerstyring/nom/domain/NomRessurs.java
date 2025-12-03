@@ -16,5 +16,5 @@ public class NomRessurs {
     List<NomLederFor> lederFor;
     List<NomSektor> sektor;
     List<NomLeder> ledere;
-    List<NomOrgTilknytning> orgTilknytning;
+    List<NomOrgTilknytning> orgTilknytninger;
 }

@@ -49,7 +49,7 @@ public class BrukerKontroll {
                     log.info( "Bruker {} har sluttet {}", bruker.getIdent(), ressurs.getSluttdato() );
                     bruker.setSluttet(true);
                 }
-                ressurs.getOrgTilknytning().stream()
+                ressurs.getOrgTilknytninger().stream()
                     .filter(orgTilknytning -> orgTilknytning.getErDagligOppfolging() && (orgTilknytning.getGyldigTom() == null || orgTilknytning.getGyldigTom().after(new Date())))
                     .map(orgTilknytning -> orgTilknytning.getOrgEnhet().getId())
                     .findFirst().ifPresentOrElse(enhet -> {

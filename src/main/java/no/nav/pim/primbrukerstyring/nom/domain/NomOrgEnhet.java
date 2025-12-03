@@ -9,7 +9,7 @@ public class NomOrgEnhet {
     String id;
     String navn;
     String orgEnhetsType;
-    List<NomKobling> koblinger;
+    List<NomKobling> orgTilknytninger;
     List<NomOrganisering> organiseringer;
     List<NomLeder> leder;
 }

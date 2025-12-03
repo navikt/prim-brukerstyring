@@ -122,7 +122,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         if (ressurs != null) {
             bruker.setNavn(ressurs.getVisningsnavn());
             bruker.setSluttet(ressurs.getSluttdato() != null && ressurs.getSluttdato().before(new Date()));
-            ressurs.getOrgTilknytning().stream()
+            ressurs.getOrgTilknytninger().stream()
                     .filter(orgTilknytning -> orgTilknytning.getErDagligOppfolging() && (orgTilknytning.getGyldigTom() == null || orgTilknytning.getGyldigTom().after(new Date())))
                     .findFirst()
                     .ifPresent(orgTilknytning -> bruker.setEnhet(orgTilknytning.getOrgEnhet().getId()));
@@ -223,14 +223,16 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, lederIdent);
             List<Ansatt> ansatte = ledersRessurser.getLederFor().stream()
                     .flatMap((lederFor) -> {
-                        Stream<NomRessurs> koblinger = lederFor.getOrgEnhet().getKoblinger().stream().map((NomKobling::getRessurs));
+                        Stream<NomRessurs> orgTilknytninger = lederFor.getOrgEnhet().getOrgTilknytninger().stream().map((NomKobling::getRessurs));
                         Stream<NomRessurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
                                 .flatMap(org -> org.getOrgEnhet().getLeder().stream().map(NomLeder::getRessurs));
-                        return Stream.concat(koblinger, organiseringer);
+                        return Stream.concat(orgTilknytninger, organiseringer);
                     })
                     .filter(ressurs -> ressurs.getIdentType() != NomIdentType.ROBOT
                                        && !ressurs.getNavident().equals(lederIdent)
                                        && ressurs.getLedere().stream().anyMatch(leder -> leder.getRessurs().getNavident().equals(lederIdent))
+                                       && ressurs.getOrgTilknytninger().stream().anyMatch(ot -> ot.getGyldigTom() == null || ot.getGyldigTom().after(new Date())
+                            )
                     )
                     .distinct().map(ressurs -> {
                         Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsNull(ressurs.getNavident());

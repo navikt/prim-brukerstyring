@@ -55,14 +55,15 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                 id
                                 navn
                                 orgEnhetsType
-                                koblinger {
+                                orgTilknytninger(utvalg: ALLE) {
                                     ressurs {
                                         navident
                                         visningsnavn
                                         sektor
                                         identType
-                                        orgTilknytning {
+                                        orgTilknytninger(utvalg: ALLE) {
                                             gyldigFom
+                                            gyldigTom
                                         }
                                         ledere {
                                             erDagligOppfolging
@@ -94,8 +95,9 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                                 visningsnavn
                                                 sektor
                                                 identType
-                                                orgTilknytning {
+                                                orgTilknytninger(utvalg: ALLE) {
                                                     gyldigFom
+                                                    gyldigTom
                                                 }
                                                 ledere {
                                                     erDagligOppfolging
