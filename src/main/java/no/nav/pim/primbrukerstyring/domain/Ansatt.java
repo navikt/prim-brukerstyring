@@ -41,7 +41,9 @@ public class Ansatt {
                 .collect(Collectors.toSet());
 
         nyAnsatt.setStillingsavtaler(stillingsavtalerUtenDuplikater);
-        nyAnsatt.setAktiv(ressurs.getOrgTilknytninger().stream().anyMatch(ot -> ot.getGyldigFom().before(new Date())));
+        nyAnsatt.setAktiv(ressurs.getOrgTilknytninger().stream()
+                .filter(ot -> ot.getGyldigTom() == null || ot.getGyldigTom().after(new Date()))
+                .anyMatch(ot -> ot.getGyldigFom().before(new Date())));
         return nyAnsatt;
     }
 
