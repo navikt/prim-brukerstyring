@@ -223,14 +223,20 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, lederIdent);
             List<Ansatt> ansatte = ledersRessurser.getLederFor().stream()
                     .flatMap((lederFor) -> {
-                        Stream<NomRessurs> orgTilknytninger = lederFor.getOrgEnhet().getOrgTilknytninger().stream().map((NomKobling::getRessurs));
+                        Stream<NomRessurs> orgTilknytninger = lederFor.getOrgEnhet().getOrgTilknytninger().stream()
+                                .filter(ot -> ot.getGyldigTom() == null || ot.getGyldigTom().after(new Date()))
+                                .map((NomKobling::getRessurs));
                         Stream<NomRessurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
-                                .flatMap(org -> org.getOrgEnhet().getLeder().stream().map(NomLeder::getRessurs));
+                                .flatMap(org -> org.getOrgEnhet().getLedere().stream()
+                                        .filter(leder -> leder.getGyldigTom() == null || leder.getGyldigTom().after(new Date()))
+                                        .map(NomLeder::getRessurs));
                         return Stream.concat(orgTilknytninger, organiseringer);
                     })
                     .filter(ressurs -> ressurs.getIdentType() != NomIdentType.ROBOT
                                        && !ressurs.getNavident().equals(lederIdent)
-                                       && ressurs.getLedere().stream().anyMatch(leder -> leder.getRessurs().getNavident().equals(lederIdent))
+                                       && ressurs.getLedere().stream()
+                                               .filter(leder -> leder.getGyldigTom() == null || leder.getGyldigTom().after(new Date()))
+                                               .anyMatch(leder -> leder.getRessurs().getNavident().equals(lederIdent))
                                        && ressurs.getOrgTilknytninger().stream().anyMatch(ot -> ot.getGyldigTom() == null || ot.getGyldigTom().after(new Date())
                             )
                     )
@@ -272,7 +278,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     private Stream<NomRessurs> hentOrgenhetsLedere(NomOrgEnhet orgEnhet){
         if (orgEnhet == null) return Stream.empty();
         return Stream.concat(
-                orgEnhet.getLeder().stream().map(NomLeder::getRessurs),
+                orgEnhet.getLedere().stream().map(NomLeder::getRessurs),
                 orgEnhet.getOrganiseringer().stream().flatMap((organisering -> hentOrgenhetsLedere(organisering.getOrgEnhet())))
         );
     }

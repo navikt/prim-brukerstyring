@@ -23,7 +23,7 @@ public class NomUtils {
         nomOrgEnhet.setOrgEnhetsType(direktoratet ? "DIREKTORAT" : "");
         nomOrgEnhet.setOrgTilknytninger(koblinger != null ? koblinger : List.of());
         nomOrgEnhet.setOrganiseringer(organiseringer != null ? organiseringer : List.of());
-        nomOrgEnhet.setLeder(ledere != null ? ledere : List.of());
+        nomOrgEnhet.setLedere(ledere != null ? ledere : List.of());
         return nomOrgEnhet;
     }
 

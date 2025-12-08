@@ -65,7 +65,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                             gyldigFom
                                             gyldigTom
                                         }
-                                        ledere {
+                                        ledere (utvalg: ALLE) {
                                             erDagligOppfolging
                                             ressurs {
                                                 navident
@@ -89,7 +89,8 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                 organiseringer {
                                     orgEnhet {
                                         navn
-                                        leder {
+                                        ledere (utvalg: ALLE) {
+                                            gyldigTom
                                             ressurs {
                                                 navident
                                                 visningsnavn
@@ -99,7 +100,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                                     gyldigFom
                                                     gyldigTom
                                                 }
-                                                ledere {
+                                                ledere(utvalg: ALLE) {
                                                     erDagligOppfolging
                                                     ressurs {
                                                         navident

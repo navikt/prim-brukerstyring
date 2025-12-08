@@ -11,5 +11,5 @@ public class NomOrgEnhet {
     String orgEnhetsType;
     List<NomKobling> orgTilknytninger;
     List<NomOrganisering> organiseringer;
-    List<NomLeder> leder;
+    List<NomLeder> ledere;
 }
