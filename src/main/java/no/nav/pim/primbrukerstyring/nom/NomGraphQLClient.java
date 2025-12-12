@@ -59,7 +59,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                     ressurs {
                                         navident
                                         visningsnavn
-                                        sektor
+                                        gjeldendeSektor
                                         identType
                                         orgTilknytninger(utvalg: ALLE) {
                                             gyldigFom
@@ -94,7 +94,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                             ressurs {
                                                 navident
                                                 visningsnavn
-                                                sektor
+                                                gjeldendeSektor
                                                 identType
                                                 orgTilknytninger(utvalg: ALLE) {
                                                     gyldigFom
@@ -160,14 +160,14 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                             ressurs(where: {navident: "%s"}) {
                                 navident
                                 visningsnavn
-                                sektor
+                                gjeldendeSektor
                                 epost
                                 telefon {
                                   nummer
                                   type
                                 }
                                 sluttdato
-                                orgTilknytning {
+                                orgTilknytninger(utvalg: ALLE) {
                                   erDagligOppfolging
                                   gyldigTom
                                   orgEnhet {
