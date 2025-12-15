@@ -70,6 +70,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                             ressurs {
                                                 navident
                                                 visningsnavn
+                                                gjeldendeSektor
                                                 epost
                                                 telefon {
                                                   nummer
