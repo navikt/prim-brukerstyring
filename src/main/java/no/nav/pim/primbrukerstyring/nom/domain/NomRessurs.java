@@ -14,7 +14,7 @@ public class NomRessurs {
     NomIdentType identType;
     List<NomTelefon> telefon;
     List<NomLederFor> lederFor;
-    List<NomSektor> sektor;
+    NomSektor sektor;
     List<NomLeder> ledere;
     List<NomOrgTilknytning> orgTilknytninger;
 }
