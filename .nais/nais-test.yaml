@@ -97,3 +97,4 @@ spec:
     logging:
       destinations:
         - id: loki
+        - id: elastic
