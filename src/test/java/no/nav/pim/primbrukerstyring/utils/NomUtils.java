@@ -48,7 +48,7 @@ public class NomUtils {
         nomRessurs.setNavident(ident != null ? ident : lagTilfeldigString());
         nomRessurs.setVisningsnavn(lagTilfeldigString());
         nomRessurs.setEpost(lagTilfeldigString());
-        nomRessurs.setSektor(List.of(NomSektor.NAV_STATLIG));
+        nomRessurs.setSektor(NomSektor.NAV_STATLIG);
         nomRessurs.setTelefon(telefon != null ? telefon : List.of());
         nomRessurs.setLederFor(lederFor != null ? lederFor : List.of());
         nomRessurs.setLedere(ledere != null ? ledere : List.of());
