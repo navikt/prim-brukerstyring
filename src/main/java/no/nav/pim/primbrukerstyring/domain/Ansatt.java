@@ -3,7 +3,6 @@ package no.nav.pim.primbrukerstyring.domain;
 import lombok.*;
 import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 
-import java.time.Instant;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
@@ -27,7 +26,7 @@ public class Ansatt {
 
         Set<AnsattStillingsavtale> stillingsavtaler = ressurs.getLedere().stream()
                 .distinct()
-                .map(nomLeder -> AnsattStillingsavtale.fraNomLeder(nomLeder, AnsattType.fraNomSektor(ressurs.getSektor()), erOverstyrt)).collect(Collectors.toSet());
+                .map(nomLeder -> AnsattStillingsavtale.fraNomLeder(nomLeder, AnsattType.fraNomSektor(ressurs.getGjeldendeSektor()), erOverstyrt)).collect(Collectors.toSet());
         if (erOverstyrt) stillingsavtaler.add(ansattStillingsavtale);
 
         Set<AnsattStillingsavtale> stillingsavtalerUtenDuplikater = stillingsavtaler.stream()
