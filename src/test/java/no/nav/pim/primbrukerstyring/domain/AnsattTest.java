@@ -1,7 +1,7 @@
 package no.nav.pim.primbrukerstyring.domain;
 
 
-import no.nav.pim.primbrukerstyring.nom.domain.*;
+import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;

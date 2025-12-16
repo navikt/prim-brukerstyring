@@ -2,9 +2,12 @@ package no.nav.pim.primbrukerstyring.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.annotation.Nullable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
 
-import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity

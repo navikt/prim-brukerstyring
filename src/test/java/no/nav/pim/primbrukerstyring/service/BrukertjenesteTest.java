@@ -7,7 +7,7 @@ import no.nav.pim.primbrukerstyring.domain.Leder;
 import no.nav.pim.primbrukerstyring.domain.OverstyrendeLeder;
 import no.nav.pim.primbrukerstyring.domain.Rolle;
 import no.nav.pim.primbrukerstyring.nom.NomGraphQLClient;
-import no.nav.pim.primbrukerstyring.nom.domain.*;
+import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 import no.nav.pim.primbrukerstyring.repository.BrukerRepository;
 import no.nav.pim.primbrukerstyring.repository.DriftOgVedlikeholdRepository;
 import no.nav.pim.primbrukerstyring.repository.LederRepository;
@@ -24,19 +24,18 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static no.nav.pim.primbrukerstyring.utils.NomUtils.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 

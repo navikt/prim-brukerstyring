@@ -221,6 +221,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         Leder validertLeder = validerLeder(authorization, lederIdent);
         if (validertLeder != null) {
             NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, lederIdent);
+            log.info("Lederressurs TEST: {}", ledersRessurser);
             List<Ansatt> ansatte = ledersRessurser.getLederFor().stream()
                     .flatMap((lederFor) -> {
                         Stream<NomRessurs> orgTilknytninger = lederFor.getOrgEnhet().getOrgTilknytninger().stream()

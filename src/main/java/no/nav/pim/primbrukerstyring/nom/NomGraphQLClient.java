@@ -45,6 +45,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                     ressurs(where: {navident: "%s"}) {
                         navident
                         visningsnavn
+                        gjeldendeSektor
                         epost
                         telefon {
                           nummer
@@ -70,6 +71,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                             ressurs {
                                                 navident
                                                 visningsnavn
+                                                gjeldendeSektor
                                                 epost
                                                 telefon {
                                                   nummer
