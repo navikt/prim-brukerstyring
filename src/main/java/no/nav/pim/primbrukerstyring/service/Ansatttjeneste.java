@@ -85,13 +85,13 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
     @PostMapping(path = "/overstyrendeleder", consumes = MediaType.APPLICATION_JSON_VALUE)
     public OverstyrendeLeder leggTilOverstyrendeLeder(@RequestHeader(value = "Authorization") String authorization, @Valid @RequestBody OverstyrendeLederDto overstyrendeLederDto) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "leggTilOverstyrendeLeder").increment();
-        if (overstyrendeLederDto.getTil().isBefore(LocalDateTime.now())) {
+        if (overstyrendeLederDto.getOverstyringTom().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Til dato kan ikke være før dagens dato");
         }
         Optional<Leder> finnesLeder = lederrepository.findByIdent(overstyrendeLederDto.getLederIdent());
         Optional<OverstyrendeLeder> finnesOverstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsNull(overstyrendeLederDto.getAnsattIdent());
-        Date fra = Optional.ofNullable(overstyrendeLederDto.getFra()).map(fraDate -> Date.from(Instant.from(fraDate))).orElse(new Date());
-        Date til = Optional.ofNullable(overstyrendeLederDto.getTil()).map(date -> Date.from(Instant.from(date))).orElse(null);
+        Date fra = Optional.ofNullable(overstyrendeLederDto.getOverstyringFom()).map(fraDate -> Date.from(Instant.from(fraDate))).orElse(new Date());
+        Date til = Optional.ofNullable(overstyrendeLederDto.getOverstyringTom()).map(date -> Date.from(Instant.from(date))).orElse(null);
         Leder leder;
         if (finnesLeder.isPresent()) {
             leder = finnesLeder.get();

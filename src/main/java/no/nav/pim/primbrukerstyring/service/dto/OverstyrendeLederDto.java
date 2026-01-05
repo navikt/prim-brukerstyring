@@ -11,7 +11,7 @@ public class OverstyrendeLederDto {
 
     String ansattIdent;
 
-    LocalDateTime fra;
+    LocalDateTime overstyringFom;
 
-    LocalDateTime til;
+    LocalDateTime overstyringTom;
 }
