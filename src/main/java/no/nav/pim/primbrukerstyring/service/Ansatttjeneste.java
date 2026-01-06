@@ -20,8 +20,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -90,8 +90,12 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
         }
         Optional<Leder> finnesLeder = lederrepository.findByIdent(overstyrendeLederDto.getLederIdent());
         Optional<OverstyrendeLeder> finnesOverstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsNull(overstyrendeLederDto.getAnsattIdent());
-        Date fra = Optional.ofNullable(overstyrendeLederDto.getOverstyringFom()).map(fraDate -> Date.from(Instant.from(fraDate))).orElse(new Date());
-        Date til = Optional.ofNullable(overstyrendeLederDto.getOverstyringTom()).map(date -> Date.from(Instant.from(date))).orElse(null);
+        Date fra = Optional.ofNullable(overstyrendeLederDto.getOverstyringFom())
+                .map(fraDateTime -> Date.from(fraDateTime.atZone(ZoneId.systemDefault()).toInstant()))
+                .orElse(new Date());
+        Date til = Optional.ofNullable(overstyrendeLederDto.getOverstyringTom())
+                .map(tilDateTime -> Date.from(tilDateTime.atZone(ZoneId.systemDefault()).toInstant()))
+                .orElse(null);
         Leder leder;
         if (finnesLeder.isPresent()) {
             leder = finnesLeder.get();
