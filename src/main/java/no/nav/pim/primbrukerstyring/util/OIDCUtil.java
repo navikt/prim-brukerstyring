@@ -12,8 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -25,7 +23,6 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +37,7 @@ public class OIDCUtil {
     private final static String LOCAL = "local-dev";
 
     @Autowired
-    private RestClient rest;
+    private RestClient restClient;
 
     @Value("${nais_cluster}")
     private String naisCluster;
@@ -159,9 +156,6 @@ public class OIDCUtil {
 
     private AADToken hentAccessToken(String auth, String grantType, String scope) {
         if (!LOCAL.equals(naisCluster)) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
             MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
             map.add("client_id", aadProperties.getClientId());
             map.add("client_secret", aadProperties.getClientSecret());
@@ -173,12 +167,13 @@ public class OIDCUtil {
             } else if (CLIENT_CREDENTIAL.equals(grantType)) {
                 map.add("grant_type", "client_credentials");
             }
-            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
             ResponseEntity<String> respons;
             try {
-                respons = rest.post()
+                respons = restClient.post()
                         .uri(aadProperties.getTokenEndpoint())
-                        .body(request)
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .body(map)
                         .retrieve()
                         .toEntity(String.class);
             } catch (Exception e) {
