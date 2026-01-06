@@ -2,7 +2,7 @@ package no.nav.pim.primbrukerstyring.service.dto;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 public class OverstyrendeLederDto {
@@ -11,7 +11,7 @@ public class OverstyrendeLederDto {
 
     String ansattIdent;
 
-    LocalDateTime overstyringFom;
+    LocalDate overstyringFom;
 
-    LocalDateTime overstyringTom;
+    LocalDate overstyringTom;
 }
