@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -90,17 +89,6 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
         }
         Optional<Leder> finnesLeder = lederrepository.findByIdent(overstyrendeLederDto.getLederIdent());
         Optional<OverstyrendeLeder> finnesOverstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsNull(overstyrendeLederDto.getAnsattIdent());
-        log.info("Fra datoTid {}", overstyrendeLederDto.getOverstyringFom());
-        log.info("Til datoTid {}", overstyrendeLederDto.getOverstyringTom());
-        Date fra = Optional.ofNullable(overstyrendeLederDto.getOverstyringFom())
-                .map(fraDate -> Date.from(fraDate.atStartOfDay(ZoneId.systemDefault()).toInstant()))
-                .orElse(new Date());
-        Date til = Optional.ofNullable(overstyrendeLederDto.getOverstyringTom())
-                .map(tilDate -> Date.from(tilDate.atStartOfDay(ZoneId.systemDefault()).toInstant()))
-                .orElse(null);
-
-        log.info("Konvertert fra {}", fra);
-        log.info("Konvertert til {}", til);
         Leder leder;
         if (finnesLeder.isPresent()) {
             leder = finnesLeder.get();
@@ -119,7 +107,14 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
         } else {
             NomRessurs ressurs = nomGraphQLClient.getRessurs(authorization, overstyrendeLederDto.getAnsattIdent());
             if (ressurs != null) {
-                return overstyrendelederrepository.save(OverstyrendeLeder.builder().ansattIdent(ressurs.getNavident()).ansattNavn(ressurs.getVisningsnavn()).overstyrendeLeder(leder).fra(fra).til(til).build());
+                return overstyrendelederrepository.save(
+                        OverstyrendeLeder.builder()
+                                .ansattIdent(ressurs.getNavident())
+                                .ansattNavn(ressurs.getVisningsnavn())
+                                .overstyrendeLeder(leder)
+                                .fra(overstyrendeLederDto.getOverstyringFom())
+                                .til(overstyrendeLederDto.getOverstyringTom())
+                                .build());
             } else {
                 log.error("###Kunne ikke finne ansatt '{}' i NOM.", overstyrendeLederDto.getAnsattIdent());
                 throw new NotFoundException("Kunne ikke finne ansatt " + overstyrendeLederDto.getAnsattIdent() + " i NOM.");
@@ -135,7 +130,7 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
         Optional<OverstyrendeLeder> finnesOverstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsNull(ansattIdent);
         if (finnesOverstyrendeLeder.isPresent()) {
             OverstyrendeLeder overstyrendeLeder = finnesOverstyrendeLeder.get();
-            overstyrendeLeder.setTil(new Date());
+            overstyrendeLeder.setTil(LocalDate.now());
             return overstyrendelederrepository.save(overstyrendeLeder);
         } else {
             log.error("###Ansatt {} har ikke en overstyrende leder i PRIM.", ansattIdent);

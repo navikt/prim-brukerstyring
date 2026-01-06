@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -206,7 +207,7 @@ public class BrukertjenesteTest {
         OverstyrendeLeder overstyrendeLeder = OverstyrendeLeder.builder()
                 .ansattIdent(ansatt1.getNavident())
                 .ansattNavn(ansatt1.getVisningsnavn())
-                .fra(new Date())
+                .fra(LocalDate.now())
                 .overstyrendeLeder(Leder.builder().erDirektoratsleder(true).ident("O123456").navn("Overstyrende Leder").build())
                 .build();
 
