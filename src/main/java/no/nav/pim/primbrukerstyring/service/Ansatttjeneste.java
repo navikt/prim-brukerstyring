@@ -90,6 +90,8 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
         }
         Optional<Leder> finnesLeder = lederrepository.findByIdent(overstyrendeLederDto.getLederIdent());
         Optional<OverstyrendeLeder> finnesOverstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsNull(overstyrendeLederDto.getAnsattIdent());
+        log.info("Fra datoTid {}", overstyrendeLederDto.getOverstyringFom());
+        log.info("Til datoTid {}", overstyrendeLederDto.getOverstyringTom());
         Date fra = Optional.ofNullable(overstyrendeLederDto.getOverstyringFom())
                 .map(fraDateTime -> Date.from(fraDateTime.atZone(ZoneId.systemDefault()).toInstant()))
                 .orElse(new Date());
