@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
@@ -85,7 +85,7 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
     @PostMapping(path = "/overstyrendeleder", consumes = MediaType.APPLICATION_JSON_VALUE)
     public OverstyrendeLeder leggTilOverstyrendeLeder(@RequestHeader(value = "Authorization") String authorization, @Valid @RequestBody OverstyrendeLederDto overstyrendeLederDto) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "leggTilOverstyrendeLeder").increment();
-        if (overstyrendeLederDto.getOverstyringTom().isBefore(LocalDateTime.now())) {
+        if (overstyrendeLederDto.getOverstyringTom().isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("Til dato kan ikke være før dagens dato");
         }
         Optional<Leder> finnesLeder = lederrepository.findByIdent(overstyrendeLederDto.getLederIdent());
@@ -93,10 +93,10 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
         log.info("Fra datoTid {}", overstyrendeLederDto.getOverstyringFom());
         log.info("Til datoTid {}", overstyrendeLederDto.getOverstyringTom());
         Date fra = Optional.ofNullable(overstyrendeLederDto.getOverstyringFom())
-                .map(fraDateTime -> Date.from(fraDateTime.atZone(ZoneId.systemDefault()).toInstant()))
+                .map(fraDate -> Date.from(fraDate.atStartOfDay(ZoneId.systemDefault()).toInstant()))
                 .orElse(new Date());
         Date til = Optional.ofNullable(overstyrendeLederDto.getOverstyringTom())
-                .map(tilDateTime -> Date.from(tilDateTime.atZone(ZoneId.systemDefault()).toInstant()))
+                .map(tilDate -> Date.from(tilDate.atStartOfDay(ZoneId.systemDefault()).toInstant()))
                 .orElse(null);
 
         log.info("Konvertert fra {}", fra);
