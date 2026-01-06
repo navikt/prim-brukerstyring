@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -142,7 +141,7 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
     @GetMapping(path = "/overstyrendeledere")
     public List<OverstyrendeLeder> hentAlleOverstyrendeLedere(@RequestHeader(value = "Authorization") String authorization) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "hentAlleOverstyrendeLedere").increment();
-        return overstyrendelederrepository.findAllByTilIsGreaterThanEqualOrTilIsNull(new Date(), Sort.by(Sort.Direction.DESC, "til"));
+        return overstyrendelederrepository.findAllByTilIsGreaterThanEqualOrTilIsNull(LocalDate.now(), Sort.by(Sort.Direction.DESC, "til"));
     }
 
     @Override
@@ -150,6 +149,6 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
     public List<OverstyrendeLeder> hentAlleInaktiveOverstyrendeLedere(@RequestHeader(value = "Authorization") String authorization) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "hentAlleInaktiveOverstyrendeLedere").increment();
 
-        return overstyrendelederrepository.findAllByTilIsBefore(new Date(), Sort.by(Sort.Direction.DESC, "til"));
+        return overstyrendelederrepository.findAllByTilIsBefore(LocalDate.now(), Sort.by(Sort.Direction.DESC, "til"));
     }
 }
