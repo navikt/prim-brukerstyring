@@ -98,6 +98,9 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
         Date til = Optional.ofNullable(overstyrendeLederDto.getOverstyringTom())
                 .map(tilDateTime -> Date.from(tilDateTime.atZone(ZoneId.systemDefault()).toInstant()))
                 .orElse(null);
+
+        log.info("Konvertert fra {}", fra);
+        log.info("Konvertert til {}", til);
         Leder leder;
         if (finnesLeder.isPresent()) {
             leder = finnesLeder.get();
