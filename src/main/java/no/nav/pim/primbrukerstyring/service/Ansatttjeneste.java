@@ -24,6 +24,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Objects.nonNull;
+
 @RestController
 @Protected
 @RequestMapping(value = "/ansatt")
@@ -83,7 +85,7 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
     @PostMapping(path = "/overstyrendeleder", consumes = MediaType.APPLICATION_JSON_VALUE)
     public OverstyrendeLeder leggTilOverstyrendeLeder(@RequestHeader(value = "Authorization") String authorization, @Valid @RequestBody OverstyrendeLederDto overstyrendeLederDto) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "leggTilOverstyrendeLeder").increment();
-        if (overstyrendeLederDto.getOverstyringTom().isBefore(LocalDate.now())) {
+        if (nonNull(overstyrendeLederDto.getOverstyringTom()) && overstyrendeLederDto.getOverstyringTom().isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("Til dato kan ikke være før dagens dato");
         }
         Optional<Leder> finnesLeder = lederrepository.findByIdent(overstyrendeLederDto.getLederIdent());
