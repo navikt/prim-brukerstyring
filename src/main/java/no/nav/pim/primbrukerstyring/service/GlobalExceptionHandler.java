@@ -2,6 +2,7 @@ package no.nav.pim.primbrukerstyring.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Builder;
+import lombok.Getter;
 import no.nav.pim.primbrukerstyring.exceptions.AuthorizationException;
 import no.nav.pim.primbrukerstyring.exceptions.ForbiddenException;
 import no.nav.pim.primbrukerstyring.exceptions.NotFoundException;
@@ -52,6 +53,7 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @Getter
     @Builder(toBuilder = true)
     public static class CustomExceptionResponse {
         String error;
