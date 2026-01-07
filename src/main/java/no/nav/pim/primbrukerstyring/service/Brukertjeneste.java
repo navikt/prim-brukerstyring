@@ -220,10 +220,8 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     public List<Ansatt> hentLedersRessurser(@RequestHeader(value = "Authorization") String authorization, @PathVariable String lederIdent) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentLedersRessurser").increment();
         Leder validertLeder = validerLeder(authorization, lederIdent);
-        log.info("VALIDERT LEDER {}", validertLeder);
         if (validertLeder != null) {
             NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, lederIdent);
-            log.info("Lederressurs TEST: {}", ledersRessurser);
             List<Ansatt> ansatte = ledersRessurser.getLederFor().stream()
                     .flatMap((lederFor) -> {
                         Stream<NomRessurs> orgTilknytninger = lederFor.getOrgEnhet().getOrgTilknytninger().stream()
@@ -246,7 +244,6 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                     .distinct().map(ressurs -> {
                         Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsGreaterThanEqualOrTilIsNull(ressurs.getNavident(), LocalDate.now());
                         AnsattStillingsavtale ansattStillingsavtale = null;
-                        log.info("OverstyrendeLeder: {}", overstyrendeLeder);
                         if (overstyrendeLeder.isPresent()) {
                             ansattStillingsavtale = AnsattStillingsavtale.fraOverstyrendeLeder(overstyrendeLeder.get());
                         }
