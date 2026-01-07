@@ -12,20 +12,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +37,7 @@ public class OIDCUtil {
     private final static String LOCAL = "local-dev";
 
     @Autowired
-    private RestTemplate rest;
+    private RestClient restClient;
 
     @Value("${nais_cluster}")
     private String naisCluster;
@@ -97,7 +94,7 @@ public class OIDCUtil {
         return token.getAccessToken();
     }
 
-    private boolean kanTokenGjenbrukes(String auth, String scope, String grantType) throws ParseException {
+    private boolean kanTokenGjenbrukes(String auth, String scope, String grantType) {
         try {
             String tokenGrantType = finnGranttype(token.getAccessToken());
             String mottaker = finnMottaker(token.getAccessToken());
@@ -145,7 +142,7 @@ public class OIDCUtil {
     private String finnMottaker(String token) throws ParseException {
         JWT jwt = JWTParser.parse(token);
         List<String> mottakere = jwt.getJWTClaimsSet().getAudience();
-        return mottakere.get(0);
+        return mottakere.getFirst();
     }
 
     private String finnGranttype(String token) throws ParseException {
@@ -157,11 +154,8 @@ public class OIDCUtil {
         }
     }
 
-    private AADToken hentAccessToken(String auth, String grantType, String scope) throws Exception {
+    private AADToken hentAccessToken(String auth, String grantType, String scope) {
         if (!LOCAL.equals(naisCluster)) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
             MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
             map.add("client_id", aadProperties.getClientId());
             map.add("client_secret", aadProperties.getClientSecret());
@@ -173,10 +167,15 @@ public class OIDCUtil {
             } else if (CLIENT_CREDENTIAL.equals(grantType)) {
                 map.add("grant_type", "client_credentials");
             }
-            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
             ResponseEntity<String> respons;
             try {
-                respons = rest.postForEntity(aadProperties.getTokenEndpoint(), request, String.class);
+                respons = restClient.post()
+                        .uri(aadProperties.getTokenEndpoint())
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .body(map)
+                        .retrieve()
+                        .toEntity(String.class);
             } catch (Exception e) {
                 log.error("###Henting av access-token feilet: {}", e.getMessage());
                 throw new AuthorizationException("Henting av access-token feilet: " + e.getMessage());
@@ -188,14 +187,13 @@ public class OIDCUtil {
         }
     }
 
-    private Optional<AADToken> finnAadToken(String bearerToken) throws Exception {
+    private Optional<AADToken> finnAadToken(String bearerToken) {
         JsonFactory factory = new JsonFactory();
-        JsonParser parser = factory.createParser(bearerToken);
         String accessToken = null;
         LocalDateTime expirationTime = null;
-        try {
+        try (JsonParser parser = factory.createParser(bearerToken)) {
             while (parser.nextToken() != JsonToken.END_OBJECT) {
-                String name = parser.getCurrentName();
+                String name = parser.currentName();
                 if ("access_token".equals(name)) {
                     parser.nextToken();
                     accessToken = parser.getText();

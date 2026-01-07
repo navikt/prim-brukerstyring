@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "overstyrende_leder")
@@ -37,10 +37,8 @@ public class OverstyrendeLeder {
     private Leder overstyrendeLeder;
 
     @Column
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fra;
+    private LocalDate fra;
 
     @Column
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date til;
+    private LocalDate til;
 }
