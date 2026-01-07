@@ -166,7 +166,7 @@ public class BrukertjenesteTest {
         given(brukerrepository.findByIdent(anyString())).willReturn(Optional.of(bruker));
         given(lederrepository.findByIdent(anyString())).willReturn(Optional.of(leder));
         given(nomGraphQLClient.getLedersResurser(anyString(), anyString())).willReturn(nomRessursLederMedAnsatte);
-        given(overstyrendelederrepository.findByAnsattIdentAndTilIsNull(anyString())).willReturn(Optional.empty());
+        given(overstyrendelederrepository.findByAnsattIdentAndTilIsGreaterThanEqualOrTilIsNull(anyString(), any(LocalDate.class))).willReturn(Optional.empty());
         given(overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(anyString())).willReturn(List.of());
 
         mvc.perform(get("/bruker/leder/" + bruker.getIdent() + "/ressurser")
@@ -214,7 +214,7 @@ public class BrukertjenesteTest {
         given(brukerrepository.findByIdent(anyString())).willReturn(Optional.of(bruker));
         given(lederrepository.findByIdent(anyString())).willReturn(Optional.of(leder));
         given(nomGraphQLClient.getLedersResurser(anyString(), anyString())).willReturn(nomRessursLederMedAnsatte);
-        given(overstyrendelederrepository.findByAnsattIdentAndTilIsNull(overstyrendeLeder.getAnsattIdent())).willReturn(Optional.of(overstyrendeLeder));
+        given(overstyrendelederrepository.findByAnsattIdentAndTilIsGreaterThanEqualOrTilIsNull(overstyrendeLeder.getAnsattIdent(), any(LocalDate.class))).willReturn(Optional.of(overstyrendeLeder));
         given(overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(anyString())).willReturn(List.of());
 
         mvc.perform(get("/bruker/leder/" + bruker.getIdent() + "/ressurser")

@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Stream;
@@ -242,7 +243,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                             )
                     )
                     .distinct().map(ressurs -> {
-                        Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsNull(ressurs.getNavident());
+                        Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsGreaterThanEqualOrTilIsNull(ressurs.getNavident(), LocalDate.now());
                         AnsattStillingsavtale ansattStillingsavtale = null;
                         if (overstyrendeLeder.isPresent()) {
                             ansattStillingsavtale = AnsattStillingsavtale.fraOverstyrendeLeder(overstyrendeLeder.get());
