@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +28,7 @@ public class AnsattTest {
             OverstyrendeLeder.builder()
                 .ansattIdent(nomAnsattRessurs.getNavident())
                 .ansattNavn(nomAnsattRessurs.getVisningsnavn())
-                .fra(new Date())
+                    .fra(LocalDate.now())
                 .overstyrendeLeder(Leder.fraNomRessurs(nomOverstyrtLederRessurs))
                 .build()
         );
