@@ -245,6 +245,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                     .distinct().map(ressurs -> {
                         Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsGreaterThanEqualOrTilIsNull(ressurs.getNavident(), LocalDate.now());
                         AnsattStillingsavtale ansattStillingsavtale = null;
+                        log.info("OverstyrendeLeder: {}", overstyrendeLeder);
                         if (overstyrendeLeder.isPresent()) {
                             ansattStillingsavtale = AnsattStillingsavtale.fraOverstyrendeLeder(overstyrendeLeder.get());
                         }
