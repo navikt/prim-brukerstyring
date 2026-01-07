@@ -220,6 +220,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     public List<Ansatt> hentLedersRessurser(@RequestHeader(value = "Authorization") String authorization, @PathVariable String lederIdent) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentLedersRessurser").increment();
         Leder validertLeder = validerLeder(authorization, lederIdent);
+        log.info("VALIDERT LEDER {}", validertLeder);
         if (validertLeder != null) {
             NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, lederIdent);
             log.info("Lederressurs TEST: {}", ledersRessurser);
