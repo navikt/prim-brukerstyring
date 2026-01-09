@@ -222,6 +222,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         Leder validertLeder = validerLeder(authorization, lederIdent);
         if (validertLeder != null) {
             NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, lederIdent);
+            log.info("Ansatte: {}", ledersRessurser.getLederFor());
             List<Ansatt> ansatte = ledersRessurser.getLederFor().stream()
                     .flatMap((lederFor) -> {
                         Stream<NomRessurs> orgTilknytninger = lederFor.getOrgEnhet().getOrgTilknytninger().stream()
@@ -243,6 +244,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                     )
                     .distinct().map(ressurs -> {
                         Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsGreaterThanEqualOrTilIsNull(ressurs.getNavident(), LocalDate.now());
+                        log.info("OverstyrendeLeder {}", overstyrendeLeder);
                         AnsattStillingsavtale ansattStillingsavtale = null;
                         if (overstyrendeLeder.isPresent()) {
                             ansattStillingsavtale = AnsattStillingsavtale.fraOverstyrendeLeder(overstyrendeLeder.get());
