@@ -41,7 +41,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     MeterRegistry metricsRegistry;
 
     @Autowired
-    Ansatttjeneste ansatttjeneste;
+    Ansatttjeneste ansattTjeneste;
 
     @Autowired
     BrukerRepository brukerrepository;
@@ -255,7 +255,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                     }).toList();
             Stream<Ansatt> overstyrteAnsatte = overstyrendelederrepository.findByOverstyrendeLederIdAndTilIsGreaterThanEqualOrTilIsNull(validertLeder.getLederId(), LocalDate.now()).stream()
                     .filter(overstyrtLeder -> ansatte.stream().noneMatch(ansatt -> ansatt.getIdent().equals(overstyrtLeder.getAnsattIdent())))
-                    .map(overstyrtLeder -> ansatttjeneste.hentAnsatt(authorization, overstyrtLeder.getAnsattIdent()));
+                    .map(overstyrtLeder -> ansattTjeneste.hentAnsatt(authorization, overstyrtLeder.getAnsattIdent()));
             log.info("OverstyrendeLeder {}", overstyrteAnsatte);
             return Stream.concat(ansatte.stream(), overstyrteAnsatte).toList();
         } else {
