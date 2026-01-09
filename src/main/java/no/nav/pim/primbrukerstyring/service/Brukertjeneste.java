@@ -65,7 +65,6 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentBruker").increment();
         String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
         Optional<Bruker> bruker = brukerrepository.findByIdent(brukerIdent);
-        log.info("Bruker hentet: {}", brukerIdent);
         if (bruker.isEmpty()) {
             NomRessurs ressurs = nomGraphQLClient.getLedersResurser(authorization, brukerIdent);
             if (ressurs != null) {
@@ -220,10 +219,8 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     public List<Ansatt> hentLedersRessurser(@RequestHeader(value = "Authorization") String authorization, @PathVariable String lederIdent) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentLedersRessurser").increment();
         Leder validertLeder = validerLeder(authorization, lederIdent);
-        log.info("LederIdent: {}", lederIdent);
         if (validertLeder != null) {
             NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, lederIdent);
-            log.info("Ansatte: {}", ledersRessurser.getLederFor());
             List<Ansatt> ansatte = ledersRessurser.getLederFor().stream()
                     .flatMap((lederFor) -> {
                         Stream<NomRessurs> orgTilknytninger = lederFor.getOrgEnhet().getOrgTilknytninger().stream()
@@ -245,7 +242,6 @@ public class Brukertjeneste implements BrukertjenesteInterface {
                     )
                     .distinct().map(ressurs -> {
                         Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsGreaterThanEqualOrTilIsNull(ressurs.getNavident(), LocalDate.now());
-                        log.info("OverstyrendeLeder {}", overstyrendeLeder);
                         AnsattStillingsavtale ansattStillingsavtale = null;
                         if (overstyrendeLeder.isPresent()) {
                             ansattStillingsavtale = AnsattStillingsavtale.fraOverstyrendeLeder(overstyrendeLeder.get());
@@ -256,7 +252,6 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             Stream<Ansatt> overstyrteAnsatte = overstyrendelederrepository.findByOverstyrendeLederIdAndTilIsGreaterThanEqualOrTilIsNull(validertLeder.getLederId(), LocalDate.now()).stream()
                     .filter(overstyrtLeder -> ansatte.stream().noneMatch(ansatt -> ansatt.getIdent().equals(overstyrtLeder.getAnsattIdent())))
                     .map(overstyrtLeder -> ansattTjeneste.hentAnsatt(authorization, overstyrtLeder.getAnsattIdent()));
-            log.info("OverstyrendeLeder {}", overstyrteAnsatte);
             return Stream.concat(ansatte.stream(), overstyrteAnsatte).toList();
         } else {
             throw new NotFoundException("Leder med ident " + lederIdent + " finnes ikke i PRIM.");
