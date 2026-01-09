@@ -1,6 +1,7 @@
 package no.nav.pim.primbrukerstyring.domain;
 
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 
 import java.util.Date;
@@ -9,6 +10,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
+@Slf4j
 @ToString
 @Getter
 @Setter
@@ -40,7 +45,11 @@ public class Ansatt {
                 .collect(Collectors.toSet());
 
         nyAnsatt.setStillingsavtaler(stillingsavtalerUtenDuplikater);
+        var ansattUtenGyldigFomOT = ressurs.getOrgTilknytninger().stream().filter(ot -> isNull(ot.getGyldigFom())).findAny().orElse(null);
+        if (nonNull(ansattUtenGyldigFomOT))
+            log.info("Ressurs med manglende OT gyldigFom {}({})", ressurs.getVisningsnavn(), ressurs.getNavident());
         nyAnsatt.setAktiv(ressurs.getOrgTilknytninger().stream()
+                .filter(ot -> nonNull(ot.getGyldigFom()))
                 .filter(ot -> ot.getGyldigTom() == null || ot.getGyldigTom().after(new Date()))
                 .anyMatch(ot -> ot.getGyldigFom().before(new Date())));
         return nyAnsatt;
