@@ -65,7 +65,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentBruker").increment();
         String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
         Optional<Bruker> bruker = brukerrepository.findByIdent(brukerIdent);
-
+        log.info("Bruker hentet: {}", brukerIdent);
         if (bruker.isEmpty()) {
             NomRessurs ressurs = nomGraphQLClient.getLedersResurser(authorization, brukerIdent);
             if (ressurs != null) {
@@ -253,7 +253,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
 
                         return Ansatt.fraNomRessurs(ressurs, ansattStillingsavtale);
                     }).toList();
-            Stream<Ansatt> overstyrteAnsatte = overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(lederIdent).stream()
+            Stream<Ansatt> overstyrteAnsatte = overstyrendelederrepository.findByOverstyrendeLederIdAndTilIsGreaterThanEqualOrTilIsNull(validertLeder.getLederId(), LocalDate.now()).stream()
                     .filter(overstyrtLeder -> ansatte.stream().noneMatch(ansatt -> ansatt.getIdent().equals(overstyrtLeder.getAnsattIdent())))
                     .map(overstyrtLeder -> ansatttjeneste.hentAnsatt(authorization, overstyrtLeder.getAnsattIdent()));
             log.info("OverstyrendeLeder {}", overstyrteAnsatte);
