@@ -220,6 +220,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     public List<Ansatt> hentLedersRessurser(@RequestHeader(value = "Authorization") String authorization, @PathVariable String lederIdent) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentLedersRessurser").increment();
         Leder validertLeder = validerLeder(authorization, lederIdent);
+        log.info("LederIdent: {}", lederIdent);
         if (validertLeder != null) {
             NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, lederIdent);
             log.info("Ansatte: {}", ledersRessurser.getLederFor());
@@ -255,6 +256,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             Stream<Ansatt> overstyrteAnsatte = overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(lederIdent).stream()
                     .filter(overstyrtLeder -> ansatte.stream().noneMatch(ansatt -> ansatt.getIdent().equals(overstyrtLeder.getAnsattIdent())))
                     .map(overstyrtLeder -> ansatttjeneste.hentAnsatt(authorization, overstyrtLeder.getAnsattIdent()));
+            log.info("OverstyrendeLeder {}", overstyrteAnsatte);
             return Stream.concat(ansatte.stream(), overstyrteAnsatte).toList();
         } else {
             throw new NotFoundException("Leder med ident " + lederIdent + " finnes ikke i PRIM.");
