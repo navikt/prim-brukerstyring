@@ -171,6 +171,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                 sluttdato
                                 orgTilknytninger(utvalg: ALLE) {
                                   erDagligOppfolging
+                                  gyldigFom
                                   gyldigTom
                                   orgEnhet {
                                     id

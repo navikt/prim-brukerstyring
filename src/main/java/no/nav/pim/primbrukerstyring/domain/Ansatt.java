@@ -1,6 +1,7 @@
 package no.nav.pim.primbrukerstyring.domain;
 
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 
 import java.util.Date;
@@ -9,6 +10,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @ToString
 @Getter
 @Setter

@@ -17,6 +17,9 @@ public interface OverstyrendeLederRepository extends JpaRepository<OverstyrendeL
 
     List<OverstyrendeLeder> findByOverstyrendeLeder_IdentAndTilIsNull(String ident);
 
+    @Query(nativeQuery = true, value = "select * from overstyrende_leder where overstyrende_leder_id = :overstyrendeLederId and (til >= :tilIsGreaterThan or til is null)")
+    List<OverstyrendeLeder> findByOverstyrendeLederIdAndTilIsGreaterThanEqualOrTilIsNull(Long overstyrendeLederId, LocalDate tilIsGreaterThan);
+
     List<OverstyrendeLeder> findAllByTilIsBefore(LocalDate tilBefore, Sort sort);
 
     List<OverstyrendeLeder> findAllByTilIsGreaterThanEqualOrTilIsNull(LocalDate tilIsGreaterThan, Sort sort);
