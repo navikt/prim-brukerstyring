@@ -11,9 +11,10 @@ public class NomRessurs {
     String visningsnavn;
     String epost;
     Date sluttdato;
+    NomIdentType identType;
     List<NomTelefon> telefon;
     List<NomLederFor> lederFor;
-    List<NomSektor> sektor;
+    NomSektor gjeldendeSektor;
     List<NomLeder> ledere;
-    List<NomOrgTilknytning> orgTilknytning;
+    List<NomOrgTilknytning> orgTilknytninger;
 }

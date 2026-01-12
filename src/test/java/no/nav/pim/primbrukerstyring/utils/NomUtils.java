@@ -21,9 +21,9 @@ public class NomUtils {
         nomOrgEnhet.setId(lagTilfeldigString());
         nomOrgEnhet.setNavn(lagTilfeldigString());
         nomOrgEnhet.setOrgEnhetsType(direktoratet ? "DIREKTORAT" : "");
-        nomOrgEnhet.setKoblinger(koblinger != null ? koblinger : List.of());
+        nomOrgEnhet.setOrgTilknytninger(koblinger != null ? koblinger : List.of());
         nomOrgEnhet.setOrganiseringer(organiseringer != null ? organiseringer : List.of());
-        nomOrgEnhet.setLeder(ledere != null ? ledere : List.of());
+        nomOrgEnhet.setLedere(ledere != null ? ledere : List.of());
         return nomOrgEnhet;
     }
 
@@ -48,7 +48,7 @@ public class NomUtils {
         nomRessurs.setNavident(ident != null ? ident : lagTilfeldigString());
         nomRessurs.setVisningsnavn(lagTilfeldigString());
         nomRessurs.setEpost(lagTilfeldigString());
-        nomRessurs.setSektor(List.of(NomSektor.NAV_STATLIG));
+        nomRessurs.setGjeldendeSektor(NomSektor.NAV_STATLIG);
         nomRessurs.setTelefon(telefon != null ? telefon : List.of());
         nomRessurs.setLederFor(lederFor != null ? lederFor : List.of());
         nomRessurs.setLedere(ledere != null ? ledere : List.of());
@@ -72,7 +72,7 @@ public class NomUtils {
         kopiertRessurs.setNavident(ressurs.getNavident());
         kopiertRessurs.setVisningsnavn(ressurs.getVisningsnavn());
         kopiertRessurs.setEpost(ressurs.getEpost());
-        kopiertRessurs.setSektor(ressurs.getSektor());
+        kopiertRessurs.setGjeldendeSektor(ressurs.getGjeldendeSektor());
         kopiertRessurs.setTelefon(ressurs.getTelefon());
         kopiertRessurs.setLederFor(ressurs.getLederFor());
         kopiertRessurs.setLedere(ressurs.getLedere());

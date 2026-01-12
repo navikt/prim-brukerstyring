@@ -18,4 +18,6 @@ public interface AnsatttjenesteInterface {
     OverstyrendeLeder fjernOverstyrendeLeder(String authorization, String ansattIdent);
 
     List<OverstyrendeLeder> hentAlleOverstyrendeLedere(String authorization);
+
+    List<OverstyrendeLeder> hentAlleInaktiveOverstyrendeLedere(String authorization);
 }

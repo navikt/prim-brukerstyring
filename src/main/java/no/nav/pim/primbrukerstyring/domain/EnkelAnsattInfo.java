@@ -1,6 +1,7 @@
 package no.nav.pim.primbrukerstyring.domain;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
 import no.nav.pim.primbrukerstyring.nom.domain.NomLeder;
 import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 

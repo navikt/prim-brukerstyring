@@ -1,13 +1,16 @@
 package no.nav.pim.primbrukerstyring.domain;
 
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @ToString
 @Getter
 @Setter
@@ -25,7 +28,7 @@ public class Ansatt {
 
         Set<AnsattStillingsavtale> stillingsavtaler = ressurs.getLedere().stream()
                 .distinct()
-                .map(nomLeder -> AnsattStillingsavtale.fraNomLeder(nomLeder, AnsattType.fraNomSektor(ressurs.getSektor()), erOverstyrt)).collect(Collectors.toSet());
+                .map(nomLeder -> AnsattStillingsavtale.fraNomLeder(nomLeder, AnsattType.fraNomSektor(ressurs.getGjeldendeSektor()), erOverstyrt)).collect(Collectors.toSet());
         if (erOverstyrt) stillingsavtaler.add(ansattStillingsavtale);
 
         Set<AnsattStillingsavtale> stillingsavtalerUtenDuplikater = stillingsavtaler.stream()
@@ -39,12 +42,17 @@ public class Ansatt {
                 .collect(Collectors.toSet());
 
         nyAnsatt.setStillingsavtaler(stillingsavtalerUtenDuplikater);
+        nyAnsatt.setAktiv(ressurs.getOrgTilknytninger().stream()
+                .filter(ot -> ot.getGyldigTom() == null || ot.getGyldigTom().after(new Date()))
+                .anyMatch(ot -> ot.getGyldigFom().before(new Date())));
         return nyAnsatt;
     }
 
     String ident;
 
     String navn;
+
+    Boolean aktiv;
 
     Set<AnsattStillingsavtale> stillingsavtaler = new HashSet<>();
 

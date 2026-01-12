@@ -7,7 +7,7 @@ import no.nav.pim.primbrukerstyring.domain.Leder;
 import no.nav.pim.primbrukerstyring.domain.OverstyrendeLeder;
 import no.nav.pim.primbrukerstyring.domain.Rolle;
 import no.nav.pim.primbrukerstyring.nom.NomGraphQLClient;
-import no.nav.pim.primbrukerstyring.nom.domain.*;
+import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 import no.nav.pim.primbrukerstyring.repository.BrukerRepository;
 import no.nav.pim.primbrukerstyring.repository.DriftOgVedlikeholdRepository;
 import no.nav.pim.primbrukerstyring.repository.LederRepository;
@@ -15,32 +15,29 @@ import no.nav.pim.primbrukerstyring.repository.OverstyrendeLederRepository;
 import no.nav.pim.primbrukerstyring.util.OIDCUtil;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static no.nav.pim.primbrukerstyring.utils.NomUtils.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(Brukertjeneste.class)
 public class BrukertjenesteTest {
 
@@ -169,7 +166,7 @@ public class BrukertjenesteTest {
         given(brukerrepository.findByIdent(anyString())).willReturn(Optional.of(bruker));
         given(lederrepository.findByIdent(anyString())).willReturn(Optional.of(leder));
         given(nomGraphQLClient.getLedersResurser(anyString(), anyString())).willReturn(nomRessursLederMedAnsatte);
-        given(overstyrendelederrepository.findByAnsattIdentAndTilIsNull(anyString())).willReturn(Optional.empty());
+        given(overstyrendelederrepository.findByAnsattIdentAndTilIsGreaterThanEqualOrTilIsNull(anyString(), any(LocalDate.class))).willReturn(Optional.empty());
         given(overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(anyString())).willReturn(List.of());
 
         mvc.perform(get("/bruker/leder/" + bruker.getIdent() + "/ressurser")
@@ -210,14 +207,14 @@ public class BrukertjenesteTest {
         OverstyrendeLeder overstyrendeLeder = OverstyrendeLeder.builder()
                 .ansattIdent(ansatt1.getNavident())
                 .ansattNavn(ansatt1.getVisningsnavn())
-                .fra(new Date())
+                .fra(LocalDate.now())
                 .overstyrendeLeder(Leder.builder().erDirektoratsleder(true).ident("O123456").navn("Overstyrende Leder").build())
                 .build();
 
         given(brukerrepository.findByIdent(anyString())).willReturn(Optional.of(bruker));
         given(lederrepository.findByIdent(anyString())).willReturn(Optional.of(leder));
         given(nomGraphQLClient.getLedersResurser(anyString(), anyString())).willReturn(nomRessursLederMedAnsatte);
-        given(overstyrendelederrepository.findByAnsattIdentAndTilIsNull(overstyrendeLeder.getAnsattIdent())).willReturn(Optional.of(overstyrendeLeder));
+        given(overstyrendelederrepository.findByAnsattIdentAndTilIsGreaterThanEqualOrTilIsNull(overstyrendeLeder.getAnsattIdent(), any(LocalDate.class))).willReturn(Optional.of(overstyrendeLeder));
         given(overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(anyString())).willReturn(List.of());
 
         mvc.perform(get("/bruker/leder/" + bruker.getIdent() + "/ressurser")

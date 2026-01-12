@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Stream;
@@ -40,7 +41,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     MeterRegistry metricsRegistry;
 
     @Autowired
-    Ansatttjeneste ansatttjeneste;
+    Ansatttjeneste ansattTjeneste;
 
     @Autowired
     BrukerRepository brukerrepository;
@@ -64,7 +65,6 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Brukertjeneste", "metode", "hentBruker").increment();
         String brukerIdent = oidcUtil.finnClaimFraOIDCToken(authorization, "NAVident").orElseThrow(() -> new AuthorizationException("Ikke gyldig OIDC-token"));
         Optional<Bruker> bruker = brukerrepository.findByIdent(brukerIdent);
-
         if (bruker.isEmpty()) {
             NomRessurs ressurs = nomGraphQLClient.getLedersResurser(authorization, brukerIdent);
             if (ressurs != null) {
@@ -122,7 +122,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
         if (ressurs != null) {
             bruker.setNavn(ressurs.getVisningsnavn());
             bruker.setSluttet(ressurs.getSluttdato() != null && ressurs.getSluttdato().before(new Date()));
-            ressurs.getOrgTilknytning().stream()
+            ressurs.getOrgTilknytninger().stream()
                     .filter(orgTilknytning -> orgTilknytning.getErDagligOppfolging() && (orgTilknytning.getGyldigTom() == null || orgTilknytning.getGyldigTom().after(new Date())))
                     .findFirst()
                     .ifPresent(orgTilknytning -> bruker.setEnhet(orgTilknytning.getOrgEnhet().getId()));
@@ -223,25 +223,35 @@ public class Brukertjeneste implements BrukertjenesteInterface {
             NomRessurs ledersRessurser = nomGraphQLClient.getLedersResurser(authorization, lederIdent);
             List<Ansatt> ansatte = ledersRessurser.getLederFor().stream()
                     .flatMap((lederFor) -> {
-                        Stream<NomRessurs> koblinger = lederFor.getOrgEnhet().getKoblinger().stream().map((NomKobling::getRessurs));
+                        Stream<NomRessurs> orgTilknytninger = lederFor.getOrgEnhet().getOrgTilknytninger().stream()
+                                .filter(ot -> ot.getGyldigTom() == null || ot.getGyldigTom().after(new Date()))
+                                .map((NomKobling::getRessurs));
                         Stream<NomRessurs> organiseringer = lederFor.getOrgEnhet().getOrganiseringer().stream()
-                                .flatMap(org -> org.getOrgEnhet().getLeder().stream().map(NomLeder::getRessurs));
-                        return Stream.concat(koblinger, organiseringer);
+                                .flatMap(org -> org.getOrgEnhet().getLedere().stream()
+                                        .filter(leder -> leder.getGyldigTom() == null || leder.getGyldigTom().after(new Date()))
+                                        .map(NomLeder::getRessurs));
+                        return Stream.concat(orgTilknytninger, organiseringer);
                     })
-                    .filter(ressurs -> !ressurs.getNavident().equals(lederIdent)
-                            && ressurs.getLedere().stream().anyMatch(leder -> leder.getRessurs().getNavident().equals(lederIdent))
+                    .filter(ressurs -> ressurs.getIdentType() != NomIdentType.ROBOT
+                                       && !ressurs.getNavident().equals(lederIdent)
+                                       && ressurs.getLedere().stream()
+                                               .filter(leder -> leder.getGyldigTom() == null || leder.getGyldigTom().after(new Date()))
+                                               .anyMatch(leder -> leder.getRessurs().getNavident().equals(lederIdent))
+                                       && ressurs.getOrgTilknytninger().stream().anyMatch(ot -> ot.getGyldigTom() == null || ot.getGyldigTom().after(new Date())
+                            )
                     )
                     .distinct().map(ressurs -> {
-                        Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsNull(ressurs.getNavident());
+                        Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsGreaterThanEqualOrTilIsNull(ressurs.getNavident(), LocalDate.now());
                         AnsattStillingsavtale ansattStillingsavtale = null;
                         if (overstyrendeLeder.isPresent()) {
                             ansattStillingsavtale = AnsattStillingsavtale.fraOverstyrendeLeder(overstyrendeLeder.get());
                         }
+
                         return Ansatt.fraNomRessurs(ressurs, ansattStillingsavtale);
                     }).toList();
-            Stream<Ansatt> overstyrteAnsatte = overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(lederIdent).stream()
+            Stream<Ansatt> overstyrteAnsatte = overstyrendelederrepository.findByOverstyrendeLederIdAndTilIsGreaterThanEqualOrTilIsNull(validertLeder.getLederId(), LocalDate.now()).stream()
                     .filter(overstyrtLeder -> ansatte.stream().noneMatch(ansatt -> ansatt.getIdent().equals(overstyrtLeder.getAnsattIdent())))
-                    .map(overstyrtLeder -> ansatttjeneste.hentAnsatt(authorization, overstyrtLeder.getAnsattIdent()));
+                    .map(overstyrtLeder -> ansattTjeneste.hentAnsatt(authorization, overstyrtLeder.getAnsattIdent()));
             return Stream.concat(ansatte.stream(), overstyrteAnsatte).toList();
         } else {
             throw new NotFoundException("Leder med ident " + lederIdent + " finnes ikke i PRIM.");
@@ -268,7 +278,7 @@ public class Brukertjeneste implements BrukertjenesteInterface {
     private Stream<NomRessurs> hentOrgenhetsLedere(NomOrgEnhet orgEnhet){
         if (orgEnhet == null) return Stream.empty();
         return Stream.concat(
-                orgEnhet.getLeder().stream().map(NomLeder::getRessurs),
+                orgEnhet.getLedere().stream().map(NomLeder::getRessurs),
                 orgEnhet.getOrganiseringer().stream().flatMap((organisering -> hentOrgenhetsLedere(organisering.getOrgEnhet())))
         );
     }

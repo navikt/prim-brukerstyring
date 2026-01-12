@@ -20,9 +20,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
+import static java.util.Objects.nonNull;
 
 @RestController
 @Protected
@@ -64,7 +66,7 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
     public Ansatt hentAnsatt(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ident) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "hentAnsatt").increment();
 
-        Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsNull(ident);
+        Optional<OverstyrendeLeder> overstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsGreaterThanEqualOrTilIsNull(ident, LocalDate.now());
         NomRessurs ressurs = nomGraphQLClient.getRessurs(authorization, ident);
         if (ressurs != null) {
             AnsattStillingsavtale ansattStillingsavtale = null;
@@ -83,8 +85,11 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
     @PostMapping(path = "/overstyrendeleder", consumes = MediaType.APPLICATION_JSON_VALUE)
     public OverstyrendeLeder leggTilOverstyrendeLeder(@RequestHeader(value = "Authorization") String authorization, @Valid @RequestBody OverstyrendeLederDto overstyrendeLederDto) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "leggTilOverstyrendeLeder").increment();
+        if (nonNull(overstyrendeLederDto.getOverstyringTom()) && overstyrendeLederDto.getOverstyringTom().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Til dato kan ikke være før dagens dato");
+        }
         Optional<Leder> finnesLeder = lederrepository.findByIdent(overstyrendeLederDto.getLederIdent());
-        Optional<OverstyrendeLeder> finnesOverstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsNull(overstyrendeLederDto.getAnsattIdent());
+        Optional<OverstyrendeLeder> finnesOverstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsGreaterThanEqualOrTilIsNull(overstyrendeLederDto.getAnsattIdent(), LocalDate.now());
         Leder leder;
         if (finnesLeder.isPresent()) {
             leder = finnesLeder.get();
@@ -103,7 +108,14 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
         } else {
             NomRessurs ressurs = nomGraphQLClient.getRessurs(authorization, overstyrendeLederDto.getAnsattIdent());
             if (ressurs != null) {
-                return overstyrendelederrepository.save(OverstyrendeLeder.builder().ansattIdent(ressurs.getNavident()).ansattNavn(ressurs.getVisningsnavn()).overstyrendeLeder(leder).fra(new Date()).build());
+                return overstyrendelederrepository.save(
+                        OverstyrendeLeder.builder()
+                                .ansattIdent(ressurs.getNavident())
+                                .ansattNavn(ressurs.getVisningsnavn())
+                                .overstyrendeLeder(leder)
+                                .fra(overstyrendeLederDto.getOverstyringFom())
+                                .til(overstyrendeLederDto.getOverstyringTom())
+                                .build());
             } else {
                 log.error("###Kunne ikke finne ansatt '{}' i NOM.", overstyrendeLederDto.getAnsattIdent());
                 throw new NotFoundException("Kunne ikke finne ansatt " + overstyrendeLederDto.getAnsattIdent() + " i NOM.");
@@ -116,10 +128,10 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
     @DeleteMapping(path = "/overstyrendeleder/{ansattIdent}")
     public OverstyrendeLeder fjernOverstyrendeLeder(@RequestHeader(value = "Authorization") String authorization, @PathVariable String ansattIdent) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "fjernOverstyrendeLeder").increment();
-        Optional<OverstyrendeLeder> finnesOverstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsNull(ansattIdent);
+        Optional<OverstyrendeLeder> finnesOverstyrendeLeder = overstyrendelederrepository.findByAnsattIdentAndTilIsGreaterThanEqualOrTilIsNull(ansattIdent, LocalDate.now());
         if (finnesOverstyrendeLeder.isPresent()) {
             OverstyrendeLeder overstyrendeLeder = finnesOverstyrendeLeder.get();
-            overstyrendeLeder.setTil(new Date());
+            overstyrendeLeder.setTil(LocalDate.now().minusDays(1));
             return overstyrendelederrepository.save(overstyrendeLeder);
         } else {
             log.error("###Ansatt {} har ikke en overstyrende leder i PRIM.", ansattIdent);
@@ -131,11 +143,14 @@ public class Ansatttjeneste implements AnsatttjenesteInterface{
     @GetMapping(path = "/overstyrendeledere")
     public List<OverstyrendeLeder> hentAlleOverstyrendeLedere(@RequestHeader(value = "Authorization") String authorization) {
         metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "hentAlleOverstyrendeLedere").increment();
+        return overstyrendelederrepository.findAllByTilIsGreaterThanEqualOrTilIsNull(LocalDate.now(), Sort.by(Sort.Direction.DESC, "til"));
+    }
 
-        List<OverstyrendeLeder> deaktiveOverstyrendeLeder = overstyrendelederrepository.findAllByTilIsNotNull(Sort.by(Sort.Direction.DESC, "til"));
-        List<OverstyrendeLeder> overstyrendeLedere = overstyrendelederrepository.findAllByTilIsNull(Sort.by(Sort.Direction.DESC, "fra"));
+    @Override
+    @GetMapping(path = "/inaktiveOverstyrendeledere")
+    public List<OverstyrendeLeder> hentAlleInaktiveOverstyrendeLedere(@RequestHeader(value = "Authorization") String authorization) {
+        metricsRegistry.counter("tjenestekall", "tjeneste", "Ansatttjeneste", "metode", "hentAlleInaktiveOverstyrendeLedere").increment();
 
-        overstyrendeLedere.addAll(deaktiveOverstyrendeLeder);
-        return overstyrendeLedere;
+        return overstyrendelederrepository.findAllByTilIsBefore(LocalDate.now(), Sort.by(Sort.Direction.DESC, "til"));
     }
 }

@@ -1,12 +1,11 @@
 package no.nav.pim.primbrukerstyring.config;
 
 import net.javacrumbs.shedlock.core.LockProvider;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.client.RestTemplate;
-import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
+import org.springframework.web.client.RestClient;
 
 import javax.sql.DataSource;
 
@@ -15,8 +14,8 @@ import javax.sql.DataSource;
 public class BrukerstyringConfig {
 
         @Bean
-        public RestTemplate restTemplate(RestTemplateBuilder builder) {
-            return builder.build();
+        public RestClient restClient() {
+            return RestClient.builder().build();
         }
 
         @Bean

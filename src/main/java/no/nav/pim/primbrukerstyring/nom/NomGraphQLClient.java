@@ -45,6 +45,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                     ressurs(where: {navident: "%s"}) {
                         navident
                         visningsnavn
+                        gjeldendeSektor
                         epost
                         telefon {
                           nummer
@@ -55,16 +56,22 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                 id
                                 navn
                                 orgEnhetsType
-                                koblinger {
+                                orgTilknytninger(utvalg: ALLE) {
                                     ressurs {
                                         navident
                                         visningsnavn
-                                        sektor
-                                        ledere {
+                                        gjeldendeSektor
+                                        identType
+                                        orgTilknytninger(utvalg: ALLE) {
+                                            gyldigFom
+                                            gyldigTom
+                                        }
+                                        ledere (utvalg: ALLE) {
                                             erDagligOppfolging
                                             ressurs {
                                                 navident
                                                 visningsnavn
+                                                gjeldendeSektor
                                                 epost
                                                 telefon {
                                                   nummer
@@ -84,12 +91,18 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                 organiseringer {
                                     orgEnhet {
                                         navn
-                                        leder {
+                                        ledere (utvalg: ALLE) {
+                                            gyldigTom
                                             ressurs {
                                                 navident
                                                 visningsnavn
-                                                sektor
-                                                ledere {
+                                                gjeldendeSektor
+                                                identType
+                                                orgTilknytninger(utvalg: ALLE) {
+                                                    gyldigFom
+                                                    gyldigTom
+                                                }
+                                                ledere(utvalg: ALLE) {
                                                     erDagligOppfolging
                                                     ressurs {
                                                         navident
@@ -116,7 +129,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                         }
                     }
                 }
-                        """.formatted(navident);
+                """.formatted(navident);
 
         try {
             HttpGraphQlClient graphQlClient = HttpGraphQlClient
@@ -149,15 +162,16 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                             ressurs(where: {navident: "%s"}) {
                                 navident
                                 visningsnavn
-                                sektor
+                                gjeldendeSektor
                                 epost
                                 telefon {
                                   nummer
                                   type
                                 }
                                 sluttdato
-                                orgTilknytning {
+                                orgTilknytninger(utvalg: ALLE) {
                                   erDagligOppfolging
+                                  gyldigFom
                                   gyldigTom
                                   orgEnhet {
                                     id
@@ -301,7 +315,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                 orgEnhet(where: {id: "%s"}) {
                     navn
                     id
-                    leder {
+                    ledere {
                         ressurs {
                             navident
                             visningsnavn
@@ -324,7 +338,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                         orgEnhet {
                             navn
                             id
-                            leder {
+                            ledere {
                                 ressurs {
                                     navident
                                     visningsnavn
@@ -347,7 +361,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                 orgEnhet {
                                     navn
                                     id
-                                    leder {
+                                    ledere {
                                         ressurs {
                                             navident
                                             visningsnavn
@@ -370,7 +384,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                         orgEnhet {
                                             navn
                                             id
-                                            leder {
+                                            ledere {
                                                 ressurs {
                                                     navident
                                                     visningsnavn
@@ -393,7 +407,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                                 orgEnhet {
                                                     navn
                                                     id
-                                                    leder {
+                                                    ledere {
                                                         ressurs {
                                                             navident
                                                             visningsnavn
@@ -416,7 +430,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                                         orgEnhet {
                                                             navn
                                                             id
-                                                            leder {
+                                                            ledere {
                                                                 ressurs {
                                                                     navident
                                                                     visningsnavn
@@ -439,7 +453,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                                                 orgEnhet {
                                                                     navn
                                                                     id
-                                                                    leder {
+                                                                    ledere {
                                                                         ressurs {
                                                                             navident
                                                                             visningsnavn
@@ -462,7 +476,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                                                         orgEnhet {
                                                                             navn
                                                                             id
-                                                                            leder {
+                                                                            ledere {
                                                                                 ressurs {
                                                                                     navident
                                                                                     visningsnavn
@@ -485,7 +499,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                                                                 orgEnhet {
                                                                                     navn
                                                                                     id
-                                                                                    leder {
+                                                                                    ledere {
                                                                                         ressurs {
                                                                                             navident
                                                                                             visningsnavn
@@ -508,7 +522,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                                                                         orgEnhet {
                                                                                             navn
                                                                                             id
-                                                                                            leder {
+                                                                                            ledere {
                                                                                                 ressurs {
                                                                                                     navident
                                                                                                     visningsnavn
