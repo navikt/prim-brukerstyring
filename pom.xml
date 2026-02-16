@@ -23,7 +23,7 @@
 		<token-validation.version>5.0.30</token-validation.version>
 		<postgresql.version>42.7.8</postgresql.version>
 		<shedlock.version>7.5.0</shedlock.version>
-		<flyway-database-postgresql.version>11.20.0</flyway-database-postgresql.version>
+		<flyway-database-postgresql.version>12.0.1</flyway-database-postgresql.version>
 		<springdoc.version>3.0.1</springdoc.version>
 		<logstash.version>9.0</logstash.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
