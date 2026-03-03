@@ -66,7 +66,7 @@ public class NomGraphQLClient implements NomGraphQLClientInterface {
                                             gyldigFom
                                             gyldigTom
                                         }
-                                        ledere (utvalg: ALLE) {
+                                        ledere (utvalg: AKTIVE) {
                                             erDagligOppfolging
                                             ressurs {
                                                 navident

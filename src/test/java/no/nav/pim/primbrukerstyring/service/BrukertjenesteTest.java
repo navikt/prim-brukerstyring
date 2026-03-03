@@ -13,8 +13,8 @@ import no.nav.pim.primbrukerstyring.repository.DriftOgVedlikeholdRepository;
 import no.nav.pim.primbrukerstyring.repository.LederRepository;
 import no.nav.pim.primbrukerstyring.repository.OverstyrendeLederRepository;
 import no.nav.pim.primbrukerstyring.util.OIDCUtil;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;
@@ -23,15 +23,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static no.nav.pim.primbrukerstyring.utils.NomUtils.*;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -70,7 +66,7 @@ public class BrukertjenesteTest {
 
     private String ident;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         ident = "T123456";
         given(oidcUtil.finnClaimFraOIDCToken(anyString(), anyString())).willReturn(Optional.of(ident));
@@ -138,8 +134,8 @@ public class BrukertjenesteTest {
     @Test
     public void hentLedersRessurserReturnererKoblingerOgLedereForOrganisasjoner() throws Exception {
         NomRessurs nomRessursLeder = lagNomRessurs(ident, null, null, null);
-        NomRessurs ansatt1 = lagNomRessurs(null, null, null, List.of(lagNomLeder(true, nomRessursLeder)));
-        NomRessurs ansatt2 = lagNomRessurs(null, null, null, List.of(lagNomLeder(true, nomRessursLeder)));
+        NomRessurs ansatt1 = lagNomRessurs(null, null, null, List.of(lagNomLeder(true, nomRessursLeder)), List.of(lagNomOrgTilknytning(null)));
+        NomRessurs ansatt2 = lagNomRessurs(null, null, null, List.of(lagNomLeder(true, nomRessursLeder)), List.of(lagNomOrgTilknytning(null)));
 
         NomRessurs nomRessursLederMedAnsatte = kopierRessurs(nomRessursLeder);
         nomRessursLederMedAnsatte.setLederFor(
@@ -179,8 +175,9 @@ public class BrukertjenesteTest {
     @Test
     public void hentLedersRessurserReturnererOverstyrteLedere() throws Exception {
         NomRessurs nomRessursLeder = lagNomRessurs(ident, null, null, null);
-        NomRessurs ansatt1 = lagNomRessurs(null, null, null, List.of(lagNomLeder(true, nomRessursLeder)));
-        NomRessurs ansatt2 = lagNomRessurs(null, null, null, List.of(lagNomLeder(true, nomRessursLeder)));
+
+        NomRessurs ansatt1 = lagNomRessurs(null, null, null, List.of(lagNomLeder(true, nomRessursLeder)), List.of(lagNomOrgTilknytning(null)));
+        NomRessurs ansatt2 = lagNomRessurs(null, null, null, List.of(lagNomLeder(true, nomRessursLeder)), List.of(lagNomOrgTilknytning(null)));
 
         NomRessurs nomRessursLederMedAnsatte = kopierRessurs(nomRessursLeder);
         nomRessursLederMedAnsatte.setLederFor(
@@ -214,7 +211,7 @@ public class BrukertjenesteTest {
         given(brukerrepository.findByIdent(anyString())).willReturn(Optional.of(bruker));
         given(lederrepository.findByIdent(anyString())).willReturn(Optional.of(leder));
         given(nomGraphQLClient.getLedersResurser(anyString(), anyString())).willReturn(nomRessursLederMedAnsatte);
-        given(overstyrendelederrepository.findByAnsattIdentAndTilIsGreaterThanEqualOrTilIsNull(overstyrendeLeder.getAnsattIdent(), any(LocalDate.class))).willReturn(Optional.of(overstyrendeLeder));
+        given(overstyrendelederrepository.findByAnsattIdentAndTilIsGreaterThanEqualOrTilIsNull(eq(overstyrendeLeder.getAnsattIdent()), any(LocalDate.class))).willReturn(Optional.of(overstyrendeLeder));
         given(overstyrendelederrepository.findByOverstyrendeLeder_IdentAndTilIsNull(anyString())).willReturn(List.of());
 
         mvc.perform(get("/bruker/leder/" + bruker.getIdent() + "/ressurser")

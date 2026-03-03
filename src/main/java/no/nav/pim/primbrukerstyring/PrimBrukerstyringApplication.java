@@ -15,9 +15,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableSchedulerLock(defaultLockAtMostFor = "PT5M")
 @EnableJwtTokenValidation(ignore = {"org.springdoc", "org.springframework"})
 public class PrimBrukerstyringApplication {
-
-	public static void main(String[] args) {
+	static void main(String[] args) {
 		SpringApplication.run(PrimBrukerstyringApplication.class, args);
 	}
-
 }
