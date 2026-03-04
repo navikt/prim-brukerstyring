@@ -3,6 +3,10 @@ package no.nav.pim.primbrukerstyring.utils;
 import no.nav.pim.primbrukerstyring.nom.domain.*;
 import org.springframework.stereotype.Component;
 
+import java.text.DateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -43,6 +47,13 @@ public class NomUtils {
         nomLeder.setRessurs(ressurs);
         return nomLeder;
     }
+
+    public static NomRessurs lagNomRessurs(String ident, List<NomTelefon> telefon, List<NomLederFor> lederFor, List<NomLeder> ledere, List<NomOrgTilknytning> orgTilknytninger) {
+        NomRessurs nomRessurs = lagNomRessurs(ident, telefon, lederFor, ledere);
+        nomRessurs.setOrgTilknytninger(orgTilknytninger);
+        return nomRessurs;
+    }
+
     public static NomRessurs lagNomRessurs(String ident, List<NomTelefon> telefon, List<NomLederFor> lederFor, List<NomLeder> ledere) {
         NomRessurs nomRessurs = new NomRessurs();
         nomRessurs.setNavident(ident != null ? ident : lagTilfeldigString());
@@ -52,6 +63,8 @@ public class NomUtils {
         nomRessurs.setTelefon(telefon != null ? telefon : List.of());
         nomRessurs.setLederFor(lederFor != null ? lederFor : List.of());
         nomRessurs.setLedere(ledere != null ? ledere : List.of());
+        nomRessurs.setOrgTilknytninger(List.of());
+        nomRessurs.setIdentType(NomIdentType.STANDARD);
         return nomRessurs;
     }
 
@@ -59,6 +72,14 @@ public class NomUtils {
         NomKobling nomKobling = new NomKobling();
         nomKobling.setRessurs(ressurs);
         return nomKobling;
+    }
+
+    public static NomOrgTilknytning lagNomOrgTilknytning(NomOrgEnhet orgEnhet) {
+        NomOrgTilknytning nomOrgTilknytning = new NomOrgTilknytning();
+        nomOrgTilknytning.setErDagligOppfolging(true);
+        nomOrgTilknytning.setOrgEnhet(orgEnhet);
+        nomOrgTilknytning.setGyldigFom(Date.from(LocalDate.now().minusYears(1).atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        return nomOrgTilknytning;
     }
 
     public static NomOrganisering lagNomOrganisering(NomLeder leder) {
@@ -76,6 +97,7 @@ public class NomUtils {
         kopiertRessurs.setTelefon(ressurs.getTelefon());
         kopiertRessurs.setLederFor(ressurs.getLederFor());
         kopiertRessurs.setLedere(ressurs.getLedere());
+        kopiertRessurs.setOrgTilknytninger(ressurs.getOrgTilknytninger());
         return kopiertRessurs;
     }
 

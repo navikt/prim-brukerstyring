@@ -2,9 +2,7 @@ package no.nav.pim.primbrukerstyring.domain;
 
 
 import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,9 +11,8 @@ import java.util.Optional;
 import static no.nav.pim.primbrukerstyring.utils.NomUtils.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(SpringRunner.class)
 public class AnsattTest {
     @Test
     public void hentAnsattFraNomSetterOverstyrtLederForst() {

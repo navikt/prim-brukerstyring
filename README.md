@@ -1,6 +1,41 @@
 # prim-brukerstyring
 En av 5 backend applikasjoner for PRIM. PRIM er et lederverktøy og en plattform for rekrutering og intern mobilitet i NAV. Denne applikasjonen støtter opp administrasjon og brukerstyring for PRIM.
 
+## Oppsett for pre-commit trigger
+Sett opp slik at pre-commit trigger kjøres lokalt på din maskin ved commit for å søke etter secrets, credentials og personinfo i endringer som sjekkes inn.
+
+### Installering
+Installer pre-commit på maskinen (trenger kun å kjøres én gang) (https://pre-commit.com/#install)
+```shell
+pip install pre-commit
+```
+Installer GitLeaks på maskinen (trenger kun å kjøres én gang) (https://github.com/gitleaks/gitleaks)
+Eksempel:
+```shell
+brew install gitleaks
+```
+#### Installasjon med nix
+```shell
+nix profile add nixpkgs#pre-commit
+nix profile add nixpkgs#gitleaks
+```
+### Verifiser installering
+```shell
+pre-commit --version
+gitleaks version
+```
+
+### Aktivere pre-commit i prosjektet
+Installer pre-commit hooks i github-prosjektet (trenger kun å kjøres én gang per prosjekt)
+```shell
+pre-commit install
+```
+Nå skal GitLeaks kjøre på alle endringer som forsøkes å commit'es. Finner den noe mistenkelig vil den stoppe commit'en og vise hva som er funnet.
+
+Commit output skal vise noe slikt som dette:
+
+    Detect hardcoded secrets using Gitleaks..................................Passed
+
 ## Sett opp lokal Postgres DB
 Last ned postgres på din maskin og sett opp databasen med
 ```bash

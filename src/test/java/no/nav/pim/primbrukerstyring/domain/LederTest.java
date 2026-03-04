@@ -4,18 +4,15 @@ package no.nav.pim.primbrukerstyring.domain;
 import no.nav.pim.primbrukerstyring.nom.domain.NomRessurs;
 import no.nav.pim.primbrukerstyring.nom.domain.NomTelefon;
 import no.nav.pim.primbrukerstyring.nom.domain.NomTelefonType;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static no.nav.pim.primbrukerstyring.utils.NomUtils.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(SpringRunner.class)
 public class LederTest {
 
     @Test
