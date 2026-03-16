@@ -11,10 +11,10 @@ spring:
     password: root
   jackson:
     mapper:
-      accept_case_insensitive_properties: true
+      accept-case-insensitive-properties: true
       sort-properties-alphabetically: false
     serialization:
-      FAIL_ON_EMPTY_BEANS: false
+      fail-on-empty-beans: false
     deserialization:
       fail-on-null-for-primitives: false
   jpa:
