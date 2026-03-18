@@ -1,7 +1,5 @@
 server:
   port: 9500
-  error:
-    include-message: always
 
 spring:
   flyway:
@@ -15,9 +13,12 @@ spring:
       maximum-pool-size: 5
   jackson:
     mapper:
-      accept_case_insensitive_properties: true
+      accept-case-insensitive-properties: true
+      sort-properties-alphabetically: false
     serialization:
-      FAIL_ON_EMPTY_BEANS: false
+      fail-on-empty-beans: false
+    deserialization:
+      fail-on-null-for-primitives: false
   jpa:
     hibernate:
       ddl-auto: none
@@ -27,6 +28,9 @@ spring:
           lob:
             non_contextual_creation: true
     show-sql: false
+  web:
+    error:
+      include-message: always
 
 springdoc:
   swagger-ui.path: /swagger-ui.html
